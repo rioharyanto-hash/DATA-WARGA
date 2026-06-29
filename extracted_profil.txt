@@ -1,0 +1,22 @@
+  Future<Uint8List> generateProfilPendudukPdf(String namaKelompok) async {
+    state = state.copyWith(isLoading: true, error: null, successMessage: null);
+    try {
+      final repo = ref.read(reportRepositoryProvider);
+      final data = await repo.getProfilPendudukData(namaKelompok);
+      final region = ref.read(regionProvider);
+
+      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfBytes = await pdfService.generateProfilPendudukPdf(
+        data: data,
+        desa: region.kelurahan,
+        kecamatan: region.kecamatan,
+        kabupaten: region.kotaKab,
+      );
+
+      state = state.copyWith(isLoading: false);
+      return pdfBytes;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }

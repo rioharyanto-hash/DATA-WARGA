@@ -1,0 +1,113 @@
+import '../../domain/entities/app_user.dart';
+
+class AppUserModel extends AppUser {
+  const AppUserModel({
+    required super.id,
+    required super.nama,
+    required super.idKader,
+    required super.password,
+    super.role,
+    super.rw,
+    super.rt,
+    super.kelompokDawis,
+    super.nik,
+    super.tempatLahir,
+    super.tanggalLahir,
+    super.pendidikanTerakhir,
+    super.alamat,
+    super.kelurahan,
+    super.kecamatan,
+    super.propinsi,
+    super.kodePos,
+    super.alamatKtp,
+    super.noHp,
+    super.email,
+    super.noRekeningBank,
+    super.npwp,
+    super.isActive,
+  });
+
+  factory AppUserModel.fromJson(Map<String, dynamic> json) {
+    return AppUserModel(
+      id: json['id'] as String,
+      nama: json['nama'] as String,
+      idKader: json['id_kader'] as String,
+      password: json['password'] as String,
+      role: (json['role'] as String?) ?? 'KADER',
+      rw: json['rw'] as String?,
+      rt: json['rt'] as String?,
+      kelompokDawis: json['kelompok_dawis'] as String?,
+      nik: json['nik'] as String?,
+      tempatLahir: json['tempat_lahir'] as String?,
+      tanggalLahir: json['tanggal_lahir'] as String?,
+      pendidikanTerakhir: json['pendidikan_terakhir'] as String?,
+      alamat: json['alamat'] as String?,
+      kelurahan: json['kelurahan'] as String?,
+      kecamatan: json['kecamatan'] as String?,
+      propinsi: json['propinsi'] as String?,
+      kodePos: json['kode_pos'] as String?,
+      alamatKtp: json['alamat_ktp'] as String?,
+      noHp: json['no_hp'] as String?,
+      email: json['email'] as String?,
+      noRekeningBank: json['no_rekening_bank'] as String?,
+      npwp: json['npwp'] as String?,
+      isActive: (json['is_active'] as int?) ?? 1,
+    );
+  }
+
+  factory AppUserModel.fromEntity(AppUser user) {
+    return AppUserModel(
+      id: user.id,
+      nama: user.nama,
+      idKader: user.idKader,
+      password: user.password,
+      role: user.role,
+      rw: user.rw,
+      rt: user.rt,
+      kelompokDawis: user.kelompokDawis,
+      nik: user.nik,
+      tempatLahir: user.tempatLahir,
+      tanggalLahir: user.tanggalLahir,
+      pendidikanTerakhir: user.pendidikanTerakhir,
+      alamat: user.alamat,
+      kelurahan: user.kelurahan,
+      kecamatan: user.kecamatan,
+      propinsi: user.propinsi,
+      kodePos: user.kodePos,
+      alamatKtp: user.alamatKtp,
+      noHp: user.noHp,
+      email: user.email,
+      noRekeningBank: user.noRekeningBank,
+      npwp: user.npwp,
+      isActive: user.isActive,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nama': nama,
+      'id_kader': idKader,
+      'password': password,
+      'role': role,
+      'rw': rw,
+      'rt': rt,
+      'kelompok_dawis': kelompokDawis,
+      'nik': nik,
+      'tempat_lahir': tempatLahir,
+      'tanggal_lahir': tanggalLahir,
+      'pendidikan_terakhir': pendidikanTerakhir,
+      'alamat': alamat,
+      'kelurahan': kelurahan,
+      'kecamatan': kecamatan,
+      'propinsi': propinsi,
+      'kode_pos': kodePos,
+      'alamat_ktp': alamatKtp,
+      'no_hp': noHp,
+      'email': email,
+      'no_rekening_bank': noRekeningBank,
+      'npwp': npwp,
+      'is_active': isActive,
+    };
+  }
+}

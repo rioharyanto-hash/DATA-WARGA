@@ -1,0 +1,30 @@
+  }
+
+  Future<Uint8List> generateYatimPiatuPdf(String namaKelompok) async {
+    state = state.copyWith(isLoading: true, error: null, successMessage: null);
+    try {
+      final repo = ref.read(reportRepositoryProvider);
+      final dataList = await repo.getYatimPiatuData(namaKelompok);
+      final region = ref.read(regionProvider);
+
+      final pdfService = ref.read(pdfReportServiceProvider);
+      // Determine RT and RW from somewhere. Actually, just use dummy for now or fetch from user
+      // Let's assume RT and RW can be taken from region or default
+      final pdfBytes = await pdfService.generateYatimPiatuPdf(
+        namaKelompok: namaKelompok,
+        rt: '01', // Should be dynamic, but for now fallback to 01
+        rw: '02',
+        desa: region.kelurahan,
+        kecamatan: region.kecamatan,
+        kabupaten: region.kotaKab,
+        provinsi: 'DKI JAKARTA',
+        data: dataList,
+      );
+
+      state = state.copyWith(isLoading: false);
+      return pdfBytes;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }

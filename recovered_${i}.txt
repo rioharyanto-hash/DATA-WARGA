@@ -1,0 +1,111 @@
+Future<Uint8List> generateYatimPiatuPdf({
+7797:     required String namaKelompok,
+7798:     required String rt,
+7799:     required String rw,
+7800:     required String desa,
+7801:     required String kecamatan,
+7802:     required String kabupaten,
+7803:     required String provinsi,
+7804:     required List<Map<String, dynamic>> data,
+7805:   }) async {
+7806:     final pdf = pw.Document();
+7807: 
+7808:     pw.Widget buildHeader() {
+7809:       return pw.Column(
+7810:         crossAxisAlignment: pw.CrossAxisAlignment.center,
+7811:         children: [
+7812:           pw.Text('DATA ANAK YATIM PIATU',
+7813:               style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+7814:           pw.SizedBox(height: 10),
+7815:           pw.Row(
+7816:             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+7817:             children: [
+7818:               pw.Column(
+7819:                 crossAxisAlignment: pw.CrossAxisAlignment.start,
+7820:                 children: [
+7821:                   pw.Text('KELOMPOK DAWISM : $namaKelompok'),
+7822:                   pw.Text('RT/RW           : $rt/$rw'),
+7823:                   pw.Text('KELURAHAN/DESA  : $desa'),
+7824:                 ],
+7825:               ),
+7826:               pw.Column(
+7827:                 crossAxisAlignment: pw.CrossAxisAlignment.start,
+7828:                 children: [
+7829:                   pw.Text('KECAMATAN       : $kecamatan'),
+7830:                   pw.Text('KABUPATEN/KOTA  : $kabupaten'),
+7831:                   pw.Text('PROVINSI        : $provinsi'),
+7832:                 ],
+7833:               ),
+7834:             ],
+7835:           ),
+7836:           pw.SizedBox(height: 15),
+7837:         ],
+7838:       );
+7839:     }
+7840: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+---
+Found in step ${data["step_index"]}, type: ${data["type"]}
+data\services\pdf_report_service.dart:7568:                    children: List.generate(
+
+lib\src\features\report\data\services\pdf_report_service.dart:7609:  Future<Uint8List> generateLampidPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:7745:  Future<Uint8List> generateProfilPendudukPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8262:        ...List.generate(labels.length, (index) {
+
+lib\src\features\report\data\services\pdf_report_service.dart:8351:  Future<Uint8List> generateYatimPiatuPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8416:              data: List.generate(data.length, 
+
+(index) {
+
+
+
+
+
+
+
+---
+Found in step ${data["step_index"]}, type: ${data["type"]}
+ces\pdf_report_service.dart:7070:  Future<Uint8List> generateFormDataManual({
+
+lib\src\features\report\data\services\pdf_report_service.dart:7422:  Future<Uint8List> generateBlankFormDataManual() 
+
+async {
+
+lib\src\features\report\data\services\pdf_report_service.dart:7609:  Future<Uint8List> generateLampidPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:7745:  Future<Uint8List> generateProfilPendudukPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8351:  Future<Uint8List> generateYatimPiatuPdf({
+
+
+
+
+
+
+
+---
+Found in step ${data["step_index"]}, type: ${data["type"]}
+ces\pdf_report_service.dart:7070:  Future<Uint8List> generateFormDataManual({
+
+lib\src\features\report\data\services\pdf_report_service.dart:7422:  Future<Uint8List> generateBlankFormDataManual() 
+
+async {
+
+lib\src\features\report\data\services\pdf_report_service.dart:7609:  Future<Uint8List> generateLampidPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8208:  Future<Uint8List> generateProfilPendudukPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8814:  Future<Uint8List> generateYatimPiatuPdf({
+
+
+
+
+
+
+
+---
+

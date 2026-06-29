@@ -1,0 +1,58 @@
+Future<Uint8List> generateProfilPendudukPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8262:        ...List.generate(labels.length, (index) {
+
+lib\src\features\report\data\services\pdf_report_service.dart:8351:  Future<Uint8List> generateYatimPiatuPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8416:              data: List.generate(data.length, 
+
+(index) {
+
+
+
+
+
+
+
+---
+Found in step ${data["step_index"]}, type: ${data["type"]}
+ces\pdf_report_service.dart:7070:  Future<Uint8List> generateFormDataManual({
+
+lib\src\features\report\data\services\pdf_report_service.dart:7422:  Future<Uint8List> generateBlankFormDataManual() 
+
+async {
+
+lib\src\features\report\data\services\pdf_report_service.dart:7609:  Future<Uint8List> generateLampidPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:7745:  Future<Uint8List> generateProfilPendudukPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8351:  Future<Uint8List> generateYatimPiatuPdf({
+
+
+
+
+
+
+
+---
+Found in step ${data["step_index"]}, type: ${data["type"]}
+ces\pdf_report_service.dart:7070:  Future<Uint8List> generateFormDataManual({
+
+lib\src\features\report\data\services\pdf_report_service.dart:7422:  Future<Uint8List> generateBlankFormDataManual() 
+
+async {
+
+lib\src\features\report\data\services\pdf_report_service.dart:7609:  Future<Uint8List> generateLampidPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8208:  Future<Uint8List> generateProfilPendudukPdf({
+
+lib\src\features\report\data\services\pdf_report_service.dart:8814:  Future<Uint8List> generateYatimPiatuPdf({
+
+
+
+
+
+
+
+---
+
