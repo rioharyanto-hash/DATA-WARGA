@@ -646,29 +646,29 @@ class ReportController extends Notifier<ReportState> {
 
         for (var row in data['rows']) {
           krtCount++;
-          totalL += (row['L'] as int? ?? 0);
-          totalP += (row['P'] as int? ?? 0);
-          totalJumlah += (row['jumlah'] as int? ?? 0);
-          totalBalita += (row['balita'] as int? ?? 0);
-          totalAnak += (row['anak'] as int? ?? 0);
-          totalRemaja += (row['remaja'] as int? ?? 0);
-          totalDewasa += (row['dewasa'] as int? ?? 0);
-          totalLansia += (row['lansia'] as int? ?? 0);
-          totalKeluarga += (row['jumlahKeluarga'] as int? ?? 0);
-          totalPus += (row['pus'] as int? ?? 0);
-          totalMow += (row['mow'] as int? ?? 0);
-          totalMop += (row['mop'] as int? ?? 0);
-          totalIud += (row['iud'] as int? ?? 0);
-          totalImplant += (row['implant'] as int? ?? 0);
-          totalSuntik += (row['suntik'] as int? ?? 0);
-          totalPil += (row['pil'] as int? ?? 0);
-          totalKondom += (row['kondom'] as int? ?? 0);
-          totalKb += (row['jumlahKb'] as int? ?? 0);
-          totalTial += (row['tial'] as int? ?? 0);
-          totalIat += (row['iat'] as int? ?? 0);
-          totalIas += (row['ias'] as int? ?? 0);
-          totalHamil += (row['hamil'] as int? ?? 0);
-          totalBukanKb += (row['jumlahBukanKb'] as int? ?? 0);
+          totalL += _parseInt(row['L']);
+          totalP += _parseInt(row['P']);
+          totalJumlah += _parseInt(row['jumlah']);
+          totalBalita += _parseInt(row['balita']);
+          totalAnak += _parseInt(row['anak']);
+          totalRemaja += _parseInt(row['remaja']);
+          totalDewasa += _parseInt(row['dewasa']);
+          totalLansia += _parseInt(row['lansia']);
+          totalKeluarga += _parseInt(row['jumlahKeluarga']);
+          totalPus += _parseInt(row['pus']);
+          totalMow += _parseInt(row['mow']);
+          totalMop += _parseInt(row['mop']);
+          totalIud += _parseInt(row['iud']);
+          totalImplant += _parseInt(row['implant']);
+          totalSuntik += _parseInt(row['suntik']);
+          totalPil += _parseInt(row['pil']);
+          totalKondom += _parseInt(row['kondom']);
+          totalKb += _parseInt(row['jumlahKb']);
+          totalTial += _parseInt(row['tial']);
+          totalIat += _parseInt(row['iat']);
+          totalIas += _parseInt(row['ias']);
+          totalHamil += _parseInt(row['hamil']);
+          totalBukanKb += _parseInt(row['jumlahBukanKb']);
         }
 
         ringkasanRows.add({
@@ -758,33 +758,33 @@ class ReportController extends Notifier<ReportState> {
 
         for (var r in data['rows']) {
           krtCount++;
-          totalKk += (r['jmlKk'] as int? ?? 0);
-          jiwaLaki += (r['jiwaLaki'] as int? ?? 0);
-          jiwaPerempuan += (r['jiwaPerempuan'] as int? ?? 0);
-          balitaLaki += (r['balitaLaki'] as int? ?? 0);
-          balitaPerempuan += (r['balitaPerempuan'] as int? ?? 0);
-          pus += (r['pus'] as int? ?? 0);
-          wus += (r['wus'] as int? ?? 0);
-          ibuHamil += (r['ibuHamil'] as int? ?? 0);
-          ibuMenyusui += (r['ibuMenyusui'] as int? ?? 0);
-          lansia += (r['lansia'] as int? ?? 0);
-          buta += (r['buta'] as int? ?? 0);
-          berkebutuhanKhusus += (r['berkebutuhanKhusus'] as int? ?? 0);
-          rumahSehat += (r['rumahSehat'] as int? ?? 0);
-          rumahTidakSehat += (r['rumahTidakSehat'] as int? ?? 0);
-          punyaTempatSampah += (r['punyaTempatSampah'] as int? ?? 0);
-          punyaSpal += (r['punyaSpal'] as int? ?? 0);
-          punyaJamban += (r['punyaJamban'] as int? ?? 0);
-          tempelStiker += (r['tempelStiker'] as int? ?? 0);
-          pdam += (r['sumberAirPdam'] as int? ?? 0);
-          sumur += (r['sumberAirSumur'] as int? ?? 0);
-          dll += (r['sumberAirLainnya'] as int? ?? 0);
-          beras += (r['makananBeras'] as int? ?? 0);
-          nonBeras += (r['makananNonBeras'] as int? ?? 0);
-          up2k += (r['ikutUp2k'] as int? ?? 0);
-          pekarangan += (r['pekarangan'] as int? ?? 0);
-          industri += (r['industriRT'] as int? ?? 0);
-          kerja += (r['kerjaBakti'] as int? ?? 0);
+          totalKk += _parseInt(r['jmlKk']);
+          jiwaLaki += _parseInt(r['jiwaLaki']);
+          jiwaPerempuan += _parseInt(r['jiwaPerempuan']);
+          balitaLaki += _parseInt(r['balitaLaki']);
+          balitaPerempuan += _parseInt(r['balitaPerempuan']);
+          pus += _parseInt(r['pus']);
+          wus += _parseInt(r['wus']);
+          ibuHamil += _parseInt(r['ibuHamil']);
+          ibuMenyusui += _parseInt(r['ibuMenyusui']);
+          lansia += _parseInt(r['lansia']);
+          buta += _parseInt(r['buta']);
+          berkebutuhanKhusus += _parseInt(r['berkebutuhanKhusus']);
+          rumahSehat += _parseInt(r['rumahSehat']);
+          rumahTidakSehat += _parseInt(r['rumahTidakSehat']);
+          punyaTempatSampah += _parseInt(r['punyaTempatSampah']);
+          punyaSpal += _parseInt(r['punyaSpal']);
+          punyaJamban += _parseInt(r['punyaJamban']);
+          tempelStiker += _parseInt(r['tempelStiker']);
+          pdam += _parseInt(r['sumberAirPdam']);
+          sumur += _parseInt(r['sumberAirSumur']);
+          dll += _parseInt(r['sumberAirLainnya']);
+          beras += _parseInt(r['makananBeras']);
+          nonBeras += _parseInt(r['makananNonBeras']);
+          up2k += _parseInt(r['ikutUp2k']);
+          pekarangan += _parseInt(r['pekarangan']);
+          industri += _parseInt(r['industriRT']);
+          kerja += _parseInt(r['kerjaBakti']);
         }
 
         ringkasanRows.add({
@@ -868,7 +868,7 @@ class ReportController extends Notifier<ReportState> {
         for (var r in keluargaList) {
           for (var key in r.keys) {
             if (key != 'namaKeluarga') {
-              totalSums[key] = (totalSums[key] ?? 0) + (r[key] as int? ?? 0);
+              totalSums[key] = (totalSums[key] ?? 0) + _parseInt(r[key]);
             }
           }
         }
@@ -914,7 +914,7 @@ class ReportController extends Notifier<ReportState> {
         for (var r in dataList) {
           for (var key in r.keys) {
             if (key != 'namaWarga' && key != 'keterangan') {
-              sums[key] = (sums[key] ?? 0) + (r[key] as int? ?? 0);
+              sums[key] = (sums[key] ?? 0) + _parseInt(r[key]);
             }
           }
         }
@@ -924,7 +924,17 @@ class ReportController extends Notifier<ReportState> {
         ringkasanRows.add(rowMap);
       }
 
+      if (ringkasanRows.isNotEmpty) {
+        int remainder = ringkasanRows.length % 15;
+        if (remainder != 0) {
+          int needed = 15 - remainder;
+          for (int i = 0; i < needed; i++) {
+            ringkasanRows.add({});
+          }
+        }
+      }
       final ringkasanData = {'rows': ringkasanRows};
+
       final kelompokNameStr = 'Semua Kelompok RT $pkkRt RW $pkkRw';
 
       final pdfBytes = await pdfService.generateFormDataPotensiWarga(
@@ -995,6 +1005,15 @@ class ReportController extends Notifier<ReportState> {
         });
       }
 
+      if (ringkasanRows.isNotEmpty) {
+        int remainder = ringkasanRows.length % 15;
+        if (remainder != 0) {
+          int needed = 15 - remainder;
+          for (int i = 0; i < needed; i++) {
+            ringkasanRows.add({});
+          }
+        }
+      }
       final ringkasanData = {'rows': ringkasanRows};
 
       final pdfBytes = await pdfService.generateLampidPdf(
@@ -1020,3 +1039,10 @@ final reportControllerProvider =
     NotifierProvider<ReportController, ReportState>(() {
       return ReportController();
     });
+
+int _parseInt(dynamic val) {
+  if (val == null) return 0;
+  if (val is int) return val;
+  if (val is String) return int.tryParse(val) ?? 0;
+  return 0;
+}

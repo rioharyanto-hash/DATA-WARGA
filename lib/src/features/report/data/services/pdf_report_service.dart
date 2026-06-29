@@ -495,33 +495,33 @@ class PdfReportService {
 
     // Calculate totals
     for (var r in rowsData) {
-      totalKk += (r['jmlKk'] as int? ?? 0);
-      totL += (r['jiwaLaki'] as int? ?? 0);
-      totP += (r['jiwaPerempuan'] as int? ?? 0);
-      balitaL += (r['balitaLaki'] as int? ?? 0);
-      balitaP += (r['balitaPerempuan'] as int? ?? 0);
-      pus += (r['pus'] as int? ?? 0);
-      wus += (r['wus'] as int? ?? 0);
-      hamil += (r['ibuHamil'] as int? ?? 0);
-      menyusui += (r['ibuMenyusui'] as int? ?? 0);
-      lansia += (r['lansia'] as int? ?? 0);
-      buta += (r['buta'] as int? ?? 0);
-      khusus += (r['berkebutuhanKhusus'] as int? ?? 0);
-      sehat += (r['rumahSehat'] as int? ?? 0);
-      tdkSehat += (r['rumahTidakSehat'] as int? ?? 0);
-      sampah += (r['punyaTempatSampah'] as int? ?? 0);
-      spal += (r['punyaSpal'] as int? ?? 0);
-      jamban += (r['punyaJamban'] as int? ?? 0);
-      stiker += (r['tempelStiker'] as int? ?? 0);
-      pdam += (r['sumberAirPdam'] as int? ?? 0);
-      sumur += (r['sumberAirSumur'] as int? ?? 0);
-      dll += (r['sumberAirLainnya'] as int? ?? 0);
-      beras += (r['makananBeras'] as int? ?? 0);
-      nonBeras += (r['makananNonBeras'] as int? ?? 0);
-      up2k += (r['ikutUp2k'] as int? ?? 0);
-      pekarangan += (r['pekarangan'] as int? ?? 0);
-      industri += (r['industriRT'] as int? ?? 0);
-      kerja += (r['kerjaBakti'] as int? ?? 0);
+      totalKk += _parseInt(r['jmlKk']);
+      totL += _parseInt(r['jiwaLaki']);
+      totP += _parseInt(r['jiwaPerempuan']);
+      balitaL += _parseInt(r['balitaLaki']);
+      balitaP += _parseInt(r['balitaPerempuan']);
+      pus += _parseInt(r['pus']);
+      wus += _parseInt(r['wus']);
+      hamil += _parseInt(r['ibuHamil']);
+      menyusui += _parseInt(r['ibuMenyusui']);
+      lansia += _parseInt(r['lansia']);
+      buta += _parseInt(r['buta']);
+      khusus += _parseInt(r['berkebutuhanKhusus']);
+      sehat += _parseInt(r['rumahSehat']);
+      tdkSehat += _parseInt(r['rumahTidakSehat']);
+      sampah += _parseInt(r['punyaTempatSampah']);
+      spal += _parseInt(r['punyaSpal']);
+      jamban += _parseInt(r['punyaJamban']);
+      stiker += _parseInt(r['tempelStiker']);
+      pdam += _parseInt(r['sumberAirPdam']);
+      sumur += _parseInt(r['sumberAirSumur']);
+      dll += _parseInt(r['sumberAirLainnya']);
+      beras += _parseInt(r['makananBeras']);
+      nonBeras += _parseInt(r['makananNonBeras']);
+      up2k += _parseInt(r['ikutUp2k']);
+      pekarangan += _parseInt(r['pekarangan']);
+      industri += _parseInt(r['industriRT']);
+      kerja += _parseInt(r['kerjaBakti']);
     }
 
     final totalRowData = {
@@ -1362,18 +1362,22 @@ class PdfReportService {
     pw.Widget buildCell(
       String text, {
       double? width,
+      double? height,
       int? flex,
       bool isHeader = false,
       bool noRightBorder = false,
       bool bottomBorder = false,
       double? fontSize,
+      PdfColor? backgroundColor,
       pw.Alignment alignment = pw.Alignment.center,
     }) {
       final content = pw.Container(
         width: width,
+        height: height,
         padding: const pw.EdgeInsets.all(1),
         alignment: alignment,
         decoration: pw.BoxDecoration(
+          color: backgroundColor,
           border: pw.Border(
             right: noRightBorder
                 ? pw.BorderSide.none
@@ -1403,22 +1407,22 @@ class PdfReportService {
     }
 
     final ageGroups = [
-      '0 - 4',
-      '5 - 9',
-      '10 - 14',
-      '15 - 19',
-      '20 - 24',
-      '25 - 29',
-      '30 - 34',
-      '35 - 39',
-      '40 - 44',
-      '45 - 49',
-      '50 - 54',
-      '55 - 59',
-      '60 - 64',
-      '65 - 69',
-      '70 - 74',
-      '75 +',
+      '0 - 4 Tahun',
+      '5 - 9 Tahun',
+      '10 - 14 Tahun',
+      '15 - 19 Tahun',
+      '20 - 24 Tahun',
+      '25 - 29 Tahun',
+      '30 - 34 Tahun',
+      '35 - 39 Tahun',
+      '40 - 44 Tahun',
+      '45 - 49 Tahun',
+      '50 - 54 Tahun',
+      '55 - 59 Tahun',
+      '60 - 64 Tahun',
+      '65 - 69 Tahun',
+      '70 - 74 Tahun',
+      '75 Tahun',
     ];
 
     final prefixList = [
@@ -1440,167 +1444,521 @@ class PdfReportService {
       '75_plus',
     ];
 
+    Map<String, int> sums = {};
+    for (var prefix in prefixList) {
+      sums['${prefix}_P'] = 0;
+      sums['${prefix}_W'] = 0;
+    }
+    sums['total_P'] = 0;
+    sums['total_W'] = 0;
+
+    for (var r in data) {
+      for (var prefix in prefixList) {
+        sums['${prefix}_P'] =
+            (sums['${prefix}_P']!) +
+            (int.tryParse(r['${prefix}_P']?.toString() ?? '0') ?? 0);
+        sums['${prefix}_W'] =
+            (sums['${prefix}_W']!) +
+            (int.tryParse(r['${prefix}_W']?.toString() ?? '0') ?? 0);
+      }
+      sums['total_P'] =
+          (sums['total_P']!) +
+          (int.tryParse(r['total_P']?.toString() ?? '0') ?? 0);
+      sums['total_W'] =
+          (sums['total_W']!) +
+          (int.tryParse(r['total_W']?.toString() ?? '0') ?? 0);
+    }
+
+    // ==========================================
+    // PAGE 1: PORTRAIT
+    // ==========================================
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: const PdfPageFormat(
+          21.5 * PdfPageFormat.cm,
+          33.0 * PdfPageFormat.cm,
+        ),
+        margin: const pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return [
+            pw.Text(
+              'PROFIL KEPENDUDUKAN',
+              style: pw.TextStyle(font: boldFont, fontSize: 12),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Text(
+              'Jumlah Penduduk Menurut Kelompok Umur dan Jenis Kelamin',
+              style: pw.TextStyle(font: regularFont, fontSize: 12),
+            ),
+            pw.SizedBox(height: 24),
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        children: [
+                          pw.SizedBox(
+                            width: 100,
+                            child: pw.Text(
+                              'NAMA',
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            ': ',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        children: [
+                          pw.SizedBox(
+                            width: 100,
+                            child: pw.Text(
+                              'Kelompok',
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            ': $namaKelompok',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        children: [
+                          pw.SizedBox(
+                            width: 100,
+                            child: pw.Text(
+                              'RT / RW',
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            ': $rt / $rw',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        children: [
+                          pw.SizedBox(
+                            width: 100,
+                            child: pw.Text(
+                              'Kelurahan',
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            ': $kelurahan',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        children: [
+                          pw.SizedBox(
+                            width: 100,
+                            child: pw.Text(
+                              'Kecamatan',
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            ': $kecamatan',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.end,
+                        children: [
+                          pw.SizedBox(
+                            width: 100,
+                            child: pw.Text(
+                              'Kota',
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            ': $kota',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 16),
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.SizedBox(
+                  width: 100,
+                  child: pw.Text(
+                    'BULAN & THN',
+                    style: pw.TextStyle(font: regularFont, fontSize: 10),
+                  ),
+                ),
+                pw.Text(
+                  ': ',
+                  style: pw.TextStyle(font: regularFont, fontSize: 10),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 8),
+
+            pw.Container(
+              decoration: pw.BoxDecoration(border: pw.Border.all(width: 1.0)),
+              child: pw.Column(
+                children: [
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      buildCell(
+                        'UMUR',
+                        flex: 1,
+                        height: 28,
+                        isHeader: true,
+                        bottomBorder: true,
+                        backgroundColor: PdfColors.yellow,
+                        fontSize: 10,
+                      ),
+                      buildCell(
+                        'P',
+                        flex: 1,
+                        height: 28,
+                        isHeader: true,
+                        bottomBorder: true,
+                        backgroundColor: PdfColors.yellow,
+                        fontSize: 10,
+                      ),
+                      buildCell(
+                        'W',
+                        flex: 1,
+                        height: 28,
+                        isHeader: true,
+                        noRightBorder: true,
+                        bottomBorder: true,
+                        backgroundColor: PdfColors.yellow,
+                        fontSize: 10,
+                      ),
+                    ],
+                  ),
+                  ...List.generate(ageGroups.length, (i) {
+                    final pVal = sums['${prefixList[i]}_P']?.toString() ?? '0';
+                    final wVal = sums['${prefixList[i]}_W']?.toString() ?? '0';
+                    return pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        buildCell(
+                          ageGroups[i],
+                          flex: 1,
+                          height: 28,
+                          bottomBorder: true,
+                          fontSize: 9,
+                        ),
+                        buildCell(
+                          pVal,
+                          flex: 1,
+                          height: 28,
+                          bottomBorder: true,
+                          fontSize: 9,
+                        ),
+                        buildCell(
+                          wVal,
+                          flex: 1,
+                          height: 28,
+                          noRightBorder: true,
+                          bottomBorder: true,
+                          fontSize: 9,
+                        ),
+                      ],
+                    );
+                  }),
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      buildCell(
+                        'TOTAL',
+                        flex: 1,
+                        height: 28,
+                        isHeader: true,
+                        backgroundColor: PdfColors.yellow,
+                        fontSize: 10,
+                      ),
+                      buildCell(
+                        sums['total_P']?.toString() ?? '0',
+                        flex: 1,
+                        height: 28,
+                        backgroundColor: PdfColors.yellow,
+                        isHeader: true,
+                        fontSize: 10,
+                      ),
+                      buildCell(
+                        sums['total_W']?.toString() ?? '0',
+                        flex: 1,
+                        height: 28,
+                        noRightBorder: true,
+                        backgroundColor: PdfColors.yellow,
+                        isHeader: true,
+                        fontSize: 10,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ];
+        },
+      ),
+    );
+
+    // ==========================================
+    // PAGE 2: LANDSCAPE
+    // ==========================================
     pdf.addPage(
       pw.MultiPage(
         pageFormat: const PdfPageFormat(
           33.0 * PdfPageFormat.cm,
           21.5 * PdfPageFormat.cm,
-        ), // Landscape F4
+        ),
         margin: const pw.EdgeInsets.all(32),
-        build: (pw.Context context) {
-          final widgets = <pw.Widget>[];
-
-          widgets.add(
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'PROFIL KEPENDUDUKAN',
-                  style: pw.TextStyle(font: boldFont, fontSize: 12),
-                ),
-                pw.Text(
-                  'Jumlah Penduduk Menurut Kelompok Umur dan Jenis Kelamin',
-                  style: pw.TextStyle(font: regularFont, fontSize: 8),
-                ),
-                pw.SizedBox(height: 16),
-
-                // Header Info
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        pw.SizedBox(
-                          width: 60,
-                          child: pw.Text(
-                            'NAMA',
-                            style: pw.TextStyle(font: regularFont, fontSize: 9),
-                          ),
-                        ),
-                        pw.Text(
-                          ': $namaKelompok',
-                          style: pw.TextStyle(font: regularFont, fontSize: 9),
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 4),
-                    pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        pw.SizedBox(
-                          width: 60,
-                          child: pw.Text(
-                            'RT / RW',
-                            style: pw.TextStyle(font: regularFont, fontSize: 9),
-                          ),
-                        ),
-                        pw.Text(
-                          ': $rt / $rw',
-                          style: pw.TextStyle(font: regularFont, fontSize: 9),
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 4),
-                    pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        pw.SizedBox(
-                          width: 60,
-                          child: pw.Text(
-                            'Kelurahan',
-                            style: pw.TextStyle(font: regularFont, fontSize: 9),
-                          ),
-                        ),
-                        pw.Text(
-                          ': $kelurahan',
-                          style: pw.TextStyle(font: regularFont, fontSize: 9),
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 4),
-                    pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        pw.SizedBox(
-                          width: 60,
-                          child: pw.Text(
-                            'Kecamatan',
-                            style: pw.TextStyle(font: regularFont, fontSize: 9),
-                          ),
-                        ),
-                        pw.Text(
-                          ': $kecamatan',
-                          style: pw.TextStyle(font: regularFont, fontSize: 9),
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 4),
-                    pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        pw.SizedBox(
-                          width: 60,
-                          child: pw.Text(
-                            'Kota',
-                            style: pw.TextStyle(font: regularFont, fontSize: 9),
-                          ),
-                        ),
-                        pw.Text(
-                          ': $kota',
-                          style: pw.TextStyle(font: regularFont, fontSize: 9),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                pw.SizedBox(height: 16),
-              ],
-            ),
-          );
-
-          // Header Row
-          widgets.add(
-            pw.Container(
-              height: 30,
-              decoration: const pw.BoxDecoration(
-                color: PdfColors.yellow,
-                border: pw.Border(
-                  top: pw.BorderSide(width: 0.5),
-                  left: pw.BorderSide(width: 0.5),
-                  right: pw.BorderSide(width: 0.5),
-                ),
+        header: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'PROFIL KEPENDUDUKAN (RINCIAN KELUARGA)',
+                style: pw.TextStyle(font: boldFont, fontSize: 12),
               ),
-              child: pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.center,
+              pw.Text(
+                'Jumlah Penduduk Menurut Kelompok Umur dan Jenis Kelamin',
+                style: pw.TextStyle(font: regularFont, fontSize: 8),
+              ),
+              pw.SizedBox(height: 16),
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  buildCell('NO', flex: 1, isHeader: true, fontSize: 8),
-                  buildCell(
-                    'Nama Kelompok / Kader',
-                    flex: 4,
-                    isHeader: true,
-                    fontSize: 8,
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.SizedBox(
+                        width: 60,
+                        child: pw.Text(
+                          'NAMA',
+                          style: pw.TextStyle(font: regularFont, fontSize: 9),
+                        ),
+                      ),
+                      pw.Text(
+                        ': $namaKelompok',
+                        style: pw.TextStyle(font: regularFont, fontSize: 9),
+                      ),
+                    ],
                   ),
-                  for (int i = 0; i < ageGroups.length; i++)
+                  pw.SizedBox(height: 4),
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.SizedBox(
+                        width: 60,
+                        child: pw.Text(
+                          'RT / RW',
+                          style: pw.TextStyle(font: regularFont, fontSize: 9),
+                        ),
+                      ),
+                      pw.Text(
+                        ': $rt / $rw',
+                        style: pw.TextStyle(font: regularFont, fontSize: 9),
+                      ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.SizedBox(
+                        width: 60,
+                        child: pw.Text(
+                          'Kelurahan',
+                          style: pw.TextStyle(font: regularFont, fontSize: 9),
+                        ),
+                      ),
+                      pw.Text(
+                        ': $kelurahan',
+                        style: pw.TextStyle(font: regularFont, fontSize: 9),
+                      ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.SizedBox(
+                        width: 60,
+                        child: pw.Text(
+                          'Kecamatan',
+                          style: pw.TextStyle(font: regularFont, fontSize: 9),
+                        ),
+                      ),
+                      pw.Text(
+                        ': $kecamatan',
+                        style: pw.TextStyle(font: regularFont, fontSize: 9),
+                      ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 4),
+                  pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.SizedBox(
+                        width: 60,
+                        child: pw.Text(
+                          'Kota',
+                          style: pw.TextStyle(font: regularFont, fontSize: 9),
+                        ),
+                      ),
+                      pw.Text(
+                        ': $kota',
+                        style: pw.TextStyle(font: regularFont, fontSize: 9),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 16),
+              pw.Container(
+                height: 30,
+                decoration: const pw.BoxDecoration(
+                  color: PdfColors.yellow,
+                  border: pw.Border(
+                    top: pw.BorderSide(width: 0.5),
+                    bottom: pw.BorderSide(width: 0.5),
+                    left: pw.BorderSide(width: 0.5),
+                    right: pw.BorderSide(width: 0.5),
+                  ),
+                ),
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                  children: [
+                    buildCell('NO', flex: 1, isHeader: true, fontSize: 8),
+                    buildCell(
+                      'Nama Kepala Keluarga',
+                      flex: 4,
+                      isHeader: true,
+                      fontSize: 8,
+                    ),
+                    for (int i = 0; i < ageGroups.length; i++)
+                      pw.Expanded(
+                        flex: 2,
+                        child: pw.Container(
+                          decoration: const pw.BoxDecoration(
+                            border: pw.Border(right: pw.BorderSide(width: 0.5)),
+                          ),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                            children: [
+                              buildCell(
+                                ageGroups[i],
+                                height: 15,
+                                isHeader: true,
+                                noRightBorder: true,
+                                bottomBorder: true,
+                                fontSize: 6,
+                              ),
+                              pw.Container(
+                                height: 15,
+                                child: pw.Row(
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.stretch,
+                                  children: [
+                                    buildCell(
+                                      'P',
+                                      flex: 1,
+                                      isHeader: true,
+                                      fontSize: 6,
+                                    ),
+                                    buildCell(
+                                      'W',
+                                      flex: 1,
+                                      isHeader: true,
+                                      noRightBorder: true,
+                                      fontSize: 6,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     pw.Expanded(
                       flex: 2,
                       child: pw.Container(
-                        decoration: const pw.BoxDecoration(
-                          border: pw.Border(right: pw.BorderSide(width: 0.5)),
-                        ),
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                           children: [
                             buildCell(
-                              ageGroups[i],
-                              flex: 1,
+                              'Jumlah',
+                              height: 15,
                               isHeader: true,
                               noRightBorder: true,
                               bottomBorder: true,
                               fontSize: 6,
                             ),
-                            pw.Expanded(
-                              flex: 1,
+                            pw.Container(
+                              height: 15,
                               child: pw.Row(
                                 crossAxisAlignment:
                                     pw.CrossAxisAlignment.stretch,
@@ -1625,50 +1983,14 @@ class PdfReportService {
                         ),
                       ),
                     ),
-                  // Jumlah Header
-                  pw.Expanded(
-                    flex: 2,
-                    child: pw.Container(
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                        children: [
-                          buildCell(
-                            'Jumlah',
-                            flex: 1,
-                            isHeader: true,
-                            noRightBorder: true,
-                            bottomBorder: true,
-                            fontSize: 6,
-                          ),
-                          pw.Expanded(
-                            flex: 1,
-                            child: pw.Row(
-                              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                              children: [
-                                buildCell(
-                                  'P',
-                                  flex: 1,
-                                  isHeader: true,
-                                  fontSize: 6,
-                                ),
-                                buildCell(
-                                  'W',
-                                  flex: 1,
-                                  isHeader: true,
-                                  noRightBorder: true,
-                                  fontSize: 6,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           );
+        },
+        build: (pw.Context context) {
+          final widgets = <pw.Widget>[];
 
           // Data Rows
           for (int idx = 0; idx < data.length; idx++) {
@@ -1678,7 +2000,7 @@ class PdfReportService {
                 height: 20,
                 decoration: const pw.BoxDecoration(
                   border: pw.Border(
-                    top: pw.BorderSide(width: 0.5),
+                    bottom: pw.BorderSide(width: 0.5),
                     left: pw.BorderSide(width: 0.5),
                     right: pw.BorderSide(width: 0.5),
                   ),
@@ -1686,27 +2008,35 @@ class PdfReportService {
                 child: pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                   children: [
-                    buildCell((idx + 1).toString(), flex: 1),
+                    buildCell((idx + 1).toString(), flex: 1, height: 20),
                     buildCell(
                       row['namaKeluarga']?.toString() ?? '',
                       flex: 4,
+                      height: 20,
                       alignment: pw.Alignment.centerLeft,
                     ),
                     for (int i = 0; i < prefixList.length; i++) ...[
                       buildCell(
                         row['${prefixList[i]}_P']?.toString() ?? '0',
                         flex: 1,
+                        height: 20,
                       ),
                       buildCell(
                         row['${prefixList[i]}_W']?.toString() ?? '0',
                         flex: 1,
+                        height: 20,
                         noRightBorder: false,
                       ),
                     ],
-                    buildCell(row['total_P']?.toString() ?? '0', flex: 1),
+                    buildCell(
+                      row['total_P']?.toString() ?? '0',
+                      flex: 1,
+                      height: 20,
+                    ),
                     buildCell(
                       row['total_W']?.toString() ?? '0',
                       flex: 1,
+                      height: 20,
                       noRightBorder: true,
                     ),
                   ],
@@ -1715,39 +2045,13 @@ class PdfReportService {
             );
           }
 
-          // JUMLAH Row Data calculations
-          Map<String, int> sums = {};
-          for (var prefix in prefixList) {
-            sums['${prefix}_P'] = 0;
-            sums['${prefix}_W'] = 0;
-          }
-          sums['total_P'] = 0;
-          sums['total_W'] = 0;
-
-          for (var r in data) {
-            for (var prefix in prefixList) {
-              sums['${prefix}_P'] =
-                  (sums['${prefix}_P']!) +
-                  (int.tryParse(r['${prefix}_P']?.toString() ?? '0') ?? 0);
-              sums['${prefix}_W'] =
-                  (sums['${prefix}_W']!) +
-                  (int.tryParse(r['${prefix}_W']?.toString() ?? '0') ?? 0);
-            }
-            sums['total_P'] =
-                (sums['total_P']!) +
-                (int.tryParse(r['total_P']?.toString() ?? '0') ?? 0);
-            sums['total_W'] =
-                (sums['total_W']!) +
-                (int.tryParse(r['total_W']?.toString() ?? '0') ?? 0);
-          }
-
+          // JUMLAH Row
           widgets.add(
             pw.Container(
               height: 20,
               decoration: const pw.BoxDecoration(
                 color: PdfColors.yellow,
                 border: pw.Border(
-                  top: pw.BorderSide(width: 0.5),
                   bottom: pw.BorderSide(width: 0.5),
                   left: pw.BorderSide(width: 0.5),
                   right: pw.BorderSide(width: 0.5),
@@ -1756,18 +2060,20 @@ class PdfReportService {
               child: pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('', flex: 1),
-                  buildCell('JUMLAH', flex: 4, isHeader: true),
+                  buildCell('', flex: 1, height: 20),
+                  buildCell('JUMLAH', flex: 4, isHeader: true, height: 20),
                   for (int i = 0; i < prefixList.length; i++) ...[
                     buildCell(
                       sums['${prefixList[i]}_P'].toString(),
                       flex: 1,
                       isHeader: true,
+                      height: 20,
                     ),
                     buildCell(
                       sums['${prefixList[i]}_W'].toString(),
                       flex: 1,
                       isHeader: true,
+                      height: 20,
                       noRightBorder: false,
                     ),
                   ],
@@ -1775,11 +2081,13 @@ class PdfReportService {
                     sums['total_P'].toString(),
                     flex: 1,
                     isHeader: true,
+                    height: 20,
                   ),
                   buildCell(
                     sums['total_W'].toString(),
                     flex: 1,
                     isHeader: true,
+                    height: 20,
                     noRightBorder: true,
                   ),
                 ],
@@ -7177,29 +7485,29 @@ class PdfReportService {
         totalBukanKb = 0;
 
     for (var row in rows) {
-      totalL += (row['L'] as int? ?? 0);
-      totalP += (row['P'] as int? ?? 0);
-      totalJumlah += (row['jumlah'] as int? ?? 0);
-      totalBalita += (row['balita'] as int? ?? 0);
-      totalAnak += (row['anak'] as int? ?? 0);
-      totalRemaja += (row['remaja'] as int? ?? 0);
-      totalDewasa += (row['dewasa'] as int? ?? 0);
-      totalLansia += (row['lansia'] as int? ?? 0);
-      totalKeluarga += (row['jumlahKeluarga'] as int? ?? 0);
-      totalPus += (row['pus'] as int? ?? 0);
-      totalMow += (row['mow'] as int? ?? 0);
-      totalMop += (row['mop'] as int? ?? 0);
-      totalIud += (row['iud'] as int? ?? 0);
-      totalImplant += (row['implant'] as int? ?? 0);
-      totalSuntik += (row['suntik'] as int? ?? 0);
-      totalPil += (row['pil'] as int? ?? 0);
-      totalKondom += (row['kondom'] as int? ?? 0);
-      totalKb += (row['jumlahKb'] as int? ?? 0);
-      totalTial += (row['tial'] as int? ?? 0);
-      totalIat += (row['iat'] as int? ?? 0);
-      totalIas += (row['ias'] as int? ?? 0);
-      totalHamil += (row['hamil'] as int? ?? 0);
-      totalBukanKb += (row['jumlahBukanKb'] as int? ?? 0);
+      totalL += _parseInt(row['L']);
+      totalP += _parseInt(row['P']);
+      totalJumlah += _parseInt(row['jumlah']);
+      totalBalita += _parseInt(row['balita']);
+      totalAnak += _parseInt(row['anak']);
+      totalRemaja += _parseInt(row['remaja']);
+      totalDewasa += _parseInt(row['dewasa']);
+      totalLansia += _parseInt(row['lansia']);
+      totalKeluarga += _parseInt(row['jumlahKeluarga']);
+      totalPus += _parseInt(row['pus']);
+      totalMow += _parseInt(row['mow']);
+      totalMop += _parseInt(row['mop']);
+      totalIud += _parseInt(row['iud']);
+      totalImplant += _parseInt(row['implant']);
+      totalSuntik += _parseInt(row['suntik']);
+      totalPil += _parseInt(row['pil']);
+      totalKondom += _parseInt(row['kondom']);
+      totalKb += _parseInt(row['jumlahKb']);
+      totalTial += _parseInt(row['tial']);
+      totalIat += _parseInt(row['iat']);
+      totalIas += _parseInt(row['ias']);
+      totalHamil += _parseInt(row['hamil']);
+      totalBukanKb += _parseInt(row['jumlahBukanKb']);
     }
 
     final int chunk = 18;
@@ -7750,7 +8058,7 @@ class PdfReportService {
                           ),
                         ),
                       // Fill empty rows if needed
-                      if (pageRows.length < chunk && !isLastPage)
+                      if (pageRows.length < chunk)
                         for (int j = 0; j < (chunk - pageRows.length); j++)
                           pw.Container(
                             height: 16,
@@ -10790,7 +11098,7 @@ class PdfReportService {
                     final pVal = data['${prefixList[i]}_P']?.toString() ?? '0';
                     final wVal = data['${prefixList[i]}_W']?.toString() ?? '0';
                     return pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
                         buildCell(ageGroups[i], flex: 2, bottomBorder: true),
                         buildCell(pVal, flex: 3, bottomBorder: true),
@@ -10805,7 +11113,7 @@ class PdfReportService {
                   }),
                   // Footer (TOTAL)
                   pw.Row(
-                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       buildCell(
                         'TOTAL',
@@ -10841,3 +11149,10 @@ class PdfReportService {
 final pdfReportServiceProvider = Provider<PdfReportService>((ref) {
   return PdfReportService();
 });
+
+int _parseInt(dynamic val) {
+  if (val == null) return 0;
+  if (val is int) return val;
+  if (val is String) return int.tryParse(val) ?? 0;
+  return 0;
+}
