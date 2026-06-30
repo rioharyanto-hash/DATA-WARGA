@@ -75,6 +75,39 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       }
     });
 
+    final jenisLaporanField = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Jenis Laporan',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<bool>(
+          value: _isRingkasan,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          items: const [
+            DropdownMenuItem(
+                value: false,
+                child: Text('1. Laporan Rincian (Per Kelompok Kader)')),
+            DropdownMenuItem(
+                value: true,
+                child: Text('2. Laporan Ringkasan (Rekap Seluruh Kelompok)')),
+          ],
+          onChanged: (val) {
+            if (val != null) {
+              setState(() {
+                _isRingkasan = val;
+              });
+            }
+          },
+        ),
+      ],
+    );
+
     final kelompokDropdown = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,23 +307,35 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: isDesktop
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  ? Column(
                       children: [
-                        Expanded(flex: 3, child: kelompokDropdown),
-                        const SizedBox(width: 16),
-                        Expanded(flex: 2, child: bulanField),
-                        const SizedBox(width: 16),
-                        Expanded(flex: 1, child: rtField),
-                        const SizedBox(width: 16),
-                        Expanded(flex: 1, child: rwField),
+                        jenisLaporanField,
+                        const SizedBox(height: 16),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (!_isRingkasan) ...[
+                              Expanded(flex: 3, child: kelompokDropdown),
+                              const SizedBox(width: 16),
+                            ],
+                            Expanded(flex: 2, child: bulanField),
+                            const SizedBox(width: 16),
+                            Expanded(flex: 1, child: rtField),
+                            const SizedBox(width: 16),
+                            Expanded(flex: 1, child: rwField),
+                          ],
+                        ),
                       ],
                     )
                   : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        kelompokDropdown,
+                        jenisLaporanField,
                         const SizedBox(height: 16),
+                        if (!_isRingkasan) ...[
+                          kelompokDropdown,
+                          const SizedBox(height: 16),
+                        ],
                         bulanField,
                         const SizedBox(height: 16),
                         Row(
@@ -311,22 +356,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 const Text(
                   'Aksi Laporan',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Checkbox(
-                      value: _isRingkasan,
-                      onChanged: (val) {
-                        setState(() {
-                          _isRingkasan = val ?? false;
-                        });
-                      },
-                    ),
-                    const Text(
-                      'Cetak sebagai Laporan Ringkasan (Rekap per Kader)',
-                    ),
-                  ],
                 ),
               ],
             ),

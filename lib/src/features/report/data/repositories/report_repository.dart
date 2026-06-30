@@ -43,7 +43,9 @@ class ReportRepository implements IReportRepository {
         int jiwaPerempuan = 0;
         int balitaLaki = 0;
         int balitaPerempuan = 0;
+        int remaja = 0;
         int lansia = 0;
+        int praLansia = 0;
         int pus = 0;
         int wus = 0;
         int ibuHamil = 0;
@@ -134,6 +136,10 @@ class ReportRepository implements IReportRepository {
                   } else {
                     balitaPerempuan++;
                   }
+                } else if (umur >= 10 && umur <= 24) {
+                  remaja++;
+                } else if (umur >= 45 && umur <= 59) {
+                  praLansia++;
                 } else if (umur >= 60) {
                   lansia++;
                 }
@@ -162,6 +168,8 @@ class ReportRepository implements IReportRepository {
           'jiwaPerempuan': jiwaPerempuan,
           'balitaLaki': balitaLaki,
           'balitaPerempuan': balitaPerempuan,
+          'remaja': remaja,
+          'praLansia': praLansia,
           'pus': pus,
           'wus': wus,
           'ibuHamil': ibuHamil,
@@ -1356,8 +1364,8 @@ class ReportRepository implements IReportRepository {
           }
         }
 
-        // REMAJA (10-18)
-        if (umur >= 10 && umur <= 18) {
+        // REMAJA (10-24)
+        if (umur >= 10 && umur <= 24) {
           if (isL) {
             remajaL++;
             if (isAktif) remajaAktifL++;

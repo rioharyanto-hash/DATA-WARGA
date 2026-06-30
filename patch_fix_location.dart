@@ -54,8 +54,7 @@ final pdfReportServiceProvider = Provider<PdfReportService>((ref) {
     content = content.replaceRange(
       classEnd,
       classEnd + 1,
-      cleanMethodContent +
-          '\n}\n\nfinal pdfReportServiceProvider = Provider<PdfReportService>((ref) {\n  return PdfReportService();\n});\n',
+      '$cleanMethodContent\n}\n\nfinal pdfReportServiceProvider = Provider<PdfReportService>((ref) {\n  return PdfReportService();\n});\n',
     );
 
     file.writeAsStringSync(content);

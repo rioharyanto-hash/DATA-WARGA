@@ -472,14 +472,8 @@ class ReportController extends Notifier<ReportState> {
       final data = await repo.getPotensiWargaData(kelompokName);
 
       final pdfService = ref.read(pdfReportServiceProvider);
-      final pdfBytes = await pdfService.generateFormDataPotensiWarga(
-        data: data,
-        kelompokName: kelompokName,
-        pkkRw: pkkRw,
-        dusun: '...', // Default dusun
-        desa: region.kelurahan,
-        tahun: tahun,
-        periode: '$bulan $tahun', // Set periode to bulan
+      final pdfBytes = await pdfService.generatePotensiWargaPdf(
+        data: {'rows': data},
       );
 
       state = state.copyWith(isLoading: false);
@@ -858,30 +852,45 @@ class ReportController extends Notifier<ReportState> {
       String pkkRw = rw == 'Semua' ? '...' : rw;
       String pkkRt = rt == 'Semua' ? '...' : rt;
 
-      final Map<String, int> totalSums = {};
+      final List<Map<String, int>> perKelompokTotals = [];
+      final List<String> namaKaderList = [];
+
       for (var name in allowedNames) {
         final data = await repo.getProfilPendudukData(name);
+        
+        final kaderName = (data['kaderName']?.toString() ?? '');
+        if (kaderName.isNotEmpty) {
+           namaKaderList.add(kaderName);
+        }
+
         final keluargaList =
             (data['keluargaList'] as List?)?.cast<Map<String, dynamic>>() ?? [];
         if (keluargaList.isEmpty) continue;
 
+        final Map<String, int> kelTotals = {};
         for (var r in keluargaList) {
           for (var key in r.keys) {
             if (key != 'namaKeluarga') {
-              totalSums[key] = (totalSums[key] ?? 0) + _parseInt(r[key]);
+              kelTotals[key] = (kelTotals[key] ?? 0) + _parseInt(r[key]);
             }
           }
         }
+        perKelompokTotals.add(kelTotals);
       }
+      
+      final bulan = ref.read(reportBulanProvider);
+      final tahun = DateTime.now().year.toString();
 
       final pdfBytes = await pdfService.generateProfilUsiaRingkasanPortraitPdf(
-        data: totalSums,
-        namaKelompok: 'Semua Kelompok RT $pkkRt RW $pkkRw',
+        perKelompokData: perKelompokTotals,
+        namaKelompok: allowedNames.isNotEmpty ? allowedNames.join(', ') : 'Semua Kelompok RT $pkkRt RW $pkkRw',
+        namaKader: namaKaderList.isNotEmpty ? namaKaderList.join(', ') : '',
         rt: pkkRt,
         rw: pkkRw,
         kelurahan: region.kelurahan,
         kecamatan: region.kecamatan,
-        kota: region.kotaKab,
+        kota: region.kotaKab, // The parameter in PdfReportService is 'kota', not 'kabupaten'
+        bulanTahun: '$bulan $tahun',
       );
 
       state = state.copyWith(isLoading: false);
@@ -935,16 +944,8 @@ class ReportController extends Notifier<ReportState> {
       }
       final ringkasanData = {'rows': ringkasanRows};
 
-      final kelompokNameStr = 'Semua Kelompok RT $pkkRt RW $pkkRw';
-
-      final pdfBytes = await pdfService.generateFormDataPotensiWarga(
-        data: ringkasanRows,
-        kelompokName: kelompokNameStr,
-        pkkRw: pkkRw,
-        dusun: pkkRt,
-        desa: region.kelurahan,
-        tahun: DateTime.now().year.toString(),
-        periode: ref.read(reportBulanProvider),
+      final pdfBytes = await pdfService.generatePotensiWargaPdf(
+        data: ringkasanData,
       );
 
       state = state.copyWith(isLoading: false);

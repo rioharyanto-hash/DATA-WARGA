@@ -9,7 +9,15 @@ void main() {
 
   test('PDF Generation generates lampid form without error', () async {
     final service = PdfReportService();
-    await service.generateLampidPdf(namaKelompok: 'Test', mutasiList: []);
+    await service.generateLampidPdf(
+      namaKelompok: 'Test',
+      mutasiList: [],
+      rt: '01',
+      rw: '01',
+      kelurahan: 'Test',
+      bulan: 'Januari',
+      tahun: '2024',
+    );
   });
 
   test(
@@ -18,6 +26,11 @@ void main() {
       final service = PdfReportService();
       await service.generateLampidPdf(
         namaKelompok: 'Test',
+        rt: '01',
+        rw: '01',
+        kelurahan: 'Test',
+        bulan: 'Januari',
+        tahun: '2024',
         mutasiList: [
           {
             'nama': 'Test Ibu',
