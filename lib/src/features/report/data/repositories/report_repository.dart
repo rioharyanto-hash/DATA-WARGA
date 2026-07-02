@@ -197,16 +197,12 @@ class ReportRepository implements IReportRepository {
       }
     }
 
-    final kaderQuery = await db.query(
-      'app_user',
-      where:
-          "LOWER(REPLACE(REPLACE(kelompok_dawis, '.', ''), ' ', '')) = ? AND role = ?",
-      whereArgs: [
-        kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase(),
-        'KADER',
-      ],
-      limit: 1,
-    );
+    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
+      final kaderQuery = allKader.where((k) {
+        final dawis = k['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+      }).toList();
 
     String namaKader = '';
     if (kaderQuery.isNotEmpty) {
@@ -484,16 +480,12 @@ class ReportRepository implements IReportRepository {
       });
     }
 
-    final kaderQuery = await db.query(
-      'app_user',
-      where:
-          "LOWER(REPLACE(REPLACE(kelompok_dawis, '.', ''), ' ', '')) = ? AND role = ?",
-      whereArgs: [
-        kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase(),
-        'KADER',
-      ],
-      limit: 1,
-    );
+    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
+      final kaderQuery = allKader.where((k) {
+        final dawis = k['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+      }).toList();
 
     String namaKordinator = '';
     if (kaderQuery.isNotEmpty) {
@@ -675,16 +667,12 @@ class ReportRepository implements IReportRepository {
       }
     }
 
-    final kaderQuery = await db.query(
-      'app_user',
-      where:
-          "LOWER(REPLACE(REPLACE(kelompok_dawis, '.', ''), ' ', '')) = ? AND role = ?",
-      whereArgs: [
-        kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase(),
-        'KADER',
-      ],
-      limit: 1,
-    );
+    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
+      final kaderQuery = allKader.where((k) {
+        final dawis = k['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+      }).toList();
 
     String namaKordinator = '';
     if (kaderQuery.isNotEmpty) {
@@ -861,16 +849,12 @@ class ReportRepository implements IReportRepository {
       }
     }
 
-    final kaderQuery = await db.query(
-      'app_user',
-      where:
-          "LOWER(REPLACE(REPLACE(kelompok_dawis, '.', ''), ' ', '')) = ? AND role = ?",
-      whereArgs: [
-        kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase(),
-        'KADER',
-      ],
-      limit: 1,
-    );
+    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
+      final kaderQuery = allKader.where((k) {
+        final dawis = k['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+      }).toList();
 
     String rt = '';
     String rw = '';
@@ -904,13 +888,12 @@ class ReportRepository implements IReportRepository {
         .toLowerCase();
 
     // Get Kader
-    final kaderQuery = await db.query(
-      'app_user',
-      where:
-          "LOWER(REPLACE(REPLACE(kelompok_dawis, '.', ''), ' ', '')) = ? AND role = ?",
-      whereArgs: [normalizedName, 'KADER'],
-      limit: 1,
-    );
+    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
+      final kaderQuery = allKader.where((k) {
+        final dawis = k['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+      }).toList();
     String namaKader = '';
     String pkkRw = rw;
     String pkkRt = rt;
@@ -924,11 +907,12 @@ class ReportRepository implements IReportRepository {
     }
 
     // 1. Ambil semua bangunan yang sesuai kelompok
-    final bgnList = await db.query(
-      'bangunan',
-      where: "LOWER(REPLACE(REPLACE(kelompok_dawis, '.', ''), ' ', '')) = ?",
-      whereArgs: [normalizedName],
-    );
+      final allBgn = await db.query('bangunan');
+      final bgnList = allBgn.where((b) {
+        final dawis = b['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == normalizedName;
+      }).toList();
 
     final List<Map<String, dynamic>> krtRows = [];
 
@@ -1124,12 +1108,12 @@ class ReportRepository implements IReportRepository {
 
     final result = <Map<String, dynamic>>[];
 
-    final bgnList = await db.query(
-      'bangunan',
-      columns: ['id'],
-      where: "LOWER(REPLACE(REPLACE(kelompok_dawis, '.', ''), ' ', '')) = ?",
-      whereArgs: [normalizedName],
-    );
+      final allBgn = await db.query('bangunan', columns: ['id', 'kelompok_dawis']);
+      final bgnList = allBgn.where((b) {
+        final dawis = b['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == normalizedName;
+      }).toList();
 
     if (bgnList.isEmpty) return result;
 
@@ -1248,15 +1232,18 @@ class ReportRepository implements IReportRepository {
         .toLowerCase();
 
     // First, let's get all Bangunan in the selected kelompok
-    final List<Map<String, dynamic>> bangunanListRaw = await db.rawQuery(
-      '''
-      SELECT DISTINCT b.id, b.nama_bangunan 
-      FROM bangunan b
-      WHERE LOWER(REPLACE(REPLACE(b.kelompok_dawis, '.', ''), ' ', '')) = ?
-      ORDER BY b.nama_bangunan ASC
-    ''',
-      [normalizedName],
-    );
+      final List<Map<String, dynamic>> allBgnRaw = await db.rawQuery(
+        '''
+        SELECT b.* 
+        FROM bangunan b
+        ORDER BY b.nama_bangunan ASC
+      ''',
+      );
+      final bangunanListRaw = allBgnRaw.where((b) {
+        final dawis = b['kelompok_dawis']?.toString() ?? '';
+        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normDawis == normalizedName;
+      }).toList();
 
     List<Map<String, dynamic>> result = [];
     int no = 1;
@@ -1425,8 +1412,61 @@ class ReportRepository implements IReportRepository {
         }
       }
 
+      // Extract housing data from bangunan
+      int rumahSehat = bgnRow['is_sehat_layak_huni'] == 1 ? 1 : 0;
+      int rumahTidakSehat = bgnRow['is_tidak_sehat_layak_huni'] == 1 ? 1 : 0;
+      int punyaTempatSampah = (bgnRow['jumlah_tempat_sampah'] as int? ?? 0) > 0
+          ? 1
+          : 0;
+      int punyaSpal = (bgnRow['jumlah_spal'] as int? ?? 0) > 0 ? 1 : 0;
+      int punyaJamban = (bgnRow['jumlah_jamban_keluarga'] as int? ?? 0) > 0
+          ? 1
+          : 0;
+      int tempelStiker = bgnRow['has_stiker_p4k'] == 1 ? 1 : 0;
+
+      int sumberAirPdam = 0;
+      int sumberAirSumur = 0;
+      int sumberAirLainnya = 0;
+      final air = bgnRow['sumber_air_minum'] as String?;
+      if (air == 'PDAM') {
+        sumberAirPdam = 1;
+      } else if (air == 'Sumur Pompa' || air == 'Sumur Galian') {
+        sumberAirSumur = 1;
+      } else if (air != null && air.isNotEmpty) {
+        sumberAirLainnya = 1;
+      }
+
+      int makananBeras = 0;
+      int makananNonBeras = 0;
+      int ikutUp2k = 0;
+      int pekarangan = 0;
+      int industriRT = 0;
+      int kerjaBakti = 0;
+
+      final pemanfaatanPekarangan = bgnRow['pemanfaatan_pekarangan'] as String?;
+      if (pemanfaatanPekarangan != null && pemanfaatanPekarangan.isNotEmpty) {
+        pekarangan = 1;
+      }
+
+      // Count activity/food data from individu
+      for (var ind in individuList) {
+        if (ind['is_ikut_up2k'] == 1) ikutUp2k++;
+        if (ind['is_industri_rumah_tangga'] == 1) industriRT++;
+        if (ind['ikut_kerja_bakti'] == 1) kerjaBakti++;
+        final makanan = ind['makanan_pokok'] as String?;
+        if (makanan != null &&
+            makanan.toLowerCase().contains('beras') &&
+            !makanan.toLowerCase().contains('non')) {
+          makananBeras++;
+        } else if (makanan != null && makanan.isNotEmpty) {
+          makananNonBeras++;
+        }
+      }
+
       result.add({
         'no': no++,
+        'rt': bgnRow['rt']?.toString() ?? '',
+        'dasawisma': namaBangunan,
         'namaBangunan': namaBangunan,
         'jmlKrt': krtCount,
         'jmlKk': kkCount,
@@ -1461,6 +1501,23 @@ class ReportRepository implements IReportRepository {
 
         'berkebutuhanL': berkebutuhanL,
         'berkebutuhanP': berkebutuhanP,
+
+        // Housing / Infrastructure fields
+        'rumahSehat': rumahSehat,
+        'rumahTidakSehat': rumahTidakSehat,
+        'punyaTempatSampah': punyaTempatSampah,
+        'punyaSpal': punyaSpal,
+        'punyaJamban': punyaJamban,
+        'tempelStiker': tempelStiker,
+        'sumberAirPdam': sumberAirPdam,
+        'sumberAirSumur': sumberAirSumur,
+        'sumberAirLainnya': sumberAirLainnya,
+        'makananBeras': makananBeras > 0 ? 1 : 0,
+        'makananNonBeras': makananNonBeras > 0 ? 1 : 0,
+        'ikutUp2k': ikutUp2k > 0 ? 1 : 0,
+        'pekarangan': pekarangan,
+        'industriRT': industriRT > 0 ? 1 : 0,
+        'kerjaBakti': kerjaBakti > 0 ? 1 : 0,
 
         'ket': '',
       });
