@@ -799,36 +799,37 @@ class ReportRepository implements IReportRepository {
             String prefix = '';
             if (age >= 0 && age <= 4) {
               prefix = '0_4';
-            } else if (age >= 5 && age <= 9)
+            } else if (age >= 5 && age <= 9) {
               prefix = '5_9';
-            else if (age >= 10 && age <= 14)
+            } else if (age >= 10 && age <= 14) {
               prefix = '10_14';
-            else if (age >= 15 && age <= 19)
+            } else if (age >= 15 && age <= 19) {
               prefix = '15_19';
-            else if (age >= 20 && age <= 24)
+            } else if (age >= 20 && age <= 24) {
               prefix = '20_24';
-            else if (age >= 25 && age <= 29)
+            } else if (age >= 25 && age <= 29) {
               prefix = '25_29';
-            else if (age >= 30 && age <= 34)
+            } else if (age >= 30 && age <= 34) {
               prefix = '30_34';
-            else if (age >= 35 && age <= 39)
+            } else if (age >= 35 && age <= 39) {
               prefix = '35_39';
-            else if (age >= 40 && age <= 44)
+            } else if (age >= 40 && age <= 44) {
               prefix = '40_44';
-            else if (age >= 45 && age <= 49)
+            } else if (age >= 45 && age <= 49) {
               prefix = '45_49';
-            else if (age >= 50 && age <= 54)
+            } else if (age >= 50 && age <= 54) {
               prefix = '50_54';
-            else if (age >= 55 && age <= 59)
+            } else if (age >= 55 && age <= 59) {
               prefix = '55_59';
-            else if (age >= 60 && age <= 64)
+            } else if (age >= 60 && age <= 64) {
               prefix = '60_64';
-            else if (age >= 65 && age <= 69)
+            } else if (age >= 65 && age <= 69) {
               prefix = '65_69';
-            else if (age >= 70 && age <= 74)
+            } else if (age >= 70 && age <= 74) {
               prefix = '70_74';
-            else if (age >= 75)
+            } else if (age >= 75) {
               prefix = '75_plus';
+            }
 
             if (jk == 'Laki-laki') {
               ageCounts['${prefix}_P'] = (ageCounts['${prefix}_P'] ?? 0) + 1;
@@ -1002,14 +1003,15 @@ class ReportRepository implements IReportRepository {
             if (age >= 0) {
               if (age < 5) {
                 balita++;
-              } else if (age >= 5 && age < 10)
+              } else if (age >= 5 && age < 10) {
                 anak++;
-              else if (age >= 10 && age < 25)
+              } else if (age >= 10 && age < 25) {
                 remaja++;
-              else if (age >= 25 && age < 60)
+              } else if (age >= 25 && age < 60) {
                 dewasa++;
-              else if (age >= 60)
+              } else if (age >= 60) {
                 lansia++;
+              }
             }
 
             // PUS
@@ -1027,29 +1029,31 @@ class ReportRepository implements IReportRepository {
             final kb = ind['metode_kb']?.toString() ?? '';
             if (kb == 'MOW/Steril Wanita') {
               mow++;
-            } else if (kb == 'MOP/Steril Pria')
+            } else if (kb == 'MOP/Steril Pria') {
               mop++;
-            else if (kb == 'IUD/Spiral/AKDR')
+            } else if (kb == 'IUD/Spiral/AKDR') {
               iud++;
-            else if (kb == 'Implant/Susuk')
+            } else if (kb == 'Implant/Susuk') {
               implant++;
-            else if (kb == 'Suntik')
+            } else if (kb == 'Suntik') {
               suntik++;
-            else if (kb == 'Pil')
+            } else if (kb == 'Pil') {
               pil++;
-            else if (kb == 'Kondom')
+            } else if (kb == 'Kondom') {
               kondom++;
+            }
 
             // Bukan KB
             final bukanKb = ind['alasan_bukan_kb']?.toString() ?? '';
             if (bukanKb == 'Hamil') {
               hamil++;
-            } else if (bukanKb == 'IAS')
+            } else if (bukanKb == 'IAS') {
               ias++;
-            else if (bukanKb == 'IAT')
+            } else if (bukanKb == 'IAT') {
               iat++;
-            else if (bukanKb == 'TIAL')
+            } else if (bukanKb == 'TIAL') {
               tial++;
+            }
           }
         }
 
@@ -1381,25 +1385,26 @@ class ReportRepository implements IReportRepository {
           final kb = ind['metode_kb']?.toString().toUpperCase() ?? '';
           if (kb.contains('PIL')) {
             kbPil++;
-          } else if (kb.contains('IUD'))
+          } else if (kb.contains('IUD')) {
             kbIud++;
-          else if (kb.contains('IMPLAN'))
+          } else if (kb.contains('IMPLAN')) {
             kbImplan++;
-          else if (kb.contains('SUNTIK'))
+          } else if (kb.contains('SUNTIK')) {
             kbSuntik++;
-          else if (kb.contains('KONDOM'))
+          } else if (kb.contains('KONDOM')) {
             kbKondom++;
-          else if (kb.contains('MOW') ||
+          } else if (kb.contains('MOW') ||
               kb.contains('MOP') ||
-              kb.contains('STERIL'))
+              kb.contains('STERIL')) {
             kbSteril++;
-          else if (kb.isNotEmpty &&
+          } else if (kb.isNotEmpty &&
               !kb.contains('TIDAK') &&
               kb != 'N/A' &&
-              kb != 'NULL')
+              kb != 'NULL') {
             kbLainnya++;
-          else
+          } else {
             tidakKb++;
+          }
         }
 
         // BERKEBUTUHAN KHUSUS

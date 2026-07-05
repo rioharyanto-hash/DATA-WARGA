@@ -89,6 +89,69 @@ class DataTransferService {
     }
   }
 
+  Future<List<int>> generateImportTemplateKader() async {
+    final excel = Excel.createExcel();
+    final sheet = excel['Template Import Kader'];
+
+    final defaultSheet = excel.getDefaultSheet();
+    if (defaultSheet != null && defaultSheet != 'Template Import Kader') {
+      excel.delete(defaultSheet);
+    }
+
+    sheet.appendRow([
+      TextCellValue('No'), // 0
+      TextCellValue('Kelompok Dawis'), // 1
+      TextCellValue('Nama Lengkap'), // 2
+      TextCellValue('ID Kader'), // 3
+      TextCellValue('Password (default: 123456)'), // 4
+      TextCellValue('NIK'), // 5
+      TextCellValue('Tempat Lahir'), // 6
+      TextCellValue('Tanggal Lahir (YYYY-MM-DD)'), // 7
+      TextCellValue('Pendidikan Terakhir'), // 8
+      TextCellValue('Alamat'), // 9
+      TextCellValue('RT'), // 10
+      TextCellValue('RW'), // 11
+      TextCellValue('Kelurahan/Desa'), // 12
+      TextCellValue('Kecamatan'), // 13
+      TextCellValue('Propinsi'), // 14
+      TextCellValue('Kode Pos'), // 15
+      TextCellValue('Alamat Sesuai KTP?'), // 16
+      TextCellValue('Alamat KTP'), // 17
+      TextCellValue('No HP'), // 18
+      TextCellValue('Email'), // 19
+      TextCellValue('No Rekening Bank'), // 20
+      TextCellValue('NPWP'), // 21
+    ]);
+
+    // Sample data row
+    sheet.appendRow([
+      TextCellValue('1'),
+      TextCellValue('MELATI'),
+      TextCellValue('Siti Aminah'),
+      TextCellValue('KDR-001'),
+      TextCellValue('123456'),
+      TextCellValue('330101...'),
+      TextCellValue('Jakarta'),
+      TextCellValue('1990-01-01'),
+      TextCellValue('SMA'),
+      TextCellValue('Jl. Merdeka No 1'),
+      TextCellValue('01'),
+      TextCellValue('02'),
+      TextCellValue('Suka Maju'),
+      TextCellValue('Cilacap'),
+      TextCellValue('Jawa Tengah'),
+      TextCellValue('53211'),
+      TextCellValue('Ya'),
+      TextCellValue('Jl. Merdeka No 1'),
+      TextCellValue('081234567890'),
+      TextCellValue('siti@email.com'),
+      TextCellValue('123456789 (BRI)'),
+      TextCellValue('12.345.678.9-000.000'),
+    ]);
+
+    return excel.encode() ?? [];
+  }
+
   Future<void> importDataKader(String filePath) async {
     final bytes = await File(filePath).readAsBytes();
     final excel = Excel.decodeBytes(bytes);

@@ -535,28 +535,6 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
     );
   }
 
-  Widget _buildTextRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(label, style: const TextStyle(color: Colors.grey)),
-          ),
-          const Text(' :  '),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   String _getKategori(int? id) {
     switch (id) {

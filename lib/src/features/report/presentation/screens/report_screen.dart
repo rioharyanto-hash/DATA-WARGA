@@ -84,7 +84,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<bool>(
-          value: _isRingkasan,
+          initialValue: _isRingkasan,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),

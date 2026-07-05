@@ -52,7 +52,6 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
   final List<String> _statusIbuList = ['Hamil', 'Melahirkan', 'Nifas'];
 
   String? _idBangunan;
-  final bool _isInitialized = false;
 
   @override
   void initState() {

@@ -16,9 +16,7 @@ class MainLayoutScreen extends StatelessWidget {
 
   // ── Design tokens ──────────────────────────────────────────────────
   static const _primaryDark = Color(0xFF4338CA); // Indigo 700
-  static const _primaryLight = Color(0xFF6366F1); // Indigo 500
   static const _bgBody = Color(0xFFF8FAFC); // Slate 50
-  static const _textDark = Color(0xFF0F172A); // Slate 900
   static const _textMuted = Color(0xFF64748B); // Slate 500
 
   // Navigation items definition

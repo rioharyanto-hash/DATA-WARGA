@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../domain/entities/app_user.dart';
 import '../providers/app_user_provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import 'package:dawis/src/features/laporan/services/data_transfer_service.dart';
 
 class UserListScreen extends ConsumerStatefulWidget {
@@ -50,6 +52,33 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
     }
   }
 
+  Future<void> _downloadTemplate() async {
+    try {
+      final service = DataTransferService();
+      final bytes = await service.generateImportTemplateKader();
+      
+      final downloadsDir = await getDownloadsDirectory();
+      if (downloadsDir != null) {
+        final filePath = '${downloadsDir.path}\\Template_Import_Kader.xlsx';
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Template berhasil disimpan di $filePath')),
+          );
+        }
+      } else {
+        throw Exception('Katalog Downloads tidak ditemukan');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menyimpan template: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(allUsersProvider);
@@ -72,6 +101,11 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
+          IconButton(
+            tooltip: 'Download Template Kader',
+            icon: const Icon(Icons.download),
+            onPressed: _isImporting ? null : _downloadTemplate,
+          ),
           IconButton(
             tooltip: 'Import Excel Kader',
             icon: const Icon(Icons.upload_file),

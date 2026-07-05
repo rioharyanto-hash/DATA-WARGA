@@ -33,8 +33,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
   final _uuid = const Uuid();
 
   String? _selectedKeluargaId;
-  String? _selectedNamaKrt;
-  final List<Map<String, dynamic>> _keluargaSearchResults = [];
 
   // ── Bagian 1: Biodata Dasar ──
   final _nikController = TextEditingController();
@@ -584,7 +582,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                   onSelected: (Map<String, dynamic> selection) {
                     setState(() {
                       _selectedKeluargaId = selection['keluarga_id'];
-                      _selectedNamaKrt = selection['nama_krt'];
                     });
                   },
                   fieldViewBuilder:

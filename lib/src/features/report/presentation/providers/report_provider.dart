@@ -1,9 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/report_repository.dart';
-import '../../data/services/pdf_report_service.dart';
+import '../../data/services/pdf_perincian_service.dart';
+import '../../data/services/pdf_ringkasan_service.dart';
+import '../../data/services/pdf_blank_service.dart';
 import 'dart:typed_data';
 import '../../../settings/presentation/providers/app_user_provider.dart';
 import '../../../settings/presentation/providers/region_provider.dart';
+
+final pdfPerincianServiceProvider = Provider((ref) => PdfPerincianService());
+final pdfRingkasanServiceProvider = Provider((ref) => PdfRingkasanService());
+final pdfBlankServiceProvider = Provider((ref) => PdfBlankService());
 
 class ReportState {
   final bool isLoading;
@@ -139,11 +145,11 @@ class ReportController extends Notifier<ReportState> {
       final data = await repo.getRekapPKK(namaKelompok);
       final region = ref.read(regionProvider);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
-      final pdfBytes = await pdfService.generateRekapPkkPdf(
+      final pdfService = ref.read(pdfPerincianServiceProvider);
+      final pdfBytes = await pdfService.generateRekapPkkPerincianPdf(
         namaKelompok: namaKelompok,
-        rt: '01', // Dummy data for now, ideally fetch from kelompok entity
-        rw: '02',
+        rt: ref.read(reportRtProvider),
+        rw: ref.read(reportRwProvider),
         desa: region.kelurahan,
         kecamatan: region.kecamatan,
         kabupaten: region.kotaKab,
@@ -166,7 +172,7 @@ class ReportController extends Notifier<ReportState> {
       final dataList = await repo.getYatimPiatuData(namaKelompok);
       final region = ref.read(regionProvider);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
       // Determine RT and RW from somewhere. Actually, just use dummy for now or fetch from user
       // Let's assume RT and RW can be taken from region or default
       final pdfBytes = await pdfService.generateYatimPiatuPdf(
@@ -195,7 +201,7 @@ class ReportController extends Notifier<ReportState> {
       final data = await repo.getProfilPendudukData(namaKelompok);
       final region = ref.read(regionProvider);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
       final pdfBytes = await pdfService.generateProfilUsiaPdf(
         namaKelompok: namaKelompok,
         rt: data['rt']?.toString() ?? '',
@@ -227,8 +233,8 @@ class ReportController extends Notifier<ReportState> {
       final repo = ref.read(reportRepositoryProvider);
       final data = await repo.getLampidData(namaKelompok);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
-      final pdfBytes = await pdfService.generateLampidPdf(
+      final pdfService = ref.read(pdfPerincianServiceProvider);
+      final pdfBytes = await pdfService.generateLampidPdfPerincian(
         namaKelompok: namaKelompok,
         mutasiList: data,
         rt: rt,
@@ -256,7 +262,7 @@ class ReportController extends Notifier<ReportState> {
       final repo = ref.read(reportRepositoryProvider);
       final data = await repo.getForm1Data(rt, rw);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
       final pdfBytes = await pdfService.generateForm1(
         data: data,
         rt: rt,
@@ -322,7 +328,7 @@ class ReportController extends Notifier<ReportState> {
         allDataList.add(data);
       }
 
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
       final pdfBytes = await pdfService.generateForm2(dataList: allDataList);
 
       state = state.copyWith(isLoading: false);
@@ -370,6 +376,12 @@ class ReportController extends Notifier<ReportState> {
         }
       }
 
+      if (!kelompokName.startsWith('Semua ')) {
+        targetKaders = targetKaders
+            .where((k) => k['kelompok_dawis'] == kelompokName)
+            .toList();
+      }
+
       final form1Kaders = List<Map<String, dynamic>>.from(
         dataForm1['kelompokList'] ?? [],
       );
@@ -393,6 +405,28 @@ class ReportController extends Notifier<ReportState> {
         );
       }).toList();
 
+      int newJumlahBangunan = 0;
+      int newJumlahKrt = 0;
+      int newJumlahKeluarga = 0;
+      int newJumlahIndividu = 0;
+
+      for (var f1 in filteredForm1Kaders) {
+        newJumlahBangunan += (f1['jumlahBangunan'] as int? ?? 0);
+        newJumlahKrt += (f1['jumlahKrt'] as int? ?? 0);
+        newJumlahKeluarga += (f1['jumlahKeluarga'] as int? ?? 0);
+        newJumlahIndividu += (f1['jumlahIndividu'] as int? ?? 0);
+      }
+
+      final filteredDataForm1 = {
+        ...dataForm1,
+        'jumlahKelompok': filteredForm1Kaders.length,
+        'jumlahBangunan': newJumlahBangunan,
+        'jumlahKrt': newJumlahKrt,
+        'jumlahKeluarga': newJumlahKeluarga,
+        'jumlahIndividu': newJumlahIndividu,
+        'kelompokList': filteredForm1Kaders,
+      };
+
       List<Map<String, dynamic>> allDataListForm2 = [];
       for (final f1 in filteredForm1Kaders) {
         final name = f1['namaKelompok'] ?? '';
@@ -400,9 +434,9 @@ class ReportController extends Notifier<ReportState> {
         allDataListForm2.add(data);
       }
 
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
       final pdfBytes = await pdfService.generateForm1And2(
-        dataForm1: dataForm1,
+        dataForm1: filteredDataForm1,
         dataForm2: allDataListForm2,
         kabupaten: region.kotaKab,
         kecamatan: region.kecamatan,
@@ -428,7 +462,7 @@ class ReportController extends Notifier<ReportState> {
       final repo = ref.read(reportRepositoryProvider);
       final data = await repo.getFormDataManual(kelompokName, rt, rw);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
       final pdfBytes = await pdfService.generateFormDataManual(data: data);
 
       state = state.copyWith(isLoading: false);
@@ -448,8 +482,8 @@ class ReportController extends Notifier<ReportState> {
       final repo = ref.read(reportRepositoryProvider);
       final data = await repo.getForm3Data(kelompokName, rt, rw);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
-      final pdfBytes = await pdfService.generateForm3(data: data);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
+      final pdfBytes = await pdfService.generateForm3Perincian(data: data);
 
       state = state.copyWith(isLoading: false);
       return pdfBytes;
@@ -459,21 +493,30 @@ class ReportController extends Notifier<ReportState> {
     }
   }
 
-  Future<Uint8List> generatePotensiWargaPdf(String kelompokName) async {
+  Future<Uint8List> generatePotensiWargaPdf(
+    String kelompokName,
+  ) async {
     state = state.copyWith(isLoading: true, error: null, successMessage: null);
     try {
       final region = ref.read(regionProvider);
       final rw = ref.read(reportRwProvider);
       final pkkRw = rw == 'Semua' ? '...' : rw;
       final tahun = DateTime.now().year.toString();
-      final bulan = ref.read(reportBulanProvider);
 
       final repo = ref.read(reportRepositoryProvider);
       final data = await repo.getPotensiWargaData(kelompokName);
 
-      final pdfService = ref.read(pdfReportServiceProvider);
-      final pdfBytes = await pdfService.generatePotensiWargaPdf(
-        data: {'rows': data},
+      final rt = ref.read(reportRtProvider);
+      final pdfService = ref.read(pdfPerincianServiceProvider);
+      final pdfBytes = await pdfService.generatePotensiWargaPdfPerincian(
+        data: {
+          'rows': data,
+          'rt': rt == 'Semua' ? '...' : rt,
+          'rw': pkkRw,
+          'kelurahan': region.kelurahan,
+          'kecamatan': region.kecamatan,
+          'tahun': tahun,
+        },
       );
 
       state = state.copyWith(isLoading: false);
@@ -487,7 +530,7 @@ class ReportController extends Notifier<ReportState> {
   Future<Uint8List> generateBlankPdf(String formType) async {
     state = state.copyWith(isLoading: true, error: null, successMessage: null);
     try {
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfBlankServiceProvider);
       Uint8List pdfBytes;
 
       switch (formType) {
@@ -600,7 +643,7 @@ class ReportController extends Notifier<ReportState> {
       final rt = ref.read(reportRtProvider);
       final rw = ref.read(reportRwProvider);
       final repo = ref.read(reportRepositoryProvider);
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfRingkasanServiceProvider);
 
       final allowedNames = await _getFilteredKelompokNames();
 
@@ -704,9 +747,10 @@ class ReportController extends Notifier<ReportState> {
         'kecamatan': firstKecamatan ?? '',
         'kota': 'Jakarta Timur',
         'rows': ringkasanRows,
+        'isRingkasan': true,
       };
 
-      final pdfBytes = await pdfService.generateForm3(data: ringkasanData);
+      final pdfBytes = await pdfService.generateForm3Ringkasan(data: ringkasanData);
 
       state = state.copyWith(isLoading: false);
       return pdfBytes;
@@ -722,23 +766,25 @@ class ReportController extends Notifier<ReportState> {
       final rt = ref.read(reportRtProvider);
       final rw = ref.read(reportRwProvider);
       final repo = ref.read(reportRepositoryProvider);
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfRingkasanServiceProvider);
       final region = ref.read(regionProvider);
 
       final allowedNames = await _getFilteredKelompokNames();
-
       List<Map<String, dynamic>> ringkasanRows = [];
       String pkkRw = rw == 'Semua' ? '...' : rw;
       String pkkRt = rt == 'Semua' ? '...' : rt;
+      int globalIndex = 1;
 
       for (var name in allowedNames) {
         final data = await repo.getRekapPKK(name);
         if (data['rows'] == null || (data['rows'] as List).isEmpty) continue;
 
+        int krtCount = (data['rows'] as List).length;
         int totalKk = 0, jiwaLaki = 0, jiwaPerempuan = 0;
         int balitaLaki = 0, balitaPerempuan = 0;
+        int remaja = 0, praLansia = 0, lansia = 0;
         int pus = 0, wus = 0, ibuHamil = 0, ibuMenyusui = 0;
-        int lansia = 0, buta = 0, berkebutuhanKhusus = 0;
+        int buta = 0, berkebutuhanKhusus = 0;
         int rumahSehat = 0,
             rumahTidakSehat = 0,
             punyaTempatSampah = 0,
@@ -748,15 +794,15 @@ class ReportController extends Notifier<ReportState> {
         int pdam = 0, sumur = 0, dll = 0;
         int beras = 0, nonBeras = 0;
         int up2k = 0, pekarangan = 0, industri = 0, kerja = 0;
-        int krtCount = 0;
 
         for (var r in data['rows']) {
-          krtCount++;
           totalKk += _parseInt(r['jmlKk']);
           jiwaLaki += _parseInt(r['jiwaLaki']);
           jiwaPerempuan += _parseInt(r['jiwaPerempuan']);
           balitaLaki += _parseInt(r['balitaLaki']);
           balitaPerempuan += _parseInt(r['balitaPerempuan']);
+          remaja += _parseInt(r['remaja']);
+          praLansia += _parseInt(r['praLansia']);
           pus += _parseInt(r['pus']);
           wus += _parseInt(r['wus']);
           ibuHamil += _parseInt(r['ibuHamil']);
@@ -781,17 +827,30 @@ class ReportController extends Notifier<ReportState> {
           kerja += _parseInt(r['kerjaBakti']);
         }
 
+        final match = RegExp(r'\d+').firstMatch(name);
+        String dasawismaNo = match != null
+            ? match.group(0)!
+            : globalIndex.toString();
+        // Fallback if we can't extract kader RT
+        final dataKader = await repo.getForm3Data(name, rt, rw);
+        final kaderRt = dataKader['rt']?.toString() ?? pkkRt;
+
         ringkasanRows.add({
-          'namaKrt': name,
+          'no': globalIndex++,
+          'rt': kaderRt.isNotEmpty && kaderRt != 'Semua' ? kaderRt : pkkRt,
+          'dasawisma': dasawismaNo,
+          'jmlKrt': krtCount,
           'jmlKk': totalKk,
-          'jiwaLaki': jiwaLaki,
-          'jiwaPerempuan': jiwaPerempuan,
-          'balitaLaki': balitaLaki,
-          'balitaPerempuan': balitaPerempuan,
+          'L': jiwaLaki,
+          'P': jiwaPerempuan,
+          'balitaL': balitaLaki,
+          'balitaP': balitaPerempuan,
+          'remaja': remaja,
           'pus': pus,
           'wus': wus,
           'ibuHamil': ibuHamil,
           'ibuMenyusui': ibuMenyusui,
+          'praLansia': praLansia,
           'lansia': lansia,
           'buta': buta,
           'berkebutuhanKhusus': berkebutuhanKhusus,
@@ -815,13 +874,16 @@ class ReportController extends Notifier<ReportState> {
       }
 
       final ringkasanData = {
-        'kelompokName': 'Semua Kelompok RT $pkkRt RW $pkkRw',
-        'namaKader': allowedNames.join(', '),
+        'rw': pkkRw,
+        'kelurahan': region.kelurahan,
+        'kecamatan': region.kecamatan,
+        'kota': region.kotaKab,
         'rows': ringkasanRows,
+        'tahun': DateTime.now().year.toString(),
       };
 
       final pdfBytes = await pdfService.generateRekapPkkPdf(
-        namaKelompok: ringkasanData['kelompokName'] as String,
+        namaKelompok: 'Semua Kelompok RT $pkkRt RW $pkkRw',
         rt: pkkRt,
         rw: pkkRw,
         desa: region.kelurahan,
@@ -845,7 +907,7 @@ class ReportController extends Notifier<ReportState> {
       final rt = ref.read(reportRtProvider);
       final rw = ref.read(reportRwProvider);
       final repo = ref.read(reportRepositoryProvider);
-      final pdfService = ref.read(pdfReportServiceProvider);
+      final pdfService = ref.read(pdfRingkasanServiceProvider);
       final region = ref.read(regionProvider);
 
       final allowedNames = await _getFilteredKelompokNames();
@@ -857,10 +919,10 @@ class ReportController extends Notifier<ReportState> {
 
       for (var name in allowedNames) {
         final data = await repo.getProfilPendudukData(name);
-        
+
         final kaderName = (data['kaderName']?.toString() ?? '');
         if (kaderName.isNotEmpty) {
-           namaKaderList.add(kaderName);
+          namaKaderList.add(kaderName);
         }
 
         final keluargaList =
@@ -877,19 +939,22 @@ class ReportController extends Notifier<ReportState> {
         }
         perKelompokTotals.add(kelTotals);
       }
-      
+
       final bulan = ref.read(reportBulanProvider);
       final tahun = DateTime.now().year.toString();
 
       final pdfBytes = await pdfService.generateProfilUsiaRingkasanPortraitPdf(
         perKelompokData: perKelompokTotals,
-        namaKelompok: allowedNames.isNotEmpty ? allowedNames.join(', ') : 'Semua Kelompok RT $pkkRt RW $pkkRw',
+        namaKelompok: allowedNames.isNotEmpty
+            ? allowedNames.join(', ')
+            : 'Semua Kelompok RT $pkkRt RW $pkkRw',
         namaKader: namaKaderList.isNotEmpty ? namaKaderList.join(', ') : '',
         rt: pkkRt,
         rw: pkkRw,
         kelurahan: region.kelurahan,
         kecamatan: region.kecamatan,
-        kota: region.kotaKab, // The parameter in PdfReportService is 'kota', not 'kabupaten'
+        kota: region
+            .kotaKab, // The parameter in PdfReportService is 'kota', not 'kabupaten'
         bulanTahun: '$bulan $tahun',
       );
 
@@ -904,16 +969,10 @@ class ReportController extends Notifier<ReportState> {
   Future<Uint8List> generatePotensiWargaRingkasanPdf() async {
     state = state.copyWith(isLoading: true, error: null, successMessage: null);
     try {
-      final rt = ref.read(reportRtProvider);
-      final rw = ref.read(reportRwProvider);
       final repo = ref.read(reportRepositoryProvider);
-      final pdfService = ref.read(pdfReportServiceProvider);
-      final region = ref.read(regionProvider);
-
+      final pdfService = ref.read(pdfRingkasanServiceProvider);
       final allowedNames = await _getFilteredKelompokNames();
       List<Map<String, dynamic>> ringkasanRows = [];
-      String pkkRw = rw == 'Semua' ? '...' : rw;
-      String pkkRt = rt == 'Semua' ? '...' : rt;
 
       for (var name in allowedNames) {
         final dataList = await repo.getPotensiWargaData(name);
@@ -944,7 +1003,7 @@ class ReportController extends Notifier<ReportState> {
       }
       final ringkasanData = {'rows': ringkasanRows};
 
-      final pdfBytes = await pdfService.generatePotensiWargaPdf(
+      final pdfBytes = await pdfService.generatePotensiWargaPdfRingkasan(
         data: ringkasanData,
       );
 
@@ -962,13 +1021,9 @@ class ReportController extends Notifier<ReportState> {
       final rt = ref.read(reportRtProvider);
       final rw = ref.read(reportRwProvider);
       final repo = ref.read(reportRepositoryProvider);
-      final pdfService = ref.read(pdfReportServiceProvider);
-      final region = ref.read(regionProvider);
-
+      final pdfService = ref.read(pdfRingkasanServiceProvider);
       final allowedNames = await _getFilteredKelompokNames();
       List<Map<String, dynamic>> ringkasanRows = [];
-      String pkkRw = rw == 'Semua' ? '...' : rw;
-      String pkkRt = rt == 'Semua' ? '...' : rt;
       int globalIndex = 1;
 
       for (var name in allowedNames) {
@@ -1015,14 +1070,13 @@ class ReportController extends Notifier<ReportState> {
           }
         }
       }
-      final ringkasanData = {'rows': ringkasanRows};
 
-      final pdfBytes = await pdfService.generateLampidPdf(
+      final pdfBytes = await pdfService.generateLampidPdfRingkasan(
         mutasiList: ringkasanRows,
-        namaKelompok: 'Semua Kelompok RT $pkkRt RW $pkkRw',
-        rt: pkkRt,
-        rw: pkkRw,
-        kelurahan: region.kelurahan,
+        namaKelompok: 'Semua Kelompok RT ${rt == 'Semua' ? '...' : rt} RW ${rw == 'Semua' ? '...' : rw}',
+        rt: rt == 'Semua' ? '...' : rt,
+        rw: rw == 'Semua' ? '...' : rw,
+        kelurahan: ref.read(regionProvider).kelurahan,
         tahun: DateTime.now().year.toString(),
         bulan: ref.read(reportBulanProvider),
       );

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:dawis/src/features/report/data/repositories/report_repository.dart';
@@ -12,6 +13,6 @@ void main() {
       '001',
       '010',
     );
-    print('Total rows returned: ${(data['rows'] as List).length}');
+    debugPrint('Total rows returned: ${(data['rows'] as List).length}');
   });
 }

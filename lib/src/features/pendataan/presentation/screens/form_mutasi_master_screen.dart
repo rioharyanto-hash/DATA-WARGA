@@ -40,7 +40,6 @@ class _FormMutasiMasterScreenState
   final List<String> _statusIbuList = ['Hamil', 'Melahirkan', 'Nifas'];
 
   bool _isLoading = false;
-  List<Individu> _searchResults = [];
 
   @override
   void dispose() {
@@ -64,19 +63,6 @@ class _FormMutasiMasterScreenState
         _tanggalMutasiController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
-  }
-
-  Future<void> _searchIndividu(String query) async {
-    if (query.length < 2) {
-      setState(() => _searchResults = []);
-      return;
-    }
-    final results = await ref
-        .read(individuRepositoryProvider)
-        .searchIndividu(query);
-    setState(() {
-      _searchResults = results;
-    });
   }
 
   Future<void> _saveMutasi() async {
@@ -168,7 +154,6 @@ class _FormMutasiMasterScreenState
                   setState(() {
                     _jenisMutasi = value;
                     _selectedIndividu = null;
-                    _searchResults = [];
                   });
                 },
                 validator: (val) => val == null ? 'Pilih jenis mutasi' : null,

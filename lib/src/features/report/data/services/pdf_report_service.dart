@@ -7181,6 +7181,7 @@ class PdfReportService {
     final regularFont = pw.Font.helvetica();
     final boldFont = pw.Font.helveticaBold();
 
+    // ignore: unused_local_variable
     final tableHeaders = [
       'NO',
       'JUMLAH KRT',
@@ -10938,9 +10939,3 @@ final pdfReportServiceProvider = Provider<PdfReportService>((ref) {
   return PdfReportService();
 });
 
-int _parseInt(dynamic val) {
-  if (val == null) return 0;
-  if (val is int) return val;
-  if (val is String) return int.tryParse(val) ?? 0;
-  return 0;
-}

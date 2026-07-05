@@ -453,7 +453,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildProfileCard(user) {
+  Widget _buildProfileCard(dynamic user) {
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
@@ -535,7 +535,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildMasterDataSection(user) {
+  Widget _buildMasterDataSection(dynamic user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -715,7 +715,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           await db.delete('keluarga');
                           await db.delete('individu');
                           await db.delete('mutasi');
-                          if (!context.mounted) return;
+                          if (!mounted) return;
                           Navigator.of(
                             context,
                             rootNavigator: true,
@@ -726,7 +726,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           );
                         } catch (e) {
-                          if (!context.mounted) return;
+                          if (!mounted) return;
                           Navigator.of(
                             context,
                             rootNavigator: true,

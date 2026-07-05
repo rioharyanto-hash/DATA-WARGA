@@ -1,7 +1,0 @@
-$content = Get-Content -Path "e:\Project\DAWIS\lib\src\features\report\data\services\pdf_report_service.dart" -Raw
-$blankStart = $content.IndexOf("  Future<Uint8List> generateBlankFormIbuHamil() async {")
-$blankEnd = $content.IndexOf("  Future<Uint8List> generateBlankFormLaporanDataPosyandu() async {")
-$lampidStart = $content.IndexOf("  Future<Uint8List> generateLampidPdf({")
-$lampidEnd = $content.IndexOf("  Future<Uint8List> generateProfilPendudukPdf({")
-Write-Output "Blank: $blankStart to $blankEnd"
-Write-Output "Lampid: $lampidStart to $lampidEnd"
