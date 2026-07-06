@@ -432,12 +432,8 @@ class PdfPerincianService {
 
           List<pw.TableRow> tableRows = [];
           for (var r in rows) {
-            tKrt += (r['namaKrt'] as String).isNotEmpty
-                ? int.tryParse(r['namaKrt'].toString()) ?? 0
-                : 0;
-            tKk += (r['namaKk'] as String).isNotEmpty
-                ? int.tryParse(r['namaKk'].toString()) ?? 0
-                : 0;
+            tKrt += (r['namaKrt'] as String).isNotEmpty ? 1 : 0;
+            tKk += (r['namaKk'] as String).isNotEmpty ? 1 : 0;
             tL += r['L'] as int? ?? 0;
             tP += r['P'] as int? ?? 0;
             tJml += r['jumlah'] as int? ?? 0;
@@ -2109,6 +2105,14 @@ class PdfPerincianService {
       );
     }
 
+    // === TABLE HEADER (30 columns matching reference, 3-level structure) ===
+    // Flex values computed from columnWidths * 10 to ensure alignment.
+    // Group sums:
+    // JUMLAH ANGGOTA KELUARGA: cols 3-12 = 2+2+2+2+2+2+2+2.5+2+2 = 20.5 → flex 205
+    // KRITERIA RUMAH: cols 13-19 = 2.5+2+2.5+2.5+2+2+2.5 = 16 → flex 160
+    // SUMBER AIR: cols 20-22 = 2+2+2 = 6 → flex 60
+    // MAKANAN POKOK: cols 23-24 = 2+2 = 4 → flex 40
+    // WARGA MENGIKUTI: cols 25-28 = 2+2.5+2.5+2 = 9 → flex 90
     final tableHeaderWidget = pw.Container(
       decoration: pw.BoxDecoration(
         color: PdfColors.yellow,
@@ -2117,41 +2121,231 @@ class PdfPerincianService {
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
-          headerCell('NO', 1.5),
-          headerCell('NOMOR RT', 2.5),
-          headerCell('JUMLAH\\nDASA\\nWISMA', 2.5),
-          headerCell('JUMLAH\\nKRT', 2.5),
-          headerCell('JUMLAH\\nKK', 2.5),
+          // NO (col 0: 1.5 → flex 15)
           pw.Expanded(
-            flex: 60,
+            flex: 15,
+            child: pw.Container(
+              decoration: pw.BoxDecoration(border: borderRight),
+              child: pw.Center(child: pw.Text('NO', style: style)),
+            ),
+          ),
+          // NAMA KEPALA RUMAH TANGGA (col 1: 5 → flex 50)
+          pw.Expanded(
+            flex: 50,
+            child: pw.Container(
+              decoration: pw.BoxDecoration(border: borderRight),
+              child: pw.Center(
+                child: pw.Text(
+                  'NAMA KEPALA RUMAH\nTANGGA',
+                  style: style,
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+          // JML KK (col 2: 2 → flex 20)
+          pw.Expanded(
+            flex: 20,
+            child: pw.Container(
+              decoration: pw.BoxDecoration(border: borderRight),
+              child: pw.Center(
+                child: pw.Text(
+                  'JML\nKK',
+                  style: style,
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+          // JUMLAH ANGGOTA KELUARGA (cols 3-12, total flex 205)
+          pw.Expanded(
+            flex: 205,
             child: pw.Container(
               decoration: pw.BoxDecoration(border: borderRight),
               child: pw.Column(
                 children: [
+                  // Level 1: Group header
                   pw.Container(
-                    height: 12,
+                    height: 10,
                     decoration: pw.BoxDecoration(border: borderBottom),
                     child: pw.Center(
                       child: pw.Text('JUMLAH ANGGOTA KELUARGA', style: style),
                     ),
                   ),
+                  // Level 2 + 3
                   pw.Expanded(
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
-                        headerCell('TOTAL\\nL', 2),
-                        headerCell('TOTAL\\nP', 2),
-                        headerCell('BALITA\\nL', 2),
-                        headerCell('BALITA\\nP', 2),
-                        headerCell('3 BUTA', 2),
-                        headerCell('BERKEB.\\nKHUSUS', 2.5),
-                        headerCell('REMAJA', 2),
-                        headerCell('PUS', 2),
-                        headerCell('WUS', 2),
-                        headerCell('IBU\\nHAMIL', 2),
-                        headerCell('IBU\\nMENYUSUI', 2.5),
-                        headerCell('PRA\\nLANSIA', 2),
-                        headerCell('LANSIA', 2, pw.Border()),
+                        // TOTAL group (cols 3-4, sum=4 → flex 40)
+                        pw.Expanded(
+                          flex: 40,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Column(
+                              children: [
+                                pw.Container(
+                                  height: 10,
+                                  decoration: pw.BoxDecoration(
+                                    border: borderBottom,
+                                  ),
+                                  child: pw.Center(
+                                    child: pw.Text('TOTAL', style: style),
+                                  ),
+                                ),
+                                pw.Expanded(
+                                  child: pw.Row(
+                                    crossAxisAlignment:
+                                        pw.CrossAxisAlignment.stretch,
+                                    children: [
+                                      pw.Expanded(
+                                        flex: 20,
+                                        child: pw.Container(
+                                          decoration: pw.BoxDecoration(
+                                            border: borderRight,
+                                          ),
+                                          child: pw.Center(
+                                            child: pw.Text('L', style: style),
+                                          ),
+                                        ),
+                                      ),
+                                      pw.Expanded(
+                                        flex: 20,
+                                        child: pw.Container(
+                                          child: pw.Center(
+                                            child: pw.Text('P', style: style),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // BALITA group (cols 5-6, sum=4 → flex 40)
+                        pw.Expanded(
+                          flex: 40,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Column(
+                              children: [
+                                pw.Container(
+                                  height: 10,
+                                  decoration: pw.BoxDecoration(
+                                    border: borderBottom,
+                                  ),
+                                  child: pw.Center(
+                                    child: pw.Text('BALITA', style: style),
+                                  ),
+                                ),
+                                pw.Expanded(
+                                  child: pw.Row(
+                                    crossAxisAlignment:
+                                        pw.CrossAxisAlignment.stretch,
+                                    children: [
+                                      pw.Expanded(
+                                        flex: 20,
+                                        child: pw.Container(
+                                          decoration: pw.BoxDecoration(
+                                            border: borderRight,
+                                          ),
+                                          child: pw.Center(
+                                            child: pw.Text('L', style: style),
+                                          ),
+                                        ),
+                                      ),
+                                      pw.Expanded(
+                                        flex: 20,
+                                        child: pw.Container(
+                                          child: pw.Center(
+                                            child: pw.Text('P', style: style),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // PUS (col 7: 2 → flex 20)
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text('PUS', style: style),
+                            ),
+                          ),
+                        ),
+                        // WUS (col 8: 2 → flex 20)
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text('WUS', style: style),
+                            ),
+                          ),
+                        ),
+                        // IBU HAMIL (col 9: 2 → flex 20)
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'IBU\nHAMIL',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // IBU MENYUSUI (col 10: 2.5 → flex 25)
+                        pw.Expanded(
+                          flex: 25,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'IBU\nMENYU\nSUI',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // LANSIA (col 11: 2 → flex 20)
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'LAN\nSIA',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // 3 BUTA (col 12: 2 → flex 20, no right border - last in group)
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            child: pw.Center(
+                              child: pw.Text(
+                                '3\nBUTA',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -2159,14 +2353,15 @@ class PdfPerincianService {
               ),
             ),
           ),
+          // KRITERIA RUMAH (cols 13-19, total flex 160)
           pw.Expanded(
-            flex: 10,
+            flex: 160,
             child: pw.Container(
               decoration: pw.BoxDecoration(border: borderRight),
               child: pw.Column(
                 children: [
                   pw.Container(
-                    height: 12,
+                    height: 10,
                     decoration: pw.BoxDecoration(border: borderBottom),
                     child: pw.Center(
                       child: pw.Text('KRITERIA RUMAH', style: style),
@@ -2176,11 +2371,95 @@ class PdfPerincianService {
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
-                        headerCell('SEHAT\\nLAYAK\\nHUNI', 2.5),
-                        headerCell(
-                          'TIDAK\\nSEHAT\\nLAYAK\\nHUNI',
-                          2.5,
-                          pw.Border(),
+                        pw.Expanded(
+                          flex: 25,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'RUMAH/\nBANGU\nNAN\nKHUSUS',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'SEHAT\nLAYAK\nHUNI',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 25,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'TIDAK\nSEHAT\nLAYAK\nHUNI',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 25,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'MEMILIKI\nTMP.\nPEMB.\nSAMPAH',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'MEMI\nLIKI\nJAMBAN',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'MEMI\nLIKI\nSPAL',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 25,
+                          child: pw.Container(
+                            child: pw.Center(
+                              child: pw.Text(
+                                'MENEMPEL\nSTIKER\nP4K',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -2189,18 +2468,15 @@ class PdfPerincianService {
               ),
             ),
           ),
-          headerCell('PUNYA\\nTEMPAT\\nSAMPAH', 2),
-          headerCell('PUNYA\\nSPAL', 2),
-          headerCell('PUNYA\\nJAMBAN\\nKELUARGA', 2.5),
-          headerCell('TEMPEL\\nSTIKER\\nP4K', 2),
+          // SUMBER AIR KELUARGA (cols 20-22, total flex 60)
           pw.Expanded(
-            flex: 12,
+            flex: 60,
             child: pw.Container(
               decoration: pw.BoxDecoration(border: borderRight),
               child: pw.Column(
                 children: [
                   pw.Container(
-                    height: 12,
+                    height: 10,
                     decoration: pw.BoxDecoration(border: borderBottom),
                     child: pw.Center(
                       child: pw.Text('SUMBER AIR KELUARGA', style: style),
@@ -2210,9 +2486,32 @@ class PdfPerincianService {
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
-                        headerCell('PDAM', 2),
-                        headerCell('SUMUR', 2),
-                        headerCell('DLL', 2, pw.Border()),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text('PDAM', style: style),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text('SUMUR', style: style),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            child: pw.Center(
+                              child: pw.Text('DLL', style: style),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -2220,14 +2519,15 @@ class PdfPerincianService {
               ),
             ),
           ),
+          // MAKANAN POKOK (cols 23-24, total flex 40)
           pw.Expanded(
-            flex: 8,
+            flex: 40,
             child: pw.Container(
               decoration: pw.BoxDecoration(border: borderRight),
               child: pw.Column(
                 children: [
                   pw.Container(
-                    height: 12,
+                    height: 10,
                     decoration: pw.BoxDecoration(border: borderBottom),
                     child: pw.Center(
                       child: pw.Text('MAKANAN POKOK', style: style),
@@ -2237,8 +2537,27 @@ class PdfPerincianService {
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
-                        headerCell('BERAS', 2),
-                        headerCell('NON\\nBERAS', 2, pw.Border()),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text('BERAS', style: style),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            child: pw.Center(
+                              child: pw.Text(
+                                'NON\nBERAS',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -2246,14 +2565,15 @@ class PdfPerincianService {
               ),
             ),
           ),
+          // WARGA MENGIKUTI KEGIATAN (cols 25-28, total flex 90)
           pw.Expanded(
-            flex: 18,
+            flex: 90,
             child: pw.Container(
               decoration: pw.BoxDecoration(border: borderRight),
               child: pw.Column(
                 children: [
                   pw.Container(
-                    height: 12,
+                    height: 10,
                     decoration: pw.BoxDecoration(border: borderBottom),
                     child: pw.Center(
                       child: pw.Text('WARGA MENGIKUTI KEGIATAN', style: style),
@@ -2263,10 +2583,53 @@ class PdfPerincianService {
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
-                        headerCell('UP2K', 2),
-                        headerCell('PEMANF.\\nPEKARA\\nNGAN', 2.5),
-                        headerCell('INDUSTRI\\nRT', 2.5),
-                        headerCell('KERJA\\nBAKTI', 2, pw.Border()),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text('UP2K', style: style),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 25,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'PEMAN\nFAATAN\nTANAH\nPEKA\nRANGAN',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 25,
+                          child: pw.Container(
+                            decoration: pw.BoxDecoration(border: borderRight),
+                            child: pw.Center(
+                              child: pw.Text(
+                                'INDUSTRI\nRUMAH\nTANGGA',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          flex: 20,
+                          child: pw.Container(
+                            child: pw.Center(
+                              child: pw.Text(
+                                'KERJA\nBAKTI',
+                                style: style,
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -2274,46 +2637,49 @@ class PdfPerincianService {
               ),
             ),
           ),
-          headerCell('KET', 3, pw.Border()),
+          // KET (col 29: 3 → flex 30)
+          pw.Expanded(
+            flex: 30,
+            child: pw.Container(
+              child: pw.Center(child: pw.Text('KET', style: style)),
+            ),
+          ),
         ],
       ),
     );
 
+    // === COLUMN WIDTHS (30 columns) ===
     final columnWidths = <int, pw.TableColumnWidth>{
-      0: const pw.FlexColumnWidth(1.5),
-      1: const pw.FlexColumnWidth(2.5),
-      2: const pw.FlexColumnWidth(2.5),
-      3: const pw.FlexColumnWidth(2.5),
-      4: const pw.FlexColumnWidth(2.5),
-      5: const pw.FlexColumnWidth(2),
-      6: const pw.FlexColumnWidth(2),
-      7: const pw.FlexColumnWidth(2),
-      8: const pw.FlexColumnWidth(2),
-      9: const pw.FlexColumnWidth(2),
-      10: const pw.FlexColumnWidth(2.5),
-      11: const pw.FlexColumnWidth(2),
-      12: const pw.FlexColumnWidth(2),
-      13: const pw.FlexColumnWidth(2),
-      14: const pw.FlexColumnWidth(2),
-      15: const pw.FlexColumnWidth(2.5),
-      16: const pw.FlexColumnWidth(2),
-      17: const pw.FlexColumnWidth(2),
-      18: const pw.FlexColumnWidth(2.5),
-      19: const pw.FlexColumnWidth(2.5),
-      20: const pw.FlexColumnWidth(2),
-      21: const pw.FlexColumnWidth(2),
-      22: const pw.FlexColumnWidth(2.5),
-      23: const pw.FlexColumnWidth(2),
-      24: const pw.FlexColumnWidth(2),
-      25: const pw.FlexColumnWidth(2),
-      26: const pw.FlexColumnWidth(2),
-      27: const pw.FlexColumnWidth(2),
-      28: const pw.FlexColumnWidth(2),
-      29: const pw.FlexColumnWidth(2),
-      30: const pw.FlexColumnWidth(2.5),
-      31: const pw.FlexColumnWidth(2.5),
-      32: const pw.FlexColumnWidth(2),
-      33: const pw.FlexColumnWidth(3),
+      0: const pw.FlexColumnWidth(1.5), // NO
+      1: const pw.FlexColumnWidth(5), // NAMA KRT
+      2: const pw.FlexColumnWidth(2), // JML KK
+      3: const pw.FlexColumnWidth(2), // TOTAL L
+      4: const pw.FlexColumnWidth(2), // TOTAL P
+      5: const pw.FlexColumnWidth(2), // BALITA L
+      6: const pw.FlexColumnWidth(2), // BALITA P
+      7: const pw.FlexColumnWidth(2), // PUS
+      8: const pw.FlexColumnWidth(2), // WUS
+      9: const pw.FlexColumnWidth(2), // IBU HAMIL
+      10: const pw.FlexColumnWidth(2.5), // IBU MENYUSUI
+      11: const pw.FlexColumnWidth(2), // LANSIA
+      12: const pw.FlexColumnWidth(2), // 3 BUTA
+      13: const pw.FlexColumnWidth(2.5), // RUMAH BANGUNAN KHUSUS
+      14: const pw.FlexColumnWidth(2), // SEHAT LAYAK HUNI
+      15: const pw.FlexColumnWidth(2.5), // TIDAK SEHAT LAYAK HUNI
+      16: const pw.FlexColumnWidth(2.5), // MEMILIKI TMP SAMPAH
+      17: const pw.FlexColumnWidth(2), // MEMILIKI JAMBAN
+      18: const pw.FlexColumnWidth(2), // MEMILIKI SPAL
+      19: const pw.FlexColumnWidth(2.5), // TEMPEL STIKER P4K
+      20: const pw.FlexColumnWidth(2), // PDAM
+      21: const pw.FlexColumnWidth(2), // SUMUR
+      22: const pw.FlexColumnWidth(2), // DLL
+      23: const pw.FlexColumnWidth(2), // BERAS
+      24: const pw.FlexColumnWidth(2), // NON BERAS
+      25: const pw.FlexColumnWidth(2), // UP2K
+      26: const pw.FlexColumnWidth(2.5), // PEKARANGAN
+      27: const pw.FlexColumnWidth(2.5), // INDUSTRI RT
+      28: const pw.FlexColumnWidth(2), // KERJA BAKTI
+      29: const pw.FlexColumnWidth(3), // KET
     };
 
     final rows = (data['rows'] as List).cast<Map<String, dynamic>>();
@@ -2324,138 +2690,160 @@ class PdfPerincianService {
         margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               pw.Center(
                 child: pw.Text(
-                  'REKAPITULASI TINGKAT RW',
-                  style: pw.TextStyle(font: boldFont, fontSize: 14),
+                  'REKAPITULASI\nCATATAN DATA DAN KEGIATAN WARGA\nKELOMPOK DASAWISMA',
+                  style: pw.TextStyle(font: boldFont, fontSize: 12),
+                  textAlign: pw.TextAlign.center,
                 ),
               ),
               pw.SizedBox(height: 16),
-              pw.Table(
-                columnWidths: {
-                  0: const pw.FixedColumnWidth(80),
-                  1: const pw.FixedColumnWidth(10),
-                  2: const pw.FixedColumnWidth(300),
-                },
-                children: [
-                  pw.TableRow(
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(
+                  left: 275,
+                ), // Geser ke kiri sejajar kata CATATAN
+                child: pw.Container(
+                  width: 500,
+                  child: pw.Table(
+                    columnWidths: {
+                      0: const pw.FixedColumnWidth(130),
+                      1: const pw.FixedColumnWidth(15),
+                      2: const pw.FixedColumnWidth(355),
+                    },
                     children: [
-                      pw.Text(
-                        'RT',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
+                      pw.TableRow(
+                        children: [
+                          pw.Text(
+                            'DASA WISMA',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            ':',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            namaKelompok,
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
-                      pw.Text(
-                        ':',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
+                      pw.TableRow(
+                        children: [
+                          pw.Text(
+                            'RT',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            ':',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            rt,
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
-                      pw.Text(
-                        '${data['rt'] ?? '...'}',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
+                      pw.TableRow(
+                        children: [
+                          pw.Text(
+                            'RW',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            ':',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            rw,
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.TableRow(
+                        children: [
+                          pw.Text(
+                            'DESA / KELURAHAN',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            ':',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            desa,
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.TableRow(
+                        children: [
+                          pw.Text(
+                            'TAHUN',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            ':',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                          pw.Text(
+                            '${data['tahun'] ?? ''}',
+                            style: pw.TextStyle(
+                              font: regularFont,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  pw.TableRow(
-                    children: [
-                      pw.Text(
-                        'RW',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        ':',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        rw,
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  pw.TableRow(
-                    children: [
-                      pw.Text(
-                        'KELURAHAN',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        ':',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        desa,
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  pw.TableRow(
-                    children: [
-                      pw.Text(
-                        'KECAMATAN',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        ':',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        kecamatan,
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  pw.TableRow(
-                    children: [
-                      pw.Text(
-                        'KAB/KOTA',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        ':',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        kabupaten,
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  pw.TableRow(
-                    children: [
-                      pw.Text(
-                        'PROVINSI',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        ':',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        provinsi,
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                  pw.TableRow(
-                    children: [
-                      pw.Text(
-                        'TAHUN',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        ':',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                      pw.Text(
-                        '${data['tahun']}',
-                        style: pw.TextStyle(font: regularFont, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
               pw.SizedBox(height: 16),
-              pw.Container(height: 40, child: tableHeaderWidget),
+              pw.Container(height: 50, child: tableHeaderWidget),
               pw.Container(
                 child: pw.Table(
                   border: pw.TableBorder.all(width: 0.5),
@@ -2463,7 +2851,7 @@ class PdfPerincianService {
                   children: [
                     pw.TableRow(
                       children: List.generate(
-                        34,
+                        30,
                         (i) => pw.Container(
                           height: 10,
                           alignment: pw.Alignment.center,
@@ -2481,59 +2869,35 @@ class PdfPerincianService {
           );
         },
         build: (context) {
-          int tKrt = 0,
-              tKk = 0,
-              tL = 0,
-              tP = 0,
-              tBalitaL = 0,
-              tBalitaP = 0,
-              tButa = 0;
-          int tBerkebutuhan = 0,
-              tRemaja = 0,
-              tPus = 0,
-              tWus = 0,
-              tHamil = 0,
-              tMenyusui = 0;
-          int tPraLansia = 0,
-              tLansia = 0,
-              tSehat = 0,
-              tTidakSehat = 0,
-              tSampah = 0;
-          int tSpal = 0,
-              tJamban = 0,
-              tStiker = 0,
-              tPdam = 0,
-              tSumur = 0,
-              tDll = 0;
-          int tBeras = 0,
-              tNonBeras = 0,
-              tUp2k = 0,
-              tPekarangan = 0,
-              tIndustri = 0,
-              tKerja = 0;
+          int tKk = 0, tL = 0, tP = 0, tBalitaL = 0, tBalitaP = 0;
+          int tPus = 0, tWus = 0, tHamil = 0, tMenyusui = 0;
+          int tLansia = 0, tButa = 0, tBerkebutuhan = 0;
+          int tSehat = 0, tTidakSehat = 0, tSampah = 0;
+          int tJamban = 0, tSpal = 0, tStiker = 0;
+          int tPdam = 0, tSumur = 0, tDll = 0;
+          int tBeras = 0, tNonBeras = 0;
+          int tUp2k = 0, tPekarangan = 0, tIndustri = 0, tKerja = 0;
 
           List<pw.TableRow> tableRows = [];
-          for (var r in rows) {
-            tKrt += r['jmlKrt'] as int? ?? 0;
+          for (int i = 0; i < rows.length; i++) {
+            final r = rows[i];
             tKk += r['jmlKk'] as int? ?? 0;
-            tL += r['L'] as int? ?? 0;
-            tP += r['P'] as int? ?? 0;
-            tBalitaL += r['balitaL'] as int? ?? 0;
-            tBalitaP += r['balitaP'] as int? ?? 0;
-            tButa += r['buta'] as int? ?? 0;
-            tBerkebutuhan += r['berkebutuhanKhusus'] as int? ?? 0;
-            tRemaja += r['remaja'] as int? ?? 0;
+            tL += r['jiwaLaki'] as int? ?? 0;
+            tP += r['jiwaPerempuan'] as int? ?? 0;
+            tBalitaL += r['balitaLaki'] as int? ?? 0;
+            tBalitaP += r['balitaPerempuan'] as int? ?? 0;
             tPus += r['pus'] as int? ?? 0;
             tWus += r['wus'] as int? ?? 0;
             tHamil += r['ibuHamil'] as int? ?? 0;
             tMenyusui += r['ibuMenyusui'] as int? ?? 0;
-            tPraLansia += r['praLansia'] as int? ?? 0;
             tLansia += r['lansia'] as int? ?? 0;
+            tButa += r['buta'] as int? ?? 0;
+            tBerkebutuhan += r['berkebutuhanKhusus'] as int? ?? 0;
             tSehat += r['rumahSehat'] as int? ?? 0;
             tTidakSehat += r['rumahTidakSehat'] as int? ?? 0;
             tSampah += r['punyaTempatSampah'] as int? ?? 0;
-            tSpal += r['punyaSpal'] as int? ?? 0;
             tJamban += r['punyaJamban'] as int? ?? 0;
+            tSpal += r['punyaSpal'] as int? ?? 0;
             tStiker += r['tempelStiker'] as int? ?? 0;
             tPdam += r['sumberAirPdam'] as int? ?? 0;
             tSumur += r['sumberAirSumur'] as int? ?? 0;
@@ -2545,282 +2909,66 @@ class PdfPerincianService {
             tIndustri += r['industriRT'] as int? ?? 0;
             tKerja += r['kerjaBakti'] as int? ?? 0;
 
+            pw.Widget cell(
+              String text, {
+              pw.Alignment align = pw.Alignment.center,
+            }) {
+              return pw.Container(
+                padding: const pw.EdgeInsets.all(2),
+                alignment: align,
+                child: pw.Text(
+                  text,
+                  style: pw.TextStyle(font: regularFont, fontSize: 5),
+                ),
+              );
+            }
+
             tableRows.add(
               pw.TableRow(
                 children: [
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['no']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['rt']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['dasawisma']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['jmlKrt']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['jmlKk']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['L']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['P']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['balitaL']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['balitaP']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['buta']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['berkebutuhanKhusus']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['remaja']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['pus']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['wus']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['ibuHamil']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['ibuMenyusui']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['praLansia']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['lansia']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['rumahSehat']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['rumahTidakSehat']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['punyaTempatSampah']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['punyaSpal']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['punyaJamban']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['tempelStiker']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['sumberAirPdam']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['sumberAirSumur']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['sumberAirLainnya']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['makananBeras']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['makananNonBeras']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['ikutUp2k']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['pekarangan']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['industriRT']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '${r['kerjaBakti']}',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(2),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      '',
-                      style: pw.TextStyle(font: regularFont, fontSize: 5),
-                    ),
-                  ), // Keterangan
+                  cell('${i + 1}'),
+                  cell('${r['namaKrt'] ?? ''}', align: pw.Alignment.centerLeft),
+                  cell('${r['jmlKk'] ?? 0}'),
+                  cell('${r['jiwaLaki'] ?? 0}'),
+                  cell('${r['jiwaPerempuan'] ?? 0}'),
+                  cell('${r['balitaLaki'] ?? 0}'),
+                  cell('${r['balitaPerempuan'] ?? 0}'),
+                  cell('${r['pus'] ?? 0}'),
+                  cell('${r['wus'] ?? 0}'),
+                  cell('${r['ibuHamil'] ?? 0}'),
+                  cell('${r['ibuMenyusui'] ?? 0}'),
+                  cell('${r['lansia'] ?? 0}'),
+                  cell('${r['buta'] ?? 0}'),
+                  cell('${r['berkebutuhanKhusus'] ?? 0}'),
+                  cell('${r['rumahSehat'] ?? 0}'),
+                  cell('${r['rumahTidakSehat'] ?? 0}'),
+                  cell('${r['punyaTempatSampah'] ?? 0}'),
+                  cell('${r['punyaJamban'] ?? 0}'),
+                  cell('${r['punyaSpal'] ?? 0}'),
+                  cell('${r['tempelStiker'] ?? 0}'),
+                  cell('${r['sumberAirPdam'] ?? 0}'),
+                  cell('${r['sumberAirSumur'] ?? 0}'),
+                  cell('${r['sumberAirLainnya'] ?? 0}'),
+                  cell('${r['makananBeras'] ?? 0}'),
+                  cell('${r['makananNonBeras'] ?? 0}'),
+                  cell('${r['ikutUp2k'] ?? 0}'),
+                  cell('${r['pekarangan'] ?? 0}'),
+                  cell('${r['industriRT'] ?? 0}'),
+                  cell('${r['kerjaBakti'] ?? 0}'),
+                  cell('${r['keterangan'] ?? ''}'),
                 ],
+              ),
+            );
+          }
+
+          // Jumlah row
+          pw.Widget totalCell(String text) {
+            return pw.Container(
+              padding: const pw.EdgeInsets.all(2),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                text,
+                style: pw.TextStyle(font: boldFont, fontSize: 5),
               ),
             );
           }
@@ -2829,278 +2977,36 @@ class PdfPerincianService {
             pw.TableRow(
               decoration: const pw.BoxDecoration(color: PdfColors.yellow),
               children: [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    'Jumlah',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ), // RT
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ), // Dasawisma
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tKrt',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tKk',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tL',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tP',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tBalitaL',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tBalitaP',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tButa',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tBerkebutuhan',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tRemaja',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tPus',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tWus',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tHamil',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tMenyusui',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tPraLansia',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tLansia',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tSehat',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tTidakSehat',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tSampah',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tSpal',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tJamban',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tStiker',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tPdam',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tSumur',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tDll',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tBeras',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tNonBeras',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tUp2k',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tPekarangan',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tIndustri',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '$tKerja',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(2),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    '',
-                    style: pw.TextStyle(font: boldFont, fontSize: 5),
-                  ),
-                ),
+                totalCell(''),
+                totalCell('JUMLAH'),
+                totalCell('$tKk'),
+                totalCell('$tL'),
+                totalCell('$tP'),
+                totalCell('$tBalitaL'),
+                totalCell('$tBalitaP'),
+                totalCell('$tPus'),
+                totalCell('$tWus'),
+                totalCell('$tHamil'),
+                totalCell('$tMenyusui'),
+                totalCell('$tLansia'),
+                totalCell('$tButa'),
+                totalCell('$tBerkebutuhan'),
+                totalCell('$tSehat'),
+                totalCell('$tTidakSehat'),
+                totalCell('$tSampah'),
+                totalCell('$tJamban'),
+                totalCell('$tSpal'),
+                totalCell('$tStiker'),
+                totalCell('$tPdam'),
+                totalCell('$tSumur'),
+                totalCell('$tDll'),
+                totalCell('$tBeras'),
+                totalCell('$tNonBeras'),
+                totalCell('$tUp2k'),
+                totalCell('$tPekarangan'),
+                totalCell('$tIndustri'),
+                totalCell('$tKerja'),
+                totalCell(''),
               ],
             ),
           );

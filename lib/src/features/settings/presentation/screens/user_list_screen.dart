@@ -56,7 +56,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
     try {
       final service = DataTransferService();
       final bytes = await service.generateImportTemplateKader();
-      
+
       final downloadsDir = await getDownloadsDirectory();
       if (downloadsDir != null) {
         final filePath = '${downloadsDir.path}\\Template_Import_Kader.xlsx';
@@ -72,9 +72,9 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan template: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan template: $e')));
       }
     }
   }

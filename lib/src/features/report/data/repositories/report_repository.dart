@@ -4,6 +4,42 @@ import 'package:dawis/core/database/local_db_helper.dart';
 import '../../domain/repositories/i_report_repository.dart';
 
 class ReportRepository implements IReportRepository {
+  int _calculateAge(String tglLahirStr) {
+    if (tglLahirStr.isEmpty) return -1;
+    DateTime? tglLahir;
+    try {
+      if (tglLahirStr.contains('-') &&
+          tglLahirStr.split('-').first.length == 2) {
+        final parts = tglLahirStr.split('-');
+        tglLahir = DateTime(
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
+      } else if (tglLahirStr.contains('/') &&
+          tglLahirStr.split('/').first.length == 2) {
+        final parts = tglLahirStr.split('/');
+        tglLahir = DateTime(
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
+      } else {
+        tglLahir = DateTime.parse(tglLahirStr);
+      }
+    } catch (_) {
+      return -1;
+    }
+
+    int age = DateTime.now().year - tglLahir.year;
+    if (DateTime.now().month < tglLahir.month ||
+        (DateTime.now().month == tglLahir.month &&
+            DateTime.now().day < tglLahir.day)) {
+      age--;
+    }
+    return age;
+  }
+
   @override
   @override
   Future<Map<String, dynamic>> getRekapPKK(String kelompokName) async {
@@ -126,19 +162,17 @@ class ReportRepository implements IReportRepository {
             }
 
             if (tglLahirStr != null && tglLahirStr.isNotEmpty) {
-              try {
-                final tglLahir = DateTime.parse(tglLahirStr);
-                final umur = DateTime.now().year - tglLahir.year;
-
+              int umur = _calculateAge(tglLahirStr);
+              if (umur >= 0) {
                 if (umur < 5) {
                   if (jk == 'Laki-laki') {
                     balitaLaki++;
                   } else {
                     balitaPerempuan++;
                   }
-                } else if (umur >= 10 && umur <= 24) {
+                } else if (umur >= 10 && umur < 25) {
                   remaja++;
-                } else if (umur >= 45 && umur <= 59) {
+                } else if (umur >= 45 && umur < 60) {
                   praLansia++;
                 } else if (umur >= 60) {
                   lansia++;
@@ -156,7 +190,7 @@ class ReportRepository implements IReportRepository {
                     pus++;
                   }
                 }
-              } catch (_) {}
+              }
             }
           }
         }
@@ -197,12 +231,20 @@ class ReportRepository implements IReportRepository {
       }
     }
 
-    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
-      final kaderQuery = allKader.where((k) {
-        final dawis = k['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
-      }).toList();
+    final allKader = await db.query(
+      'app_user',
+      where: 'role = ?',
+      whereArgs: ['KADER'],
+    );
+    final kaderQuery = allKader.where((k) {
+      final dawis = k['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis ==
+          (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+    }).toList();
 
     String namaKader = '';
     if (kaderQuery.isNotEmpty) {
@@ -480,12 +522,20 @@ class ReportRepository implements IReportRepository {
       });
     }
 
-    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
-      final kaderQuery = allKader.where((k) {
-        final dawis = k['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
-      }).toList();
+    final allKader = await db.query(
+      'app_user',
+      where: 'role = ?',
+      whereArgs: ['KADER'],
+    );
+    final kaderQuery = allKader.where((k) {
+      final dawis = k['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis ==
+          (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+    }).toList();
 
     String namaKordinator = '';
     if (kaderQuery.isNotEmpty) {
@@ -624,17 +674,9 @@ class ReportRepository implements IReportRepository {
             String tglLahirStr = ind['tanggal_lahir']?.toString() ?? '';
             String umur = '';
             if (tglLahirStr.isNotEmpty) {
-              try {
-                DateTime tglLahir = DateTime.parse(tglLahirStr);
-                int age = DateTime.now().year - tglLahir.year;
-                if (DateTime.now().month < tglLahir.month ||
-                    (DateTime.now().month == tglLahir.month &&
-                        DateTime.now().day < tglLahir.day)) {
-                  age--;
-                }
+              int age = _calculateAge(tglLahirStr);
+              if (age >= 0) {
                 umur = age.toString();
-              } catch (e) {
-                // Ignore parse error
               }
             }
 
@@ -667,12 +709,20 @@ class ReportRepository implements IReportRepository {
       }
     }
 
-    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
-      final kaderQuery = allKader.where((k) {
-        final dawis = k['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
-      }).toList();
+    final allKader = await db.query(
+      'app_user',
+      where: 'role = ?',
+      whereArgs: ['KADER'],
+    );
+    final kaderQuery = allKader.where((k) {
+      final dawis = k['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis ==
+          (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+    }).toList();
 
     String namaKordinator = '';
     if (kaderQuery.isNotEmpty) {
@@ -782,17 +832,8 @@ class ReportRepository implements IReportRepository {
             String tglLahirStr = ind['tanggal_lahir']?.toString() ?? '';
             int age = 0;
             if (tglLahirStr.isNotEmpty) {
-              try {
-                DateTime tglLahir = DateTime.parse(tglLahirStr);
-                age = DateTime.now().year - tglLahir.year;
-                if (DateTime.now().month < tglLahir.month ||
-                    (DateTime.now().month == tglLahir.month &&
-                        DateTime.now().day < tglLahir.day)) {
-                  age--;
-                }
-              } catch (e) {
-                // ignore
-              }
+              int parsedAge = _calculateAge(tglLahirStr);
+              if (parsedAge >= 0) age = parsedAge;
             }
 
             String jk = ind['jenis_kelamin']?.toString() ?? '';
@@ -850,12 +891,20 @@ class ReportRepository implements IReportRepository {
       }
     }
 
-    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
-      final kaderQuery = allKader.where((k) {
-        final dawis = k['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
-      }).toList();
+    final allKader = await db.query(
+      'app_user',
+      where: 'role = ?',
+      whereArgs: ['KADER'],
+    );
+    final kaderQuery = allKader.where((k) {
+      final dawis = k['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis ==
+          (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+    }).toList();
 
     String rt = '';
     String rw = '';
@@ -889,12 +938,20 @@ class ReportRepository implements IReportRepository {
         .toLowerCase();
 
     // Get Kader
-    final allKader = await db.query('app_user', where: 'role = ?', whereArgs: ['KADER']);
-      final kaderQuery = allKader.where((k) {
-        final dawis = k['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
-      }).toList();
+    final allKader = await db.query(
+      'app_user',
+      where: 'role = ?',
+      whereArgs: ['KADER'],
+    );
+    final kaderQuery = allKader.where((k) {
+      final dawis = k['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis ==
+          (kelompokName.replaceAll('.', '').replaceAll(' ', '').toLowerCase());
+    }).toList();
     String namaKader = '';
     String pkkRw = rw;
     String pkkRt = rt;
@@ -908,12 +965,15 @@ class ReportRepository implements IReportRepository {
     }
 
     // 1. Ambil semua bangunan yang sesuai kelompok
-      final allBgn = await db.query('bangunan');
-      final bgnList = allBgn.where((b) {
-        final dawis = b['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == normalizedName;
-      }).toList();
+    final allBgn = await db.query('bangunan');
+    final bgnList = allBgn.where((b) {
+      final dawis = b['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis == normalizedName;
+    }).toList();
 
     final List<Map<String, dynamic>> krtRows = [];
 
@@ -937,23 +997,22 @@ class ReportRepository implements IReportRepository {
           whereArgs: [idKrt],
         );
 
-        List<String> namaKkList = [];
-
-        int countL = 0, countP = 0;
-        int balita = 0, anak = 0, remaja = 0, dewasa = 0, lansia = 0;
-        int countPUS = 0;
-        int mow = 0,
-            mop = 0,
-            iud = 0,
-            implant = 0,
-            suntik = 0,
-            pil = 0,
-            kondom = 0;
-        int hamil = 0, ias = 0, iat = 0, tial = 0;
-        int jumlahKeluarga = kkList.length;
+        bool isFirstKk = true;
 
         for (var kk in kkList) {
           String idKk = kk['id'].toString();
+
+          int countL = 0, countP = 0;
+          int balita = 0, anak = 0, remaja = 0, dewasa = 0, lansia = 0;
+          int countPUS = 0;
+          int mow = 0,
+              mop = 0,
+              iud = 0,
+              implant = 0,
+              suntik = 0,
+              pil = 0,
+              kondom = 0;
+          int hamil = 0, ias = 0, iat = 0, tial = 0;
 
           final indList = await _getIndividuAktif(db, idKk);
 
@@ -962,22 +1021,24 @@ class ReportRepository implements IReportRepository {
           String currentNamaKk = '';
           for (var ind in indList) {
             final hk = ind['hubungan_keluarga']?.toString() ?? '';
-
             final upperHk = hk.toUpperCase();
 
-            if (upperHk == 'KEPALA KELUARGA' || upperHk == 'SUAMI') {
+            if (upperHk == 'KEPALA KELUARGA' ||
+                upperHk == 'SUAMI' ||
+                upperHk == 'KEPALA RUMAH TANGGA' ||
+                upperHk == 'KK') {
               hasSuamiOrKk = true;
             }
-            if (upperHk == 'KEPALA KELUARGA' || upperHk == 'KK') {
+            if (upperHk == 'KEPALA KELUARGA' ||
+                upperHk == 'KK' ||
+                upperHk == 'KEPALA RUMAH TANGGA') {
               currentNamaKk = ind['nama_lengkap']?.toString() ?? '';
             }
           }
 
-          if (currentNamaKk.isNotEmpty) {
-            namaKkList.add(currentNamaKk);
-          } else if (kkList.length == 1) {
+          if (currentNamaKk.isEmpty && isFirstKk) {
             // fallback
-            namaKkList.add(namaKrt);
+            currentNamaKk = namaKrt;
           }
 
           for (var ind in indList) {
@@ -989,15 +1050,7 @@ class ReportRepository implements IReportRepository {
             String tglLahirStr = ind['tanggal_lahir']?.toString() ?? '';
             int age = -1;
             if (tglLahirStr.isNotEmpty) {
-              try {
-                DateTime tglLahir = DateTime.parse(tglLahirStr);
-                age = DateTime.now().year - tglLahir.year;
-                if (DateTime.now().month < tglLahir.month ||
-                    (DateTime.now().month == tglLahir.month &&
-                        DateTime.now().day < tglLahir.day)) {
-                  age--;
-                }
-              } catch (_) {}
+              age = _calculateAge(tglLahirStr);
             }
 
             if (age >= 0) {
@@ -1055,36 +1108,38 @@ class ReportRepository implements IReportRepository {
               tial++;
             }
           }
-        }
 
-        krtRows.add({
-          'no': no++,
-          'namaKrt': namaKrt,
-          'namaKk': namaKkList.join(', '),
-          'L': countL,
-          'P': countP,
-          'jumlah': countL + countP,
-          'balita': balita,
-          'anak': anak,
-          'remaja': remaja,
-          'dewasa': dewasa,
-          'lansia': lansia,
-          'jumlahKeluarga': jumlahKeluarga,
-          'pus': countPUS,
-          'mow': mow,
-          'mop': mop,
-          'iud': iud,
-          'implant': implant,
-          'suntik': suntik,
-          'pil': pil,
-          'kondom': kondom,
-          'jumlahKb': mow + mop + iud + implant + suntik + pil + kondom,
-          'tial': tial,
-          'iat': iat,
-          'ias': ias,
-          'hamil': hamil,
-          'jumlahBukanKb': tial + iat + ias + hamil,
-        });
+          krtRows.add({
+            'no': isFirstKk ? (no++).toString() : '',
+            'namaKrt': isFirstKk ? namaKrt : '',
+            'namaKk': currentNamaKk,
+            'L': countL,
+            'P': countP,
+            'jumlah': countL + countP,
+            'balita': balita,
+            'anak': anak,
+            'remaja': remaja,
+            'dewasa': dewasa,
+            'lansia': lansia,
+            'jumlahKeluarga': 1,
+            'pus': countPUS,
+            'mow': mow,
+            'mop': mop,
+            'iud': iud,
+            'implant': implant,
+            'suntik': suntik,
+            'pil': pil,
+            'kondom': kondom,
+            'jumlahKb': mow + mop + iud + implant + suntik + pil + kondom,
+            'tial': tial,
+            'iat': iat,
+            'ias': ias,
+            'hamil': hamil,
+            'jumlahBukanKb': tial + iat + ias + hamil,
+          });
+
+          isFirstKk = false;
+        }
       }
     }
 
@@ -1112,12 +1167,18 @@ class ReportRepository implements IReportRepository {
 
     final result = <Map<String, dynamic>>[];
 
-      final allBgn = await db.query('bangunan', columns: ['id', 'kelompok_dawis']);
-      final bgnList = allBgn.where((b) {
-        final dawis = b['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == normalizedName;
-      }).toList();
+    final allBgn = await db.query(
+      'bangunan',
+      columns: ['id', 'kelompok_dawis'],
+    );
+    final bgnList = allBgn.where((b) {
+      final dawis = b['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis == normalizedName;
+    }).toList();
 
     if (bgnList.isEmpty) return result;
 
@@ -1180,15 +1241,8 @@ class ReportRepository implements IReportRepository {
 
         int umur = 0;
         if (tglLahir.isNotEmpty) {
-          try {
-            final birthDate = DateTime.parse(tglLahir);
-            final today = DateTime.now();
-            umur = today.year - birthDate.year;
-            if (today.month < birthDate.month ||
-                (today.month == birthDate.month && today.day < birthDate.day)) {
-              umur--;
-            }
-          } catch (_) {}
+          int parsedAge = _calculateAge(tglLahir);
+          if (parsedAge >= 0) umur = parsedAge;
         }
 
         bool isYatimPiatuExplicit = (statusYp.isNotEmpty);
@@ -1236,18 +1290,19 @@ class ReportRepository implements IReportRepository {
         .toLowerCase();
 
     // First, let's get all Bangunan in the selected kelompok
-      final List<Map<String, dynamic>> allBgnRaw = await db.rawQuery(
-        '''
+    final List<Map<String, dynamic>> allBgnRaw = await db.rawQuery('''
         SELECT b.* 
         FROM bangunan b
         ORDER BY b.nama_bangunan ASC
-      ''',
-      );
-      final bangunanListRaw = allBgnRaw.where((b) {
-        final dawis = b['kelompok_dawis']?.toString() ?? '';
-        final normDawis = dawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normDawis == normalizedName;
-      }).toList();
+      ''');
+    final bangunanListRaw = allBgnRaw.where((b) {
+      final dawis = b['kelompok_dawis']?.toString() ?? '';
+      final normDawis = dawis
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      return normDawis == normalizedName;
+    }).toList();
 
     List<Map<String, dynamic>> result = [];
     int no = 1;
@@ -1284,8 +1339,7 @@ class ReportRepository implements IReportRepository {
       // Demographics in this bangunan
       final individuList = await db.rawQuery(
         '''
-        SELECT i.*, 
-        CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) as umur
+        SELECT i.*
         FROM individu i
         JOIN keluarga kel ON i.id_keluarga = kel.id
         JOIN krt k ON kel.id_krt = k.id
@@ -1333,7 +1387,9 @@ class ReportRepository implements IReportRepository {
 
       for (var ind in individuList) {
         final jk = ind['jenis_kelamin']?.toString().toUpperCase() ?? '';
-        final umur = ind['umur'] as int? ?? 0;
+        int umur = 0;
+        int parsedAge = _calculateAge(ind['tanggal_lahir']?.toString() ?? '');
+        if (parsedAge >= 0) umur = parsedAge;
         final isKawin =
             (ind['status_perkawinan']?.toString().toUpperCase() == 'KAWIN');
         final isAktif = ind['aktif_posyandu']?.toString() == '1';
@@ -1356,7 +1412,7 @@ class ReportRepository implements IReportRepository {
         }
 
         // REMAJA (10-24)
-        if (umur >= 10 && umur <= 24) {
+        if (umur >= 10 && umur < 25) {
           if (isL) {
             remajaL++;
             if (isAktif) remajaAktifL++;

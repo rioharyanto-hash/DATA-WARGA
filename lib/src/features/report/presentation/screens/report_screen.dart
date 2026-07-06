@@ -91,11 +91,13 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           ),
           items: const [
             DropdownMenuItem(
-                value: false,
-                child: Text('1. Laporan Rincian (Per Kelompok Kader)')),
+              value: false,
+              child: Text('1. Laporan Rincian (Per Kelompok Kader)'),
+            ),
             DropdownMenuItem(
-                value: true,
-                child: Text('2. Laporan Ringkasan (Rekap Seluruh Kelompok)')),
+              value: true,
+              child: Text('2. Laporan Ringkasan (Rekap Seluruh Kelompok)'),
+            ),
           ],
           onChanged: (val) {
             if (val != null) {

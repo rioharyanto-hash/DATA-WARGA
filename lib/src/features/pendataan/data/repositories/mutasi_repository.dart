@@ -54,4 +54,18 @@ class MutasiRepository {
     final db = await LocalDbHelper.database;
     await db.delete('mutasi', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<List<Mutasi>> getMutasiByKelompokDawis(String kelompokDawis) async {
+    final db = await LocalDbHelper.database;
+    final maps = await db.rawQuery(
+      '''
+      SELECT mutasi.* FROM mutasi
+      JOIN bangunan ON mutasi.id_bangunan = bangunan.id
+      WHERE bangunan.kelompok_dawis = ?
+      ORDER BY mutasi.tanggal_mutasi DESC
+    ''',
+      [kelompokDawis],
+    );
+    return maps.map((json) => MutasiModel.fromJson(json)).toList();
+  }
 }

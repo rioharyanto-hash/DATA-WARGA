@@ -4,13 +4,26 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/mutasi.dart';
 import '../providers/mutasi_provider.dart';
 import '../providers/bangunan_provider.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
 
-class LampidListScreen extends ConsumerWidget {
+class LampidListScreen extends ConsumerStatefulWidget {
   const LampidListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mutasiAsync = ref.watch(allMutasiProvider);
+  ConsumerState<LampidListScreen> createState() => _LampidListScreenState();
+}
+
+class _LampidListScreenState extends ConsumerState<LampidListScreen> {
+  String? _selectedKelompokDawis;
+
+  @override
+  Widget build(BuildContext context) {
+    final mutasiAsync = ref.watch(
+      mutasiFilteredProvider(_selectedKelompokDawis),
+    );
+    final currentUser = ref.watch(loggedInUserProvider);
+    final isAdmin = currentUser?.role == 'ADMIN';
+    final allUsersAsync = ref.watch(allUsersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -18,29 +31,108 @@ class LampidListScreen extends ConsumerWidget {
           'Data LAMPID (Mutasi)',
           style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         ),
+        actions: [
+          if (isAdmin)
+            allUsersAsync.when(
+              data: (users) {
+                final kaderList = users
+                    .where((u) => u.role == 'KADER')
+                    .toList();
+                if (kaderList.isEmpty) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    right: 16.0,
+                    top: 10,
+                    bottom: 10,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade900,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        dropdownColor: Colors.white,
+                        value: _selectedKelompokDawis,
+                        icon: const Icon(
+                          Icons.filter_list_rounded,
+                          color: Colors.white,
+                        ),
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        selectedItemBuilder: (BuildContext context) {
+                          return [null, ...kaderList].map((k) {
+                            return Center(
+                              child: Text(
+                                k == null
+                                    ? 'Semua Kader'
+                                    : 'Dawis: ${k.kelompokDawis ?? "-"}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }).toList();
+                        },
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('Semua Kader'),
+                          ),
+                          ...kaderList.map((k) {
+                            return DropdownMenuItem<String>(
+                              value: k.kelompokDawis,
+                              child: Text('Dawis: ${k.kelompokDawis ?? "-"}'),
+                            );
+                          }).toList(),
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedKelompokDawis = val;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => const SizedBox.shrink(),
+            ),
+        ],
       ),
-      body: mutasiAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) =>
-            Center(child: Text('Gagal memuat data LAMPID: $err')),
-        data: (mutasiList) {
-          if (mutasiList.isEmpty) {
-            return const Center(
-              child: Text(
-                'Belum ada riwayat mutasi (LAMPID).',
-                style: TextStyle(color: Colors.grey),
-              ),
-            );
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: mutasiAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) =>
+                  Center(child: Text('Gagal memuat data LAMPID: $err')),
+              data: (mutasiList) {
+                if (mutasiList.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Belum ada riwayat mutasi (LAMPID).',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: mutasiList.length,
-            itemBuilder: (context, index) {
-              return _LampidListItem(mutasi: mutasiList[index]);
-            },
-          );
-        },
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: mutasiList.length,
+                  itemBuilder: (context, index) {
+                    return _LampidListItem(mutasi: mutasiList[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

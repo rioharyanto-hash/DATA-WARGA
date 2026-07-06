@@ -535,7 +535,6 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
     );
   }
 
-
   String _getKategori(int? id) {
     switch (id) {
       case 1:

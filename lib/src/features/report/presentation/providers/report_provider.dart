@@ -493,9 +493,7 @@ class ReportController extends Notifier<ReportState> {
     }
   }
 
-  Future<Uint8List> generatePotensiWargaPdf(
-    String kelompokName,
-  ) async {
+  Future<Uint8List> generatePotensiWargaPdf(String kelompokName) async {
     state = state.copyWith(isLoading: true, error: null, successMessage: null);
     try {
       final region = ref.read(regionProvider);
@@ -750,7 +748,9 @@ class ReportController extends Notifier<ReportState> {
         'isRingkasan': true,
       };
 
-      final pdfBytes = await pdfService.generateForm3Ringkasan(data: ringkasanData);
+      final pdfBytes = await pdfService.generateForm3Ringkasan(
+        data: ringkasanData,
+      );
 
       state = state.copyWith(isLoading: false);
       return pdfBytes;
@@ -1073,7 +1073,8 @@ class ReportController extends Notifier<ReportState> {
 
       final pdfBytes = await pdfService.generateLampidPdfRingkasan(
         mutasiList: ringkasanRows,
-        namaKelompok: 'Semua Kelompok RT ${rt == 'Semua' ? '...' : rt} RW ${rw == 'Semua' ? '...' : rw}',
+        namaKelompok:
+            'Semua Kelompok RT ${rt == 'Semua' ? '...' : rt} RW ${rw == 'Semua' ? '...' : rw}',
         rt: rt == 'Semua' ? '...' : rt,
         rw: rw == 'Semua' ? '...' : rw,
         kelurahan: ref.read(regionProvider).kelurahan,

@@ -49,6 +49,35 @@ class ViewIndividuScreen extends ConsumerWidget {
           if (individu == null) {
             return const Center(child: Text('Data tidak ditemukan'));
           }
+          int calculateAge(String dateStr) {
+            if (dateStr.isEmpty) return -1;
+            try {
+              final parts = dateStr.contains('-')
+                  ? dateStr.split('-')
+                  : dateStr.split('/');
+              if (parts.length == 3) {
+                int p0 = int.parse(parts[0]);
+                int p2 = int.parse(parts[2]);
+                int year = p0 > 1000 ? p0 : p2;
+                int day = p0 > 1000 ? p2 : p0;
+                int month = int.parse(parts[1]);
+                DateTime birthDate = DateTime(year, month, day);
+                DateTime today = DateTime.now();
+                int age = today.year - birthDate.year;
+                if (today.month < birthDate.month ||
+                    (today.month == birthDate.month &&
+                        today.day < birthDate.day)) {
+                  age--;
+                }
+                return age;
+              }
+            } catch (_) {}
+            return -1;
+          }
+
+          final umur = calculateAge(individu.tanggalLahir ?? '');
+          final umurStr = umur >= 0 ? '$umur Tahun' : '-';
+
           return LayoutBuilder(
             builder: (context, constraints) {
               final isWide = constraints.maxWidth > 800;
@@ -66,6 +95,7 @@ class ViewIndividuScreen extends ConsumerWidget {
                       : '-',
                   'Tempat, Tanggal Lahir':
                       '${individu.tempatLahir}, ${individu.tanggalLahir}',
+                  'Umur': umurStr,
                   'Jenis Kelamin': individu.jenisKelamin,
                   'Agama': individu.agama ?? '-',
                   'Alamat KTP': individu.alamatKtp?.isNotEmpty == true

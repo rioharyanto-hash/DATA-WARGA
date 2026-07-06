@@ -1,3 +1,10 @@
+## [2026-07-06]
+### [MINOR] - Versi 1.8.0+20
+- Menambahkan kolom Umur pada halaman Profil Warga (View Individu).
+- Memperbaiki rentang perhitungan umur sesuai standar pada algoritma rekap.
+- Menambahkan Dropdown Pilihan Kader di dalam AppBar pada form Mutasi dan Lampid.
+- Menyesuaikan layout info header PDF Laporan Perincian agar sejajar dengan teks.
+
 ## [2026-07-02]
 ### [PATCH] - Versi 1.7.3+19
 - Fix Rekapitulasi PDF: "BoxConstraints forces an infinite height" - baris data dan baris total menggunakan `pw.CrossAxisAlignment.stretch` tanpa fixed height. Diperbaiki dengan menambahkan `height: 16` dan mengubah ke `CrossAxisAlignment.center`.

@@ -26,3 +26,15 @@ final allMutasiProvider = FutureProvider<List<Mutasi>>((ref) async {
   final repo = ref.watch(mutasiRepositoryProvider);
   return await repo.getAllMutasi();
 });
+
+final mutasiFilteredProvider = FutureProvider.family<List<Mutasi>, String?>((
+  ref,
+  kelompokDawis,
+) async {
+  final repo = ref.watch(mutasiRepositoryProvider);
+  if (kelompokDawis == null || kelompokDawis.isEmpty) {
+    return await repo.getAllMutasi();
+  } else {
+    return await repo.getMutasiByKelompokDawis(kelompokDawis);
+  }
+});

@@ -8,6 +8,7 @@ import '../../domain/entities/mutasi.dart';
 import '../../domain/entities/individu.dart';
 import '../providers/mutasi_provider.dart';
 import '../providers/individu_provider.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
 
 class FormMutasiMasterScreen extends ConsumerStatefulWidget {
   const FormMutasiMasterScreen({super.key});
@@ -38,6 +39,8 @@ class _FormMutasiMasterScreenState
   final _sebabKematianController = TextEditingController();
   String? _statusIbu;
   final List<String> _statusIbuList = ['Hamil', 'Melahirkan', 'Nifas'];
+
+  String? _selectedKelompokDawis;
 
   bool _isLoading = false;
 
@@ -124,11 +127,87 @@ class _FormMutasiMasterScreenState
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = ref.watch(loggedInUserProvider);
+    final isAdmin = currentUser?.role == 'ADMIN';
+    final allUsersAsync = ref.watch(allUsersProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Form Mutasi Ibu Hamil & Warga'),
-        backgroundColor: Colors.pink,
-        foregroundColor: Colors.white,
+        actions: [
+          if (isAdmin)
+            allUsersAsync.when(
+              data: (users) {
+                final kaderList = users
+                    .where((u) => u.role == 'KADER')
+                    .toList();
+                if (kaderList.isEmpty) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    right: 16.0,
+                    top: 10,
+                    bottom: 10,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade900,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        dropdownColor: Colors.white,
+                        value: _selectedKelompokDawis,
+                        icon: const Icon(
+                          Icons.filter_list_rounded,
+                          color: Colors.white,
+                        ),
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        selectedItemBuilder: (BuildContext context) {
+                          return [null, ...kaderList].map((k) {
+                            return Center(
+                              child: Text(
+                                k == null
+                                    ? 'Semua Kader'
+                                    : 'Dawis: ${k.kelompokDawis ?? "-"}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }).toList();
+                        },
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('Semua Kader'),
+                          ),
+                          ...kaderList.map((k) {
+                            return DropdownMenuItem<String>(
+                              value: k.kelompokDawis,
+                              child: Text('Dawis: ${k.kelompokDawis ?? "-"}'),
+                            );
+                          }).toList(),
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedKelompokDawis = val;
+                            _selectedIndividu = null; // Reset selection
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => const SizedBox.shrink(),
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -201,7 +280,10 @@ class _FormMutasiMasterScreenState
                 Autocomplete<Individu>(
                   optionsBuilder: (TextEditingValue textEditingValue) async {
                     final repo = ref.read(individuRepositoryProvider);
-                    return await repo.searchIndividu(textEditingValue.text);
+                    return await repo.searchIndividu(
+                      textEditingValue.text,
+                      kelompokDawis: _selectedKelompokDawis,
+                    );
                   },
                   displayStringForOption: (Individu option) =>
                       '${option.namaLengkap} - NIK: ${option.nik}',

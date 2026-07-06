@@ -42,22 +42,44 @@ class IndividuRepository {
     return maps.map((json) => IndividuModel.fromJson(json)).toList();
   }
 
-  Future<List<Individu>> searchIndividu(String query) async {
+  Future<List<Individu>> searchIndividu(
+    String query, {
+    String? kelompokDawis,
+  }) async {
     final db = await LocalDbHelper.database;
-    final maps = await db.rawQuery(
-      '''
-      SELECT * FROM individu 
-      WHERE nama_lengkap LIKE ? 
-      AND id NOT IN (
-        SELECT id_individu_asal FROM mutasi 
-        WHERE id_individu_asal IS NOT NULL 
-        AND jenis_mutasi IN ('Meninggal', 'Pindah')
-      )
-      LIMIT 20
-      ''',
-      ['%$query%'],
-    );
-    return maps.map((json) => IndividuModel.fromJson(json)).toList();
+    if (kelompokDawis != null && kelompokDawis.isNotEmpty) {
+      final maps = await db.rawQuery(
+        '''
+        SELECT individu.* FROM individu 
+        JOIN keluarga ON individu.id_keluarga = keluarga.id
+        JOIN krt ON keluarga.id_krt = krt.id
+        JOIN bangunan ON krt.id_bangunan = bangunan.id
+        WHERE individu.nama_lengkap LIKE ? 
+        AND bangunan.kelompok_dawis = ?
+        AND individu.id NOT IN (
+          SELECT id_individu_asal FROM mutasi 
+          WHERE id_individu_asal IS NOT NULL 
+          AND jenis_mutasi IN ('Meninggal', 'Pindah')
+        )
+        ''',
+        ['%$query%', kelompokDawis],
+      );
+      return maps.map((json) => IndividuModel.fromJson(json)).toList();
+    } else {
+      final maps = await db.rawQuery(
+        '''
+        SELECT * FROM individu 
+        WHERE nama_lengkap LIKE ? 
+        AND id NOT IN (
+          SELECT id_individu_asal FROM mutasi 
+          WHERE id_individu_asal IS NOT NULL 
+          AND jenis_mutasi IN ('Meninggal', 'Pindah')
+        )
+        ''',
+        ['%$query%'],
+      );
+      return maps.map((json) => IndividuModel.fromJson(json)).toList();
+    }
   }
 
   Future<Individu?> getIndividuById(String id) async {
