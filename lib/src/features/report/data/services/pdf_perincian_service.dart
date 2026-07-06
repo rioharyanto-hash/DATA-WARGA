@@ -274,7 +274,7 @@ class PdfPerincianService {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.legal.landscape,
+        pageFormat: const PdfPageFormat(13 * PdfPageFormat.inch, 8.5 * PdfPageFormat.inch), // F4 / Folio
         margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Column(
@@ -1099,7 +1099,7 @@ class PdfPerincianService {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.legal.landscape,
+        pageFormat: const PdfPageFormat(13 * PdfPageFormat.inch, 8.5 * PdfPageFormat.inch), // F4 / Folio
         margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Column(
@@ -2129,9 +2129,9 @@ class PdfPerincianService {
               child: pw.Center(child: pw.Text('NO', style: style)),
             ),
           ),
-          // NAMA KEPALA RUMAH TANGGA (col 1: 5 → flex 50)
+          // NAMA KEPALA RUMAH TANGGA (col 1: 10 → flex 100)
           pw.Expanded(
-            flex: 50,
+            flex: 100,
             child: pw.Container(
               decoration: pw.BoxDecoration(border: borderRight),
               child: pw.Center(
@@ -2649,9 +2649,12 @@ class PdfPerincianService {
     );
 
     // === COLUMN WIDTHS (30 columns) ===
+    // Menggunakan FlexColumnWidth yang tersinkronisasi dengan flex pada header.
+    // Lebar NAMA KRT diperbesar rasionya agar saat dicetak di F4 tidak mepet,
+    // sedangkan kolom isian data (flex 2) akan menjadi lebih ramping.
     final columnWidths = <int, pw.TableColumnWidth>{
       0: const pw.FlexColumnWidth(1.5), // NO
-      1: const pw.FlexColumnWidth(5), // NAMA KRT
+      1: const pw.FlexColumnWidth(10), // NAMA KRT (diperbesar dari 5 ke 10)
       2: const pw.FlexColumnWidth(2), // JML KK
       3: const pw.FlexColumnWidth(2), // TOTAL L
       4: const pw.FlexColumnWidth(2), // TOTAL P
@@ -2686,7 +2689,7 @@ class PdfPerincianService {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.legal.landscape,
+        pageFormat: const PdfPageFormat(13 * PdfPageFormat.inch, 8.5 * PdfPageFormat.inch), // Ukuran F4 / Folio
         margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Column(
