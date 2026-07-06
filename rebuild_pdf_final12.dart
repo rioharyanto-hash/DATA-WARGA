@@ -128,22 +128,25 @@ import 'package:pdf/widgets.dart' as pw;
   }
 
   String ringkasanClass =
-      header + "class PdfRingkasanService {\n\n" + helpers + "\n\n";
+      "${header}class PdfRingkasanService {\n\n$helpers\n\n";
   for (final m in ringkasanMethods) {
     String mCode = extractMethod(m);
-    if (m == 'generateForm3')
+    if (m == 'generateForm3') {
       mCode = mCode.replaceAll('generateForm3', 'generateForm3Ringkasan');
-    if (m == 'generatePotensiWargaPdf')
+    }
+    if (m == 'generatePotensiWargaPdf') {
       mCode = mCode.replaceAll(
         'generatePotensiWargaPdf',
         'generatePotensiWargaPdfRingkasan',
       );
-    if (m == 'generateLampidPdf')
+    }
+    if (m == 'generateLampidPdf') {
       mCode = mCode.replaceAll(
         'generateLampidPdf',
         'generateLampidPdfRingkasan',
       );
-    ringkasanClass += mCode + "\n\n";
+    }
+    ringkasanClass += "$mCode\n\n";
   }
   ringkasanClass += "}\n\n";
   ringkasanClass += """int _parseInt(dynamic val) {
@@ -155,27 +158,31 @@ import 'package:pdf/widgets.dart' as pw;
 """;
 
   String perincianClass =
-      header + "class PdfPerincianService {\n\n" + helpers + "\n\n";
+      "${header}class PdfPerincianService {\n\n$helpers\n\n";
   for (final m in perincianMethods) {
     String mCode = extractMethod(m);
-    if (m == 'generateForm3')
+    if (m == 'generateForm3') {
       mCode = mCode.replaceAll('generateForm3', 'generateForm3Perincian');
-    if (m == 'generatePotensiWargaPdf')
+    }
+    if (m == 'generatePotensiWargaPdf') {
       mCode = mCode.replaceAll(
         'generatePotensiWargaPdf',
         'generatePotensiWargaPdfPerincian',
       );
-    if (m == 'generateRekapPkkPdf')
+    }
+    if (m == 'generateRekapPkkPdf') {
       mCode = mCode.replaceAll(
         'generateRekapPkkPdf',
         'generateRekapPkkPerincianPdf',
       );
-    if (m == 'generateLampidPdf')
+    }
+    if (m == 'generateLampidPdf') {
       mCode = mCode.replaceAll(
         'generateLampidPdf',
         'generateLampidPdfPerincian',
       );
-    perincianClass += mCode + "\n\n";
+    }
+    perincianClass += "$mCode\n\n";
   }
   perincianClass += "}\n\n";
   perincianClass += """int _parseInt(dynamic val) {

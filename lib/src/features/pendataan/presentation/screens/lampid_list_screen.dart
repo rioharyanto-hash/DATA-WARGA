@@ -88,7 +88,7 @@ class _LampidListScreenState extends ConsumerState<LampidListScreen> {
                               value: k.kelompokDawis,
                               child: Text('Dawis: ${k.kelompokDawis ?? "-"}'),
                             );
-                          }).toList(),
+                          }),
                         ],
                         onChanged: (val) {
                           setState(() {

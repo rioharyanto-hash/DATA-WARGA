@@ -191,7 +191,7 @@ class _FormMutasiMasterScreenState
                               value: k.kelompokDawis,
                               child: Text('Dawis: ${k.kelompokDawis ?? "-"}'),
                             );
-                          }).toList(),
+                          }),
                         ],
                         onChanged: (val) {
                           setState(() {
