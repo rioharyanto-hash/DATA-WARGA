@@ -144,6 +144,7 @@ class ReportController extends Notifier<ReportState> {
       final repo = ref.read(reportRepositoryProvider);
       final data = await repo.getRekapPKK(namaKelompok);
       final region = ref.read(regionProvider);
+      data['tahun'] = DateTime.now().year.toString();
 
       final pdfService = ref.read(pdfPerincianServiceProvider);
       final pdfBytes = await pdfService.generateRekapPkkPerincianPdf(
@@ -209,6 +210,7 @@ class ReportController extends Notifier<ReportState> {
         kelurahan: region.kelurahan,
         kecamatan: region.kecamatan,
         kota: region.kotaKab,
+        bulanTahun: '${ref.read(reportBulanProvider)} ${DateTime.now().year}',
         data:
             (data['keluargaList'] as List?)?.cast<Map<String, dynamic>>() ?? [],
       );
@@ -514,6 +516,9 @@ class ReportController extends Notifier<ReportState> {
           'kelurahan': region.kelurahan,
           'kecamatan': region.kecamatan,
           'tahun': tahun,
+          'bulan': ref.read(reportBulanProvider),
+          'periode': ref.read(reportBulanProvider),
+          'kelompok': kelompokName,
         },
       );
 
@@ -971,6 +976,16 @@ class ReportController extends Notifier<ReportState> {
     try {
       final repo = ref.read(reportRepositoryProvider);
       final pdfService = ref.read(pdfRingkasanServiceProvider);
+      
+      final rt = ref.read(reportRtProvider);
+      final rw = ref.read(reportRwProvider);
+      final region = ref.read(regionProvider);
+      final bulan = ref.read(reportBulanProvider);
+      final tahun = DateTime.now().year.toString();
+
+      String pkkRw = rw == 'Semua' ? '...' : rw;
+      String pkkRt = rt == 'Semua' ? '...' : rt;
+
       final allowedNames = await _getFilteredKelompokNames();
       List<Map<String, dynamic>> ringkasanRows = [];
 
@@ -1001,7 +1016,16 @@ class ReportController extends Notifier<ReportState> {
           }
         }
       }
-      final ringkasanData = {'rows': ringkasanRows};
+      final ringkasanData = {
+        'rows': ringkasanRows,
+        'rt': pkkRt,
+        'rw': pkkRw,
+        'kelurahan': region.kelurahan,
+        'kecamatan': region.kecamatan,
+        'tahun': tahun,
+        'bulan': bulan,
+        'periode': bulan,
+      };
 
       final pdfBytes = await pdfService.generatePotensiWargaPdfRingkasan(
         data: ringkasanData,

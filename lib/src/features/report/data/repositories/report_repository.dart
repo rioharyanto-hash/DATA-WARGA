@@ -1293,7 +1293,7 @@ class ReportRepository implements IReportRepository {
     final List<Map<String, dynamic>> allBgnRaw = await db.rawQuery('''
         SELECT b.* 
         FROM bangunan b
-        ORDER BY b.nama_bangunan ASC
+        ORDER BY CAST(b.nomor_urut_bangunan AS INTEGER) ASC, b.nama_bangunan ASC
       ''');
     final bangunanListRaw = allBgnRaw.where((b) {
       final dawis = b['kelompok_dawis']?.toString() ?? '';

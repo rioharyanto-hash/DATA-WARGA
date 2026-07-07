@@ -2179,7 +2179,7 @@ class PdfRingkasanService {
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                       pw.Text(
-                        '...',
+                        '${data['rt'] ?? '...'}',
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                     ],
@@ -2195,7 +2195,7 @@ class PdfRingkasanService {
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                       pw.Text(
-                        '...',
+                        '${data['rw'] ?? '...'}',
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                     ],
@@ -2211,7 +2211,7 @@ class PdfRingkasanService {
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                       pw.Text(
-                        '...',
+                        '${data['kelurahan'] ?? '...'}',
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                     ],
@@ -2227,7 +2227,7 @@ class PdfRingkasanService {
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                       pw.Text(
-                        '...',
+                        '${data['kecamatan'] ?? '...'}',
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                     ],
@@ -2243,7 +2243,7 @@ class PdfRingkasanService {
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                       pw.Text(
-                        '...',
+                        '${data['tahun'] ?? '...'}',
                         style: pw.TextStyle(font: regularFont, fontSize: 10),
                       ),
                     ],

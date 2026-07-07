@@ -1,3 +1,21 @@
+## [2026-07-07]
+### [PATCH] - Versi 1.9.1+24
+- Memperbaiki pengisian parameter periode, bulan, dan tahun pada form PDF Rekapitulasi Perincian/Ringkasan dan Profil Kependudukan Perincian/Ringkasan agar tercetak sesuai data waktu laporan saat *generate* PDF.
+
+## [2026-07-07]
+### [MINOR] - Versi 1.9.0+23
+- Menambahkan utility `PdfFormBuilder` (`lib/core/utils/pdf_form_builder.dart`) sebagai standar pembuatan arsitektur UI tabel pada *generate* form PDF untuk menghindari bug tinggi *row* yang tidak sinkron dan menyederhanakan kode pada pengembangan form baru di masa mendatang. Utility ini mendukung kustomisasi perataan baris (*alignment*) pada header info dan cell tabel.
+
+## [2026-07-07]
+### [PATCH] - Versi 1.8.2+22
+- Memperbaiki garis vertikal (border tabel) pada PDF Data Potensi Warga agar menyatu dan memiliki tinggi yang seragam dengan menggunakan struktur `pw.Table`.
+- Memperbaiki urutan data bangunan pada Data Potensi Warga agar diurutkan berdasarkan `nomor_urut_bangunan` secara ASC.
+
+## [2026-07-07]
+### [PATCH] - Versi 1.8.1+21
+- Fix Data Potensi Warga (Terisi) PDF: Seluruh struktur kolom diubah dari format lama (KRITERIA RUMAH, SUMBER AIR, MAKANAN POKOK, WARGA MENGIKUTI KEGIATAN) ke format yang benar sesuai form resmi Kelompok Dasawisma (NAMA BANGUNAN, JML KRT, JML KK, TOTAL L/P, BALITA, PUS, PENGGUNAAN ALAT KB, REMAJA 10-18 TH, LANSIA, BERKEBUTUHAN KHUSUS, KET — 30 kolom).
+- Memperbaiki header info PDF dari RT/RW/Kelurahan/Kecamatan/Tahun menjadi NAMA KELOMPOK/RUKUN WARGA (RW)/DESA-KELURAHAN/TAHUN/PERIODE.
+
 ## [2026-07-06]
 ### [MINOR] - Versi 1.8.0+20
 - Menambahkan kolom Umur pada halaman Profil Warga (View Individu).
