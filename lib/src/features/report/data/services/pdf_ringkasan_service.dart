@@ -2276,7 +2276,7 @@ class PdfRingkasanService {
     final regularFont = pw.Font.helvetica();
 
     pw.Widget buildCell(
-      String text, {
+      dynamic contentData, {
       double? width,
       int? flex,
       bool isHeader = false,
@@ -2286,6 +2286,19 @@ class PdfRingkasanService {
       pw.Alignment alignment = pw.Alignment.center,
       PdfColor backgroundColor = PdfColors.white,
     }) {
+      final contentWidget = contentData is String
+          ? pw.Text(
+              contentData,
+              textAlign: alignment == pw.Alignment.centerLeft
+                  ? pw.TextAlign.left
+                  : pw.TextAlign.center,
+              style: pw.TextStyle(
+                font: isHeader ? boldFont : regularFont,
+                fontSize: fontSize ?? (isHeader ? 10 : 10),
+              ),
+            )
+          : contentData as pw.Widget;
+
       final content = pw.Container(
         width: width,
         padding: const pw.EdgeInsets.all(4),
@@ -2301,16 +2314,7 @@ class PdfRingkasanService {
                 : pw.BorderSide.none,
           ),
         ),
-        child: pw.Text(
-          text,
-          textAlign: alignment == pw.Alignment.centerLeft
-              ? pw.TextAlign.left
-              : pw.TextAlign.center,
-          style: pw.TextStyle(
-            font: isHeader ? boldFont : regularFont,
-            fontSize: fontSize ?? (isHeader ? 10 : 10),
-          ),
-        ),
+        child: contentWidget,
       );
 
       if (flex != null) {
@@ -2357,15 +2361,53 @@ class PdfRingkasanService {
       '75_plus',
     ];
 
-    // Helper: build breakdown string "a + b + c = total"
-    String buildBreakdown(List<Map<String, int>> dataList, String key) {
+    // Helper: build breakdown widget with perfectly aligned numbers
+    pw.Widget buildBreakdown(List<Map<String, int>> dataList, String key) {
       if (dataList.length <= 1) {
         final val = dataList.isNotEmpty ? (dataList.first[key] ?? 0) : 0;
-        return val.toString();
+        return pw.Text(val.toString(), style: pw.TextStyle(font: regularFont, fontSize: 10));
       }
       final values = dataList.map((d) => d[key] ?? 0).toList();
       final total = values.fold(0, (sum, v) => sum + v);
-      return '${values.join(' + ')} =   $total';
+      
+      List<pw.Widget> children = [];
+      for (int i = 0; i < values.length; i++) {
+        children.add(
+          pw.Container(
+            width: 14,
+            alignment: pw.Alignment.centerRight,
+            child: pw.Text(values[i].toString(), style: pw.TextStyle(font: regularFont, fontSize: 10)),
+          ),
+        );
+        if (i < values.length - 1) {
+          children.add(
+            pw.Container(
+              width: 12,
+              alignment: pw.Alignment.center,
+              child: pw.Text('+', style: pw.TextStyle(font: regularFont, fontSize: 10)),
+            ),
+          );
+        }
+      }
+      children.add(
+        pw.Container(
+          width: 12,
+          alignment: pw.Alignment.center,
+          child: pw.Text('=', style: pw.TextStyle(font: regularFont, fontSize: 10)),
+        ),
+      );
+      children.add(
+        pw.Container(
+          width: 20,
+          alignment: pw.Alignment.centerRight,
+          child: pw.Text(total.toString(), style: pw.TextStyle(font: regularFont, fontSize: 10)),
+        ),
+      );
+      
+      return pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        children: children,
+      );
     }
 
     pdf.addPage(
@@ -2408,7 +2450,7 @@ class PdfRingkasanService {
                             ),
                           ),
                           pw.Text(
-                            ': $namaKelompok',
+                            ': $namaKader',
                             style: pw.TextStyle(
                               font: regularFont,
                               fontSize: 10,
@@ -2431,7 +2473,7 @@ class PdfRingkasanService {
                             ),
                           ),
                           pw.Text(
-                            ': ',
+                            ': $namaKelompok',
                             style: pw.TextStyle(
                               font: regularFont,
                               fontSize: 10,
@@ -2566,7 +2608,7 @@ class PdfRingkasanService {
                     children: [
                       buildCell(
                         'UMUR',
-                        flex: 4,
+                        flex: 2,
                         isHeader: true,
                         bottomBorder: true,
                         backgroundColor: PdfColors.yellow,
@@ -2601,13 +2643,14 @@ class PdfRingkasanService {
                     return pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
-                        buildCell(ageGroups[i], flex: 4, bottomBorder: true),
-                        buildCell(pBreakdown, flex: 2, bottomBorder: true),
+                        buildCell(ageGroups[i], flex: 2, bottomBorder: true),
+                        buildCell(pBreakdown, flex: 2, bottomBorder: true, alignment: pw.Alignment.center),
                         buildCell(
                           wBreakdown,
-                          flex: 3,
+                          flex: 2,
                           noRightBorder: true,
                           bottomBorder: true,
+                          alignment: pw.Alignment.center,
                         ),
                       ],
                     );
@@ -2618,7 +2661,7 @@ class PdfRingkasanService {
                     children: [
                       buildCell(
                         'TOTAL',
-                        flex: 4,
+                        flex: 2,
                         isHeader: true,
                         backgroundColor: PdfColors.yellow,
                       ),
@@ -2626,12 +2669,14 @@ class PdfRingkasanService {
                         buildBreakdown(perKelompokData, 'total_P'),
                         flex: 2,
                         backgroundColor: PdfColors.yellow,
+                        alignment: pw.Alignment.center,
                       ),
                       buildCell(
                         buildBreakdown(perKelompokData, 'total_W'),
                         flex: 2,
                         noRightBorder: true,
                         backgroundColor: PdfColors.yellow,
+                        alignment: pw.Alignment.center,
                       ),
                     ],
                   ),

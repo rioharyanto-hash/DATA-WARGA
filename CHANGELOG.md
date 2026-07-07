@@ -1,4 +1,10 @@
 ## [2026-07-07]
+### [PATCH] - Versi 1.9.2+25
+- Memperbaiki data `NAMA` agar memuat nama Kader yang ditarik secara benar dari field `namaKader` pada report provider.
+- Merapikan pemformatan string Kelompok (memisahkan dengan spasi jika berderet).
+- Memperbaiki proporsi lebar kolom tabel (UMUR, P, W) dan menyelaraskan baris persamaan penjumlahan agar tampak proporsional dan rapi seperti form standar fisik.
+
+## [2026-07-07]
 ### [PATCH] - Versi 1.9.1+24
 - Memperbaiki pengisian parameter periode, bulan, dan tahun pada form PDF Rekapitulasi Perincian/Ringkasan dan Profil Kependudukan Perincian/Ringkasan agar tercetak sesuai data waktu laporan saat *generate* PDF.
 

@@ -949,7 +949,7 @@ class ReportController extends Notifier<ReportState> {
       for (var name in allowedNames) {
         final data = await repo.getProfilPendudukData(name);
 
-        final kaderName = (data['kaderName']?.toString() ?? '');
+        final kaderName = (data['namaKader']?.toString() ?? '');
         if (kaderName.isNotEmpty) {
           namaKaderList.add(kaderName);
         }
@@ -972,10 +972,31 @@ class ReportController extends Notifier<ReportState> {
       final bulan = ref.read(reportBulanProvider);
       final tahun = DateTime.now().year.toString();
 
+      String formatKelompokNames(List<String> names) {
+        if (names.isEmpty) return '';
+        if (names.length == 1) return names.first.replaceFirst('.', ' ');
+        
+        String first = names.first;
+        int lastDotIndex = first.lastIndexOf('.');
+        if (lastDotIndex != -1) {
+          String prefix = first.substring(0, lastDotIndex + 1).replaceFirst('.', ' ');
+          List<String> suffixes = [];
+          for (String name in names) {
+            if (name.lastIndexOf('.') != -1) {
+              suffixes.add(name.substring(name.lastIndexOf('.') + 1));
+            } else {
+              suffixes.add(name);
+            }
+          }
+          return prefix + suffixes.join(', ');
+        }
+        return names.join(', ').replaceFirst('.', ' ');
+      }
+
       final pdfBytes = await pdfService.generateProfilUsiaRingkasanPortraitPdf(
         perKelompokData: perKelompokTotals,
         namaKelompok: allowedNames.isNotEmpty
-            ? allowedNames.join(', ')
+            ? formatKelompokNames(allowedNames)
             : 'Semua Kelompok RT $pkkRt RW $pkkRw',
         namaKader: namaKaderList.isNotEmpty ? namaKaderList.join(', ') : '',
         rt: pkkRt,
