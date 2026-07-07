@@ -75,7 +75,7 @@ class ViewIndividuScreen extends ConsumerWidget {
             return -1;
           }
 
-          final umur = calculateAge(individu.tanggalLahir ?? '');
+          final umur = calculateAge(individu.tanggalLahir);
           final umurStr = umur >= 0 ? '$umur Tahun' : '-';
 
           return LayoutBuilder(

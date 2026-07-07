@@ -325,12 +325,14 @@ class ReportRepository implements IReportRepository {
     Map<String, Map<String, dynamic>> kelompokMap = {};
 
     for (var b in bangunanList) {
-      String kel = b['kelompok_dawis']?.toString() ?? 'Unassigned';
-      if (kel.isEmpty) kel = 'Unassigned';
+      String rawKel = b['kelompok_dawis']?.toString() ?? 'Unassigned';
+      if (rawKel.isEmpty) rawKel = 'Unassigned';
+
+      String kel = rawKel.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
 
       if (!kelompokMap.containsKey(kel)) {
         kelompokMap[kel] = {
-          'namaKelompok': kel,
+          'namaKelompok': rawKel,
           'rt': rt,
           'namaKordinator': '', // Could be filled manually later
           'jumlahBangunan': 0,
@@ -1592,22 +1594,48 @@ class ReportRepository implements IReportRepository {
     final db = await LocalDbHelper.database;
     final result = await db.query(
       'app_user',
-      columns: ['kelompok_dawis', 'rt', 'rw', 'id_kader'],
+      columns: ['kelompok_dawis', 'rt', 'rw', 'id_kader', 'nama'],
       where: 'role = ?',
       whereArgs: ['KADER'],
-      orderBy: 'kelompok_dawis ASC',
     );
-    return result
-        .map(
-          (row) => {
-            'kelompok_dawis': row['kelompok_dawis']?.toString() ?? '',
-            'rt': row['rt']?.toString() ?? '',
-            'rw': row['rw']?.toString() ?? '',
-            'id_kader': row['id_kader']?.toString() ?? '',
-          },
-        )
-        .where((map) => map['kelompok_dawis']!.isNotEmpty)
-        .toList();
+    
+    final bangunanGroups = await db.query(
+      'bangunan',
+      columns: ['kelompok_dawis', 'rt', 'rw'],
+      distinct: true,
+    );
+    
+    final Map<String, Map<String, String>> combined = {};
+    
+    for (var row in result) {
+      final k = row['kelompok_dawis']?.toString() ?? '';
+      if (k.isNotEmpty) {
+        combined[k] = {
+          'kelompok_dawis': k,
+          'rt': row['rt']?.toString() ?? '',
+          'rw': row['rw']?.toString() ?? '',
+          'id_kader': row['id_kader']?.toString() ?? '',
+          'nama': row['nama']?.toString() ?? '',
+        };
+      }
+    }
+    
+    for (var row in bangunanGroups) {
+      final k = row['kelompok_dawis']?.toString() ?? '';
+      if (k.isNotEmpty && !combined.containsKey(k)) {
+        combined[k] = {
+          'kelompok_dawis': k,
+          'rt': row['rt']?.toString() ?? '',
+          'rw': row['rw']?.toString() ?? '',
+          'id_kader': '',
+          'nama': '',
+        };
+      }
+    }
+    
+    final list = combined.values.toList();
+    list.sort((a, b) => a['kelompok_dawis']!.compareTo(b['kelompok_dawis']!));
+    return list;
   }
 
   Future<List<Map<String, dynamic>>> _getIndividuAktif(

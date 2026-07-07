@@ -194,13 +194,57 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       children: [
         const Text('RT', style: TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
-        TextField(
-          controller: _rtController,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
-          keyboardType: TextInputType.number,
+        kelompokDawisAsync.when(
+          data: (list) {
+            final uniqueRts = list
+                .map((e) => e['rt'] ?? '')
+                .where((e) => e.isNotEmpty)
+                .toSet()
+                .toList()
+              ..sort();
+            
+            if (uniqueRts.isEmpty) {
+              return TextField(
+                controller: _rtController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                keyboardType: TextInputType.number,
+                enabled: false,
+              );
+            }
+
+            final validRt = uniqueRts.contains(_rtController.text) 
+                ? _rtController.text 
+                : uniqueRts.first;
+
+            if (_rtController.text != validRt) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _rtController.text = validRt;
+              });
+            }
+
+            return DropdownButtonFormField<String>(
+              value: validRt,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              items: uniqueRts
+                  .map((rt) => DropdownMenuItem(value: rt, child: Text(rt)))
+                  .toList(),
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() {
+                    _rtController.text = val;
+                  });
+                }
+              },
+            );
+          },
+          loading: () => const LinearProgressIndicator(),
+          error: (_, __) => const Text('Error'),
         ),
       ],
     );
@@ -210,13 +254,57 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       children: [
         const Text('RW', style: TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
-        TextField(
-          controller: _rwController,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
-          keyboardType: TextInputType.number,
+        kelompokDawisAsync.when(
+          data: (list) {
+            final uniqueRws = list
+                .map((e) => e['rw'] ?? '')
+                .where((e) => e.isNotEmpty)
+                .toSet()
+                .toList()
+              ..sort();
+
+            if (uniqueRws.isEmpty) {
+              return TextField(
+                controller: _rwController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                keyboardType: TextInputType.number,
+                enabled: false,
+              );
+            }
+
+            final validRw = uniqueRws.contains(_rwController.text)
+                ? _rwController.text
+                : uniqueRws.first;
+
+            if (_rwController.text != validRw) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _rwController.text = validRw;
+              });
+            }
+
+            return DropdownButtonFormField<String>(
+              value: validRw,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              items: uniqueRws
+                  .map((rw) => DropdownMenuItem(value: rw, child: Text(rw)))
+                  .toList(),
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() {
+                    _rwController.text = val;
+                  });
+                }
+              },
+            );
+          },
+          loading: () => const LinearProgressIndicator(),
+          error: (_, __) => const Text('Error'),
         ),
       ],
     );
@@ -384,11 +472,14 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
                           title: getFormattedTitle('Form I & II'),
-                          generatePdf: () => ref
-                              .read(reportControllerProvider.notifier)
-                              .generateForm1And2Pdf(
-                                _namaKelompokController.text,
-                              ),
+                          generatePdf: () {
+                            final name = _isRingkasan
+                                ? 'Semua Kelompok RT ${_rtController.text} RW ${_rwController.text}'
+                                : _namaKelompokController.text;
+                            return ref
+                                .read(reportControllerProvider.notifier)
+                                .generateForm1And2Pdf(name);
+                          },
                         ),
                       ),
                     );

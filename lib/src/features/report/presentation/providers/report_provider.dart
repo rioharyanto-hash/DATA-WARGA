@@ -405,6 +405,26 @@ class ReportController extends Notifier<ReportState> {
         return allowedNames.any(
           (allowed) => allowed.startsWith(f1Name) || f1Name.startsWith(allowed),
         );
+      }).map((f1) {
+        final f1Name = (f1['namaKelompok'] as String)
+            .toLowerCase()
+            .replaceAll(' ', '')
+            .replaceAll('.', '');
+            
+        final matchedKader = targetKaders.cast<Map<String, String>?>().firstWhere(
+          (k) {
+             if (k == null) return false;
+             final allowed = (k['kelompok_dawis'] ?? '').toLowerCase().replaceAll(' ', '').replaceAll('.', '');
+             return allowed.startsWith(f1Name) || f1Name.startsWith(allowed);
+          },
+          orElse: () => null,
+        );
+        
+        return {
+          ...f1,
+          'idKader': matchedKader?['id_kader'] ?? '',
+          'namaKordinator': matchedKader?['nama'] ?? '',
+        };
       }).toList();
 
       int newJumlahBangunan = 0;
@@ -682,10 +702,14 @@ class ReportController extends Notifier<ReportState> {
             totalIas = 0,
             totalHamil = 0,
             totalBukanKb = 0;
-        int krtCount = 0;
+        int totalKrtCount = 0;
+        int totalKkCount = 0;
 
         for (var row in data['rows']) {
-          krtCount++;
+          totalKkCount++;
+          if ((row['namaKrt'] as String).isNotEmpty) {
+            totalKrtCount++;
+          }
           totalL += _parseInt(row['L']);
           totalP += _parseInt(row['P']);
           totalJumlah += _parseInt(row['jumlah']);
@@ -713,8 +737,8 @@ class ReportController extends Notifier<ReportState> {
 
         ringkasanRows.add({
           'no': globalIndex++,
-          'namaKrt': name,
-          'namaKk': krtCount.toString(),
+          'namaKrt': totalKrtCount.toString(),
+          'namaKk': totalKkCount.toString(),
           'L': totalL,
           'P': totalP,
           'jumlah': totalJumlah,
