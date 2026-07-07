@@ -397,35 +397,42 @@ class ReportController extends Notifier<ReportState> {
           )
           .toList();
 
-      final filteredForm1Kaders = form1Kaders.where((f1) {
-        final f1Name = (f1['namaKelompok'] as String)
-            .toLowerCase()
-            .replaceAll(' ', '')
-            .replaceAll('.', '');
-        return allowedNames.any(
-          (allowed) => allowed.startsWith(f1Name) || f1Name.startsWith(allowed),
-        );
-      }).map((f1) {
-        final f1Name = (f1['namaKelompok'] as String)
-            .toLowerCase()
-            .replaceAll(' ', '')
-            .replaceAll('.', '');
-            
-        final matchedKader = targetKaders.cast<Map<String, String>?>().firstWhere(
-          (k) {
-             if (k == null) return false;
-             final allowed = (k['kelompok_dawis'] ?? '').toLowerCase().replaceAll(' ', '').replaceAll('.', '');
-             return allowed.startsWith(f1Name) || f1Name.startsWith(allowed);
-          },
-          orElse: () => null,
-        );
-        
-        return {
-          ...f1,
-          'idKader': matchedKader?['id_kader'] ?? '',
-          'namaKordinator': matchedKader?['nama'] ?? '',
-        };
-      }).toList();
+      final filteredForm1Kaders = form1Kaders
+          .where((f1) {
+            final f1Name = (f1['namaKelompok'] as String)
+                .toLowerCase()
+                .replaceAll(' ', '')
+                .replaceAll('.', '');
+            return allowedNames.any(
+              (allowed) =>
+                  allowed.startsWith(f1Name) || f1Name.startsWith(allowed),
+            );
+          })
+          .map((f1) {
+            final f1Name = (f1['namaKelompok'] as String)
+                .toLowerCase()
+                .replaceAll(' ', '')
+                .replaceAll('.', '');
+
+            final matchedKader = targetKaders
+                .cast<Map<String, String>?>()
+                .firstWhere((k) {
+                  if (k == null) return false;
+                  final allowed = (k['kelompok_dawis'] ?? '')
+                      .toLowerCase()
+                      .replaceAll(' ', '')
+                      .replaceAll('.', '');
+                  return allowed.startsWith(f1Name) ||
+                      f1Name.startsWith(allowed);
+                }, orElse: () => null);
+
+            return {
+              ...f1,
+              'idKader': matchedKader?['id_kader'] ?? '',
+              'namaKordinator': matchedKader?['nama'] ?? '',
+            };
+          })
+          .toList();
 
       int newJumlahBangunan = 0;
       int newJumlahKrt = 0;
@@ -975,11 +982,13 @@ class ReportController extends Notifier<ReportState> {
       String formatKelompokNames(List<String> names) {
         if (names.isEmpty) return '';
         if (names.length == 1) return names.first.replaceFirst('.', ' ');
-        
+
         String first = names.first;
         int lastDotIndex = first.lastIndexOf('.');
         if (lastDotIndex != -1) {
-          String prefix = first.substring(0, lastDotIndex + 1).replaceFirst('.', ' ');
+          String prefix = first
+              .substring(0, lastDotIndex + 1)
+              .replaceFirst('.', ' ');
           List<String> suffixes = [];
           for (String name in names) {
             if (name.lastIndexOf('.') != -1) {
@@ -1021,7 +1030,7 @@ class ReportController extends Notifier<ReportState> {
     try {
       final repo = ref.read(reportRepositoryProvider);
       final pdfService = ref.read(pdfRingkasanServiceProvider);
-      
+
       final rt = ref.read(reportRtProvider);
       final rw = ref.read(reportRwProvider);
       final region = ref.read(regionProvider);
@@ -1033,6 +1042,8 @@ class ReportController extends Notifier<ReportState> {
 
       final allowedNames = await _getFilteredKelompokNames();
       List<Map<String, dynamic>> ringkasanRows = [];
+      int globalIndex = 1;
+      List<String> dasawismaList = [];
 
       for (var name in allowedNames) {
         final dataList = await repo.getPotensiWargaData(name);
@@ -1041,13 +1052,35 @@ class ReportController extends Notifier<ReportState> {
         final Map<String, int> sums = {};
         for (var r in dataList) {
           for (var key in r.keys) {
-            if (key != 'namaWarga' && key != 'keterangan') {
+            if (key != 'namaWarga' && key != 'keterangan' && key != 'no') {
               sums[key] = (sums[key] ?? 0) + _parseInt(r[key]);
             }
           }
         }
 
-        final rowMap = <String, dynamic>{'namaWarga': name, 'keterangan': ''};
+        String rtFromName = pkkRt;
+        String dasawismaFromName = '1';
+        final RegExp dRegex = RegExp(r'\.([0-9]{3})\.([0-9]{3})$');
+        final dMatch = dRegex.firstMatch(name);
+        if (dMatch != null) {
+          if (pkkRt == '...' || pkkRt == 'Semua') {
+            rtFromName = dMatch.group(1)!;
+          }
+          dasawismaFromName = dMatch.group(2)!;
+          if (!dasawismaList.contains(dasawismaFromName)) {
+            dasawismaList.add(dasawismaFromName);
+          }
+        }
+
+        final rowMap = <String, dynamic>{
+          'no': globalIndex++,
+          'namaWarga': name,
+          'nomor_rt': rtFromName,
+          'jumlah_dasawisma': dasawismaFromName,
+          'jumlah_bangunan': dataList.length,
+          'jumlah_kelompok': 1,
+          'keterangan': '',
+        };
         rowMap.addAll(sums);
         ringkasanRows.add(rowMap);
       }
@@ -1063,6 +1096,9 @@ class ReportController extends Notifier<ReportState> {
       }
       final ringkasanData = {
         'rows': ringkasanRows,
+        'kelompok': dasawismaList.isNotEmpty
+            ? 'BUAH GOWOK.$pkkRw.$pkkRt. ${dasawismaList.join(', ')}'
+            : 'BUAH GOWOK.$pkkRw.$pkkRt',
         'rt': pkkRt,
         'rw': pkkRw,
         'kelurahan': region.kelurahan,
