@@ -184,9 +184,7 @@ class ReportRepository implements IReportRepository {
                   final hubunganKeluarga =
                       (individu['hubungan_keluarga'] as String?)?.toUpperCase();
 
-                  if (statusKawin == 'Kawin' ||
-                      hubunganKeluarga == 'ISTRI' ||
-                      hubunganKeluarga == 'KEPALA RUMAH TANGGA') {
+                  if (hubunganKeluarga == 'ISTRI') {
                     pus++;
                   }
                 }
@@ -1070,13 +1068,8 @@ class ReportRepository implements IReportRepository {
             }
 
             // PUS
-            final statKawin = ind['status_perkawinan']?.toString() ?? '';
-            if (jk == 'Perempuan' &&
-                (statKawin.toLowerCase() == 'kawin' ||
-                    statKawin.toLowerCase() == 'menikah') &&
-                age >= 15 &&
-                age < 50 &&
-                hasSuamiOrKk) {
+            final hubKelPUS = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+            if (hubKelPUS == 'ISTRI' && age >= 15 && age < 50) {
               countPUS++;
             }
 
@@ -1392,8 +1385,8 @@ class ReportRepository implements IReportRepository {
         int umur = 0;
         int parsedAge = _calculateAge(ind['tanggal_lahir']?.toString() ?? '');
         if (parsedAge >= 0) umur = parsedAge;
-        final isKawin =
-            (ind['status_perkawinan']?.toString().toUpperCase() == 'KAWIN');
+        final isIstri =
+            (ind['hubungan_keluarga']?.toString().toUpperCase() == 'ISTRI');
         final isAktif = ind['aktif_posyandu']?.toString() == '1';
         final isL = (jk == 'L' || jk == 'LAKI-LAKI');
         final isP = (jk == 'P' || jk == 'PEREMPUAN');
@@ -1438,7 +1431,7 @@ class ReportRepository implements IReportRepository {
         }
 
         // PUS & KB
-        if (isP && umur >= 15 && umur <= 49 && isKawin) {
+        if (isIstri && umur >= 15 && umur <= 49) {
           pus++;
           final kb = ind['metode_kb']?.toString().toUpperCase() ?? '';
           if (kb.contains('PIL')) {

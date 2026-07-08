@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -39,8 +38,10 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ],
         ),
-        actions: const [
-          Padding(
+        actions: [
+          _buildFilterDropdowns(ref),
+          const SizedBox(width: 8),
+          const Padding(
             padding: EdgeInsets.only(right: 16.0),
             child: Icon(Icons.dashboard_rounded, color: Colors.white),
           ),
@@ -239,39 +240,63 @@ class DashboardScreen extends ConsumerWidget {
                           // ── Demografi Grid ──
                           LayoutBuilder(
                                 builder: (context, constraints) {
-                                  final grid = GridView.count(
+                                  int crossAxisCount = 2;
+                                  if (constraints.maxWidth >= 800) {
+                                    crossAxisCount = 4;
+                                  } else if (constraints.maxWidth >= 600) {
+                                    crossAxisCount = 3;
+                                  }
+
+                                  return GridView.count(
                                     shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
-                                    crossAxisCount: 2,
+                                    crossAxisCount: crossAxisCount,
                                     crossAxisSpacing: 14,
                                     mainAxisSpacing: 14,
                                     childAspectRatio: 2.2,
                                     children: [
+                                      // Kelompok Umur
                                       _buildMiniStatCard(
-                                        'Balita (0-5 thn)',
-                                        summary.jumlahBalita.toString(),
+                                        'Balita (0-4 thn)',
+                                        (summary.umurGrouping['Balita (0-4)'] ??
+                                                0)
+                                            .toString(),
                                         Icons.child_care_rounded,
                                         const Color(0xFF10B981),
                                       ),
                                       _buildMiniStatCard(
-                                        'Lansia (>60 thn)',
+                                        'Anak (5-9 thn)',
+                                        (summary.umurGrouping['Anak (5-9)'] ??
+                                                0)
+                                            .toString(),
+                                        Icons.face_rounded,
+                                        const Color(0xFF10B981),
+                                      ),
+                                      _buildMiniStatCard(
+                                        'Remaja (10-24 thn)',
+                                        (summary.umurGrouping['Remaja (10-24)'] ??
+                                                0)
+                                            .toString(),
+                                        Icons.directions_run_rounded,
+                                        const Color(0xFF10B981),
+                                      ),
+                                      _buildMiniStatCard(
+                                        'Dewasa (25-59 thn)',
+                                        (summary.umurGrouping['Dewasa (25-59)'] ??
+                                                0)
+                                            .toString(),
+                                        Icons.person_rounded,
+                                        const Color(0xFF10B981),
+                                      ),
+                                      _buildMiniStatCard(
+                                        'Lansia (>=60 thn)',
                                         summary.jumlahLansia.toString(),
                                         Icons.elderly_rounded,
                                         const Color(0xFFF59E0B),
                                       ),
-                                      _buildMiniStatCard(
-                                        'WUS',
-                                        summary.jumlahWus.toString(),
-                                        Icons.female_rounded,
-                                        const Color(0xFFEC4899),
-                                      ),
-                                      _buildMiniStatCard(
-                                        'PUS',
-                                        summary.jumlahPus.toString(),
-                                        Icons.favorite_rounded,
-                                        const Color(0xFF8B5CF6),
-                                      ),
+
+                                      // Gender
                                       _buildMiniStatCard(
                                         'Laki-laki',
                                         summary.jumlahLakiLaki.toString(),
@@ -284,29 +309,55 @@ class DashboardScreen extends ConsumerWidget {
                                         Icons.woman_rounded,
                                         const Color(0xFFEC4899),
                                       ),
-                                    ],
-                                  );
 
-                                  final chart = _buildUmurBarChart(
-                                    summary.umurGrouping,
-                                  );
+                                      // WUS / PUS
+                                      _buildMiniStatCard(
+                                        'WUS',
+                                        summary.jumlahWus.toString(),
+                                        Icons.female_rounded,
+                                        const Color(0xFFEC4899),
+                                      ),
+                                      _buildMiniStatCard(
+                                        'PUS',
+                                        summary.jumlahPus.toString(),
+                                        Icons.favorite_rounded,
+                                        const Color(0xFF8B5CF6),
+                                      ),
 
-                                  if (constraints.maxWidth >= 800) {
-                                    return Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(child: grid),
-                                        const SizedBox(width: 24),
-                                        Expanded(child: chart),
-                                      ],
-                                    );
-                                  }
-                                  return Column(
-                                    children: [
-                                      grid,
-                                      const SizedBox(height: 28),
-                                      chart,
+                                      // Disabilitas
+                                      _buildMiniStatCard(
+                                        'Disabilitas',
+                                        summary.jumlahDisabilitas.toString(),
+                                        Icons.accessible_rounded,
+                                        const Color(0xFFEF4444),
+                                      ),
+
+                                      // LAMPID
+                                      _buildMiniStatCard(
+                                        'Lahir',
+                                        summary.jumlahLahir.toString(),
+                                        Icons.child_friendly_rounded,
+                                        const Color(0xFF06B6D4),
+                                      ),
+                                      _buildMiniStatCard(
+                                        'Meninggal',
+                                        summary.jumlahMeninggal.toString(),
+                                        Icons
+                                            .sentiment_very_dissatisfied_rounded,
+                                        const Color(0xFF64748B),
+                                      ),
+                                      _buildMiniStatCard(
+                                        'Pindah',
+                                        summary.jumlahPindah.toString(),
+                                        Icons.flight_takeoff_rounded,
+                                        const Color(0xFFF59E0B),
+                                      ),
+                                      _buildMiniStatCard(
+                                        'Datang',
+                                        summary.jumlahDatang.toString(),
+                                        Icons.flight_land_rounded,
+                                        const Color(0xFF10B981),
+                                      ),
                                     ],
                                   );
                                 },
@@ -484,143 +535,93 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildUmurBarChart(Map<String, int> umurGrouping) {
-    if (umurGrouping.isEmpty) return const SizedBox.shrink();
+  Widget _buildFilterDropdowns(WidgetRef ref) {
+    final filterOptionsAsync = ref.watch(dashboardFilterOptionsProvider);
+    final selectedRw = ref.watch(dashboardRwFilterProvider);
+    final selectedRt = ref.watch(dashboardRtFilterProvider);
+    final selectedKader = ref.watch(dashboardKaderFilterProvider);
 
-    final maxVal = umurGrouping.values.isEmpty
-        ? 0
-        : umurGrouping.values.reduce((a, b) => a > b ? a : b);
-    if (maxVal == 0) return const SizedBox.shrink();
+    return filterOptionsAsync.when(
+      data: (options) {
+        return Row(
+          children: [
+            _buildDropdown(
+              value: selectedRw,
+              items: options['rw'] ?? [],
+              hint: 'RW',
+              onChanged: (val) =>
+                  ref.read(dashboardRwFilterProvider.notifier).update(val),
+            ),
+            const SizedBox(width: 8),
+            _buildDropdown(
+              value: selectedRt,
+              items: options['rt'] ?? [],
+              hint: 'RT',
+              onChanged: (val) =>
+                  ref.read(dashboardRtFilterProvider.notifier).update(val),
+            ),
+            const SizedBox(width: 8),
+            _buildDropdown(
+              value: selectedKader,
+              items: options['kader'] ?? [],
+              hint: 'Kader',
+              onChanged: (val) =>
+                  ref.read(dashboardKaderFilterProvider.notifier).update(val),
+            ),
+          ],
+        );
+      },
+      loading: () =>
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
 
-    final labels = umurGrouping.keys.toList();
-    final values = umurGrouping.values.toList();
+  Widget _buildDropdown({
+    required String? value,
+    required List<String> items,
+    required String hint,
+    required void Function(String?) onChanged,
+  }) {
+    // Check if the current value exists in the options
+    final effectiveValue = value != null && items.contains(value)
+        ? value
+        : null;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Kelompok Umur',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: _textDark,
+      child: DropdownButton<String>(
+        value: effectiveValue,
+        hint: Text(
+          hint,
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        dropdownColor: _primaryDark,
+        icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
+        underline: const SizedBox(),
+        items: [
+          const DropdownMenuItem<String>(
+            value: null,
+            child: Text(
+              'Semua',
+              style: TextStyle(color: Colors.white, fontSize: 13),
             ),
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 200,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: (maxVal * 1.3).toDouble(),
-                barTouchData: BarTouchData(
-                  enabled: true,
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (group) => _primaryDark,
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      return BarTooltipItem(
-                        '${labels[group.x.toInt()]}\n${rod.toY.toInt()}',
-                        const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 32,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        if (index < 0 || index >= labels.length) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            labels[index]
-                                .split(' ')
-                                .first, // Just the name, e.g. "Balita"
-                            style: const TextStyle(
-                              color: _textMuted,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 10,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 28,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value.toInt().toString(),
-                          style: const TextStyle(
-                            color: _textMuted,
-                            fontSize: 10,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: maxVal > 5 ? (maxVal / 5).toDouble() : 1,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    strokeWidth: 1,
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                barGroups: List.generate(
-                  labels.length,
-                  (index) => BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                        toY: values[index].toDouble(),
-                        color: _primaryLight,
-                        width: 16,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(4),
-                          topRight: Radius.circular(4),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          ...items.map(
+            (e) => DropdownMenuItem(
+              value: e,
+              child: Text(
+                e,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
               ),
             ),
           ),
         ],
+        onChanged: onChanged,
       ),
     );
   }

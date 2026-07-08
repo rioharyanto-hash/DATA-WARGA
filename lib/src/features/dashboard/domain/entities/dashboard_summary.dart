@@ -11,6 +11,11 @@ class DashboardSummary {
   final Map<String, int> pendidikanGrouping;
   final Map<String, int> pekerjaanGrouping;
   final Map<String, int> umurGrouping;
+  final int jumlahDisabilitas;
+  final int jumlahLahir;
+  final int jumlahMeninggal;
+  final int jumlahPindah;
+  final int jumlahDatang;
 
   DashboardSummary({
     required this.jumlahBangunan,
@@ -25,5 +30,10 @@ class DashboardSummary {
     required this.pendidikanGrouping,
     required this.pekerjaanGrouping,
     required this.umurGrouping,
+    required this.jumlahDisabilitas,
+    required this.jumlahLahir,
+    required this.jumlahMeninggal,
+    required this.jumlahPindah,
+    required this.jumlahDatang,
   });
 }

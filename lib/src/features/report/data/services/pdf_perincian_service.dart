@@ -5687,8 +5687,7 @@ class PdfPerincianService {
     totalBangunan = bangunanSet.length;
     totalKrt = krtSet.length;
     totalKk = kkSet.length;
-
-    pdf.addPage(
+pdf.addPage(
       pw.MultiPage(
         pageFormat: formatF4Landscape,
         margin: const pw.EdgeInsets.all(32),
@@ -5696,6 +5695,24 @@ class PdfPerincianService {
           String val(Map<String, dynamic> row, String key) {
             final v = row[key]?.toString();
             return (v == null || v.trim().isEmpty) ? '0' : v;
+          }
+
+          String getValGrouped(int idx, String key, String level) {
+            if (idx == 0) return val(data['rows'][idx], key);
+            
+            final currentRow = data['rows'][idx];
+            final prevRow = data['rows'][idx - 1];
+            
+            bool isSameBangunan = val(currentRow, 'noUrutBangunan') == val(prevRow, 'noUrutBangunan') && 
+                                  val(currentRow, 'namaBangunan') == val(prevRow, 'namaBangunan');
+            bool isSameKrt = isSameBangunan && val(currentRow, 'namaKrt') == val(prevRow, 'namaKrt') && val(currentRow, 'nikKrt') == val(prevRow, 'nikKrt');
+            bool isSameKk = isSameKrt && val(currentRow, 'namaKepalaKeluarga') == val(prevRow, 'namaKepalaKeluarga') && val(currentRow, 'noKk') == val(prevRow, 'noKk');
+            
+            if (level == 'bangunan' && isSameBangunan) return '';
+            if (level == 'krt' && isSameKrt) return '';
+            if (level == 'kk' && isSameKk) return '';
+            
+            return val(currentRow, key);
           }
 
           return [
@@ -5769,7 +5786,14 @@ class PdfPerincianService {
 
             // Tabel
             pw.Table(
-              border: pw.TableBorder.all(width: 0.5),
+              border: pw.TableBorder(
+                top: const pw.BorderSide(width: 0.5),
+                bottom: const pw.BorderSide(width: 0.5),
+                left: const pw.BorderSide(width: 0.5),
+                right: const pw.BorderSide(width: 0.5),
+                verticalInside: const pw.BorderSide(width: 0.5),
+                horizontalInside: pw.BorderSide.none,
+              ),
               columnWidths: {
                 0: const pw.FlexColumnWidth(1), // NO
                 1: const pw.FlexColumnWidth(2), // NO URUT BANGUNAN
@@ -5823,114 +5847,102 @@ class PdfPerincianService {
                 ),
 
                 // Data Rows
-                for (int i = 0; i < (data['rows'] as List).length; i++)
-                  pw.TableRow(
-                    children: [
-                      _buildCell('${i + 1}', ttf, true, fontSize: 6),
-                      _buildCell(
-                        val(data['rows'][i], 'noUrutBangunan'),
-                        ttf,
-                        true,
-                        fontSize: 6,
+                ...(() {
+                  pw.Widget _buildCellCustom(String text, pw.Font font, bool isCentered, {double fontSize = 6, bool topBorder = false}) {
+                    return pw.Container(
+                      alignment: isCentered ? pw.Alignment.center : pw.Alignment.centerLeft,
+                      padding: const pw.EdgeInsets.all(4),
+                      decoration: pw.BoxDecoration(
+                        border: topBorder ? const pw.Border(top: pw.BorderSide(width: 0.5)) : null,
                       ),
-                      _buildCell(
-                        val(data['rows'][i], 'namaBangunan'),
-                        ttf,
-                        false,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'namaKrt'),
-                        ttf,
-                        false,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'nikKrt'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'noTlp'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'namaKepalaKeluarga'),
-                        ttf,
-                        false,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'noKk'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'individu'),
-                        ttf,
-                        false,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'lp'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'nikIndividu'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'tglLahir'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'umur'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'sttsKrt'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'sttsKk'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'nop'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'lb'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                      _buildCell(
-                        val(data['rows'][i], 'll'),
-                        ttf,
-                        true,
-                        fontSize: 6,
-                      ),
-                    ],
-                  ),
+                      child: pw.Text(text, style: pw.TextStyle(font: font, fontSize: fontSize), textAlign: isCentered ? pw.TextAlign.center : pw.TextAlign.left),
+                    );
+                  }
+
+                  final list = <pw.TableRow>[];
+                  final rowsList = data['rows'] as List;
+                  
+                  int bangunanCounter = 0;
+                  
+                  int getMidBangunanIdx(int idx) {
+                    int startIdx = idx;
+                    while (startIdx > 0) {
+                      final curr = rowsList[startIdx];
+                      final prev = rowsList[startIdx - 1];
+                      bool isSame = val(curr, 'noUrutBangunan') == val(prev, 'noUrutBangunan') && val(curr, 'namaBangunan') == val(prev, 'namaBangunan');
+                      if (!isSame) break;
+                      startIdx--;
+                    }
+                    int endIdx = idx;
+                    while (endIdx < rowsList.length - 1) {
+                      final curr = rowsList[endIdx];
+                      final next = rowsList[endIdx + 1];
+                      bool isSame = val(curr, 'noUrutBangunan') == val(next, 'noUrutBangunan') && val(curr, 'namaBangunan') == val(next, 'namaBangunan');
+                      if (!isSame) break;
+                      endIdx++;
+                    }
+                    return startIdx + ((endIdx - startIdx) ~/ 2);
+                  }
+
+                  for (int i = 0; i < rowsList.length; i++) {
+                    final currentRow = rowsList[i];
+                    final prevRow = i > 0 ? rowsList[i - 1] : null;
+
+                    bool isNewBangunan = i == 0 || val(currentRow, 'noUrutBangunan') != val(prevRow!, 'noUrutBangunan') || val(currentRow, 'namaBangunan') != val(prevRow, 'namaBangunan');
+                    bool isNewKrt = isNewBangunan || val(currentRow, 'namaKrt') != val(prevRow!, 'namaKrt') || val(currentRow, 'nikKrt') != val(prevRow, 'nikKrt');
+                    bool isNewKk = isNewKrt || val(currentRow, 'namaKepalaKeluarga') != val(prevRow!, 'namaKepalaKeluarga') || val(currentRow, 'noKk') != val(prevRow, 'noKk');
+                    
+                    if (isNewBangunan) bangunanCounter++;
+
+                    if (i > 0 && isNewBangunan) {
+                      list.add(
+                        pw.TableRow(
+                          children: List.generate(18, (_) => pw.Container(
+                            height: 6,
+                            decoration: const pw.BoxDecoration(
+                              color: PdfColors.grey400,
+                              border: pw.Border(
+                                top: pw.BorderSide(width: 0.5),
+                                bottom: pw.BorderSide(width: 0.5),
+                              ),
+                            ),
+                          )),
+                        )
+                      );
+                    }
+
+                    bool tbBangunan = i == 0 || isNewBangunan;
+                    bool tbKrt = tbBangunan || isNewKrt;
+                    bool tbKk = tbKrt || isNewKk;
+                    bool tbIndividu = true;
+                    
+                    bool isMidBangunan = i == getMidBangunanIdx(i);
+
+                    list.add(pw.TableRow(
+                      children: [
+                        _buildCellCustom(isMidBangunan ? '$bangunanCounter' : '', ttfBold, true, topBorder: tbBangunan),
+                        _buildCellCustom(isMidBangunan ? val(currentRow, 'noUrutBangunan') : '', ttfBold, true, topBorder: tbBangunan),
+                        _buildCellCustom(isMidBangunan ? val(currentRow, 'namaBangunan') : '', ttfBold, true, topBorder: tbBangunan),
+                        _buildCellCustom(getValGrouped(i, 'namaKrt', 'krt'), ttf, false, topBorder: tbKrt),
+                        _buildCellCustom(getValGrouped(i, 'nikKrt', 'krt'), ttf, true, topBorder: tbKrt),
+                        _buildCellCustom(getValGrouped(i, 'noTlp', 'krt'), ttf, true, topBorder: tbKrt),
+                        _buildCellCustom(getValGrouped(i, 'namaKepalaKeluarga', 'kk'), ttf, false, topBorder: tbKk),
+                        _buildCellCustom(getValGrouped(i, 'noKk', 'kk'), ttf, true, topBorder: tbKk),
+                        _buildCellCustom(val(rowsList[i], 'individu'), ttf, false, topBorder: tbIndividu),
+                        _buildCellCustom(val(rowsList[i], 'lp'), ttf, true, topBorder: tbIndividu),
+                        _buildCellCustom(val(rowsList[i], 'nikIndividu'), ttf, true, topBorder: tbIndividu),
+                        _buildCellCustom(val(rowsList[i], 'tglLahir'), ttf, true, topBorder: tbIndividu),
+                        _buildCellCustom(val(rowsList[i], 'umur'), ttf, true, topBorder: tbIndividu),
+                        _buildCellCustom(val(rowsList[i], 'sttsKrt'), ttf, true, topBorder: tbIndividu),
+                        _buildCellCustom(val(rowsList[i], 'sttsKk'), ttf, true, topBorder: tbIndividu),
+                        _buildCellCustom(isMidBangunan ? val(currentRow, 'nop') : '', ttfBold, true, topBorder: tbBangunan),
+                        _buildCellCustom(isMidBangunan ? val(currentRow, 'lb') : '', ttfBold, true, topBorder: tbBangunan),
+                        _buildCellCustom(isMidBangunan ? val(currentRow, 'll') : '', ttfBold, true, topBorder: tbBangunan),
+                      ],
+                    ));
+                  }
+                  return list;
+                })(),
 
                 // Baris Total
                 pw.TableRow(

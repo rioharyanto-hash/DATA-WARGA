@@ -6,10 +6,19 @@ import 'package:path/path.dart';
 
 class LocalDbHelper {
   static Database? _database;
+  static Future<Database>? _initDbFuture;
 
   static Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('dasawisma.db');
+    
+    if (_initDbFuture != null) {
+      await _initDbFuture;
+      return _database!;
+    }
+    
+    _initDbFuture = _initDB('dasawisma.db');
+    _database = await _initDbFuture;
+    _initDbFuture = null;
     return _database!;
   }
 

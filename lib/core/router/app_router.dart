@@ -22,6 +22,7 @@ import '../../src/features/pendataan/presentation/screens/search_keluarga_screen
 import '../../src/features/pendataan/presentation/screens/lampid_list_screen.dart';
 import '../../src/features/navigation/presentation/widgets/main_layout_screen.dart';
 import '../../src/features/report/presentation/screens/report_screen.dart';
+import '../../src/features/data_warga/presentation/screens/data_warga_screen.dart';
 import '../../src/features/settings/presentation/screens/settings_screen.dart';
 import '../../src/features/settings/presentation/screens/user_list_screen.dart';
 import '../../src/features/settings/presentation/screens/form_user_screen.dart';
@@ -31,6 +32,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>();
 final _pendataanNavigatorKey = GlobalKey<NavigatorState>();
 final _laporanNavigatorKey = GlobalKey<NavigatorState>();
+final _dataWargaNavigatorKey = GlobalKey<NavigatorState>();
 final _settingsNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -238,6 +240,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/laporan',
                 builder: (context, state) => const ReportScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _dataWargaNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/data-warga',
+                builder: (context, state) => const DataWargaScreen(),
               ),
             ],
           ),

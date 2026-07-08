@@ -488,6 +488,7 @@ class CsvTransferService {
         'RW',
         'NOMOR_URUT_BANGUNAN',
         'NAMA_BANGUNAN',
+        'KATEGORI_BANGUNAN',
         'ALAMAT_LENGKAP',
         'STATUS_HUNIAN',
         'NOP_PBB',
@@ -502,6 +503,7 @@ class CsvTransferService {
         '02',
         '1',
         'Rumah Pak Budi',
+        'Rumah Tinggal',
         'Jl. Melati No 10',
         'Milik Sendiri',
         '123456789',
@@ -539,13 +541,14 @@ class CsvTransferService {
 
     for (var row in result) {
       rows.add([
-        row['id'],
-        row['kelompok_dawis'],
-        row['rt'],
-        row['rw'],
+        row['id'] ?? '',
+        row['kelompok_dawis'] ?? '',
+        row['rt'] ?? '',
+        row['rw'] ?? '',
         row['nomor_urut_bangunan'] ?? '',
-        row['nama_bangunan'],
-        row['alamat_lengkap'],
+        row['nama_bangunan'] ?? '',
+        row['kategori_bangunan'] ?? '',
+        row['alamat_lengkap'] ?? '',
         row['status_hunian'],
         row['nop_pbb'] ?? '',
         row['luas_bangunan'] ?? '',
@@ -615,25 +618,26 @@ class CsvTransferService {
       String rw = row[2 + offset]?.toString().trim() ?? '';
       String nomorUrutBangunan = row[3 + offset]?.toString().trim() ?? '';
       String namaBangunan = row[4 + offset]?.toString().trim() ?? '';
-      String alamat = row[5 + offset]?.toString().trim() ?? '';
+      String kategoriBangunan = row[5 + offset]?.toString().trim() ?? 'Lainnya';
+      String alamat = row[6 + offset]?.toString().trim() ?? '';
 
-      String statusHunian = row.length > 6 + offset
-          ? row[6 + offset]?.toString().trim() ?? 'Milik Sendiri'
+      String statusHunian = row.length > 7 + offset
+          ? row[7 + offset]?.toString().trim() ?? 'Milik Sendiri'
           : 'Milik Sendiri';
-      String nopPbb = row.length > 7 + offset
-          ? row[7 + offset]?.toString().trim() ?? ''
-          : '';
-      String luasBangunan = row.length > 8 + offset
+      String nopPbb = row.length > 8 + offset
           ? row[8 + offset]?.toString().trim() ?? ''
           : '';
-      String luasTanah = row.length > 9 + offset
+      String luasBangunan = row.length > 9 + offset
           ? row[9 + offset]?.toString().trim() ?? ''
           : '';
-      String statusKepemilikan = row.length > 10 + offset
+      String luasTanah = row.length > 10 + offset
           ? row[10 + offset]?.toString().trim() ?? ''
           : '';
-      String sumberAirMinum = row.length > 11 + offset
+      String statusKepemilikan = row.length > 11 + offset
           ? row[11 + offset]?.toString().trim() ?? ''
+          : '';
+      String sumberAirMinum = row.length > 12 + offset
+          ? row[12 + offset]?.toString().trim() ?? ''
           : '';
 
       try {
@@ -655,6 +659,7 @@ class CsvTransferService {
           'kelompok_dawis': kelompokDawis.isEmpty
               ? 'Unassigned'
               : kelompokDawis,
+          'kategori_bangunan': kategoriBangunan,
           'alamat_lengkap': alamat,
           'rt': rt,
           'rw': rw,

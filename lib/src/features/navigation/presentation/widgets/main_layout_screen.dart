@@ -37,6 +37,11 @@ class MainLayoutScreen extends StatelessWidget {
       label: 'Laporan',
     ),
     _NavItem(
+      icon: Icons.people_outline,
+      activeIcon: Icons.people,
+      label: 'DATA WARGA',
+    ),
+    _NavItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings,
       label: 'Pengaturan',
@@ -188,6 +193,11 @@ class MainLayoutScreen extends StatelessWidget {
                   icon: Icon(Icons.pie_chart_outline, color: _textMuted),
                   selectedIcon: Icon(Icons.pie_chart, color: _primaryDark),
                   label: 'Laporan',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.people_outline, color: _textMuted),
+                  selectedIcon: Icon(Icons.people, color: _primaryDark),
+                  label: 'DATA WARGA',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.settings_outlined, color: _textMuted),

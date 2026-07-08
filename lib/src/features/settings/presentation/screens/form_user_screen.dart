@@ -88,7 +88,11 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
       _dawisController.text = user.kelompokDawis ?? '';
       _nikController.text = user.nik ?? '';
       _tempatLahirController.text = user.tempatLahir ?? '';
-      _tanggalLahirController.text = user.tanggalLahir ?? '';
+      String initialDate = user.tanggalLahir ?? '';
+      if (initialDate.length > 10 && initialDate.contains('T')) {
+        initialDate = initialDate.substring(0, 10);
+      }
+      _tanggalLahirController.text = initialDate;
 
       if (_pendidikanList.contains(user.pendidikanTerakhir)) {
         _selectedPendidikan = user.pendidikanTerakhir;

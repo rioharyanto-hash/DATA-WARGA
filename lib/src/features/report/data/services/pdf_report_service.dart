@@ -8433,6 +8433,24 @@ class PdfReportService {
             return (v == null || v.trim().isEmpty) ? '0' : v;
           }
 
+          String getValGrouped(int idx, String key, String level) {
+            if (idx == 0) return val(data['rows'][idx], key);
+            
+            final currentRow = data['rows'][idx];
+            final prevRow = data['rows'][idx - 1];
+            
+            bool isSameBangunan = val(currentRow, 'noUrutBangunan') == val(prevRow, 'noUrutBangunan') && 
+                                  val(currentRow, 'namaBangunan') == val(prevRow, 'namaBangunan');
+            bool isSameKrt = isSameBangunan && val(currentRow, 'namaKrt') == val(prevRow, 'namaKrt') && val(currentRow, 'nikKrt') == val(prevRow, 'nikKrt');
+            bool isSameKk = isSameKrt && val(currentRow, 'namaKepalaKeluarga') == val(prevRow, 'namaKepalaKeluarga') && val(currentRow, 'noKk') == val(prevRow, 'noKk');
+            
+            if (level == 'bangunan' && isSameBangunan) return '';
+            if (level == 'krt' && isSameKrt) return '';
+            if (level == 'kk' && isSameKk) return '';
+            
+            return val(currentRow, key);
+          }
+
           return [
             // Judul
             pw.Center(
@@ -8563,43 +8581,43 @@ class PdfReportService {
                     children: [
                       _buildCell('${i + 1}', ttf, true, fontSize: 6),
                       _buildCell(
-                        val(data['rows'][i], 'noUrutBangunan'),
+                        getValGrouped(i, 'noUrutBangunan', 'bangunan'),
                         ttf,
                         true,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'namaBangunan'),
+                        getValGrouped(i, 'namaBangunan', 'bangunan'),
                         ttf,
                         false,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'namaKrt'),
+                        getValGrouped(i, 'namaKrt', 'krt'),
                         ttf,
                         false,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'nikKrt'),
+                        getValGrouped(i, 'nikKrt', 'krt'),
                         ttf,
                         true,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'noTlp'),
+                        getValGrouped(i, 'noTlp', 'krt'),
                         ttf,
                         true,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'namaKepalaKeluarga'),
+                        getValGrouped(i, 'namaKepalaKeluarga', 'kk'),
                         ttf,
                         false,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'noKk'),
+                        getValGrouped(i, 'noKk', 'kk'),
                         ttf,
                         true,
                         fontSize: 6,
@@ -8647,19 +8665,19 @@ class PdfReportService {
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'nop'),
+                        getValGrouped(i, 'nop', 'bangunan'),
                         ttf,
                         true,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'lb'),
+                        getValGrouped(i, 'lb', 'bangunan'),
                         ttf,
                         true,
                         fontSize: 6,
                       ),
                       _buildCell(
-                        val(data['rows'][i], 'll'),
+                        getValGrouped(i, 'll', 'bangunan'),
                         ttf,
                         true,
                         fontSize: 6,

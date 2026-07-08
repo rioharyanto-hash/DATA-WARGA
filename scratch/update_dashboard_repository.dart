@@ -1,4 +1,9 @@
-import 'package:sqflite/sqflite.dart';
+import 'dart:io';
+
+void main() async {
+  final file = File('lib/src/features/dashboard/data/repositories/dashboard_repository_impl.dart');
+  
+  final content = """import 'package:sqflite/sqflite.dart';
 import '../../../../../core/database/local_db_helper.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/repositories/dashboard_repository.dart';
@@ -7,15 +12,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
   @override
   Future<Map<String, List<String>>> getFilterOptions() async {
     final db = await LocalDbHelper.database;
-    final rwList = await db.rawQuery(
-      "SELECT DISTINCT rw FROM bangunan WHERE rw IS NOT NULL AND rw != '' ORDER BY rw",
-    );
-    final rtList = await db.rawQuery(
-      "SELECT DISTINCT rt FROM bangunan WHERE rt IS NOT NULL AND rt != '' ORDER BY rt",
-    );
-    final kaderList = await db.rawQuery(
-      "SELECT DISTINCT kelompok_dawis FROM bangunan WHERE kelompok_dawis IS NOT NULL AND kelompok_dawis != '' ORDER BY kelompok_dawis",
-    );
+    final rwList = await db.rawQuery('SELECT DISTINCT rw FROM bangunan WHERE rw IS NOT NULL AND rw != "" ORDER BY rw');
+    final rtList = await db.rawQuery('SELECT DISTINCT rt FROM bangunan WHERE rt IS NOT NULL AND rt != "" ORDER BY rt');
+    final kaderList = await db.rawQuery('SELECT DISTINCT kelompok_dawis FROM bangunan WHERE kelompok_dawis IS NOT NULL AND kelompok_dawis != "" ORDER BY kelompok_dawis');
 
     return {
       'rw': rwList.map((e) => e['rw'].toString()).toList(),
@@ -35,7 +34,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     String bJoin = '';
     String bWhere = '1=1';
     List<Object?> bParams = [];
-
+    
     if (rw != null && rw.isNotEmpty) {
       bWhere += ' AND b.rw = ?';
       bParams.add(rw);
@@ -48,29 +47,21 @@ class DashboardRepositoryImpl implements DashboardRepository {
       bWhere += ' AND b.kelompok_dawis = ?';
       bParams.add(kelompokDawis);
     }
-
+    
     String bangunanWhere = bWhere.replaceAll('b.', '');
-
-    String keluargaJoin =
-        'JOIN krt k ON kel.id_krt = k.id JOIN bangunan b ON k.id_bangunan = b.id';
-    String individuJoin =
-        'JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id JOIN bangunan b ON k.id_bangunan = b.id';
+    
+    String keluargaJoin = 'JOIN krt k ON kel.id_krt = k.id JOIN bangunan b ON k.id_bangunan = b.id';
+    String individuJoin = 'JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id JOIN bangunan b ON k.id_bangunan = b.id';
 
     // Jumlah Bangunan & KK
     final bangunanCount =
         Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM bangunan b WHERE $bangunanWhere',
-            bParams,
-          ),
+          await db.rawQuery('SELECT COUNT(*) FROM bangunan b WHERE \$bangunanWhere', bParams),
         ) ??
         0;
     final kkCount =
         Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM keluarga kel $keluargaJoin WHERE $bWhere',
-            bParams,
-          ),
+          await db.rawQuery('SELECT COUNT(*) FROM keluarga kel \$keluargaJoin WHERE \$bWhere', bParams),
         ) ??
         0;
 
@@ -78,9 +69,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final balitaCount =
         Sqflite.firstIntValue(
           await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
+      SELECT COUNT(*) FROM individu i \$individuJoin
       WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) BETWEEN 0 AND 5
-      AND $bWhere
+      AND \$bWhere
     ''', bParams),
         ) ??
         0;
@@ -89,9 +80,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final lansiaCount =
         Sqflite.firstIntValue(
           await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
+      SELECT COUNT(*) FROM individu i \$individuJoin
       WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 60
-      AND $bWhere
+      AND \$bWhere
     ''', bParams),
         ) ??
         0;
@@ -100,10 +91,10 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final wusCount =
         Sqflite.firstIntValue(
           await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
+      SELECT COUNT(*) FROM individu i \$individuJoin
       WHERE i.jenis_kelamin = 'Perempuan' 
       AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) BETWEEN 15 AND 49
-      AND $bWhere
+      AND \$bWhere
     ''', bParams),
         ) ??
         0;
@@ -112,18 +103,18 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final pusCount =
         Sqflite.firstIntValue(
           await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE UPPER(i.hubungan_keluarga) = 'ISTRI'
+      SELECT COUNT(*) FROM individu i \$individuJoin
+      WHERE i.jenis_kelamin = 'Perempuan' 
+      AND i.status_perkawinan = 'Kawin'
       AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) BETWEEN 15 AND 49
-      AND $bWhere
+      AND \$bWhere
     ''', bParams),
         ) ??
         0;
 
     // Pendidikan Grouping
     final pendidikanRaw = await db.rawQuery(
-      'SELECT i.pendidikan_terakhir, COUNT(*) as count FROM individu i $individuJoin WHERE $bWhere GROUP BY i.pendidikan_terakhir',
-      bParams,
+      'SELECT i.pendidikan_terakhir, COUNT(*) as count FROM individu i \$individuJoin WHERE \$bWhere GROUP BY i.pendidikan_terakhir', bParams
     );
     final Map<String, int> pendidikanGrouping = {};
     for (var row in pendidikanRaw) {
@@ -134,8 +125,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     // Pekerjaan Grouping
     final pekerjaanRaw = await db.rawQuery(
-      'SELECT i.pekerjaan, COUNT(*) as count FROM individu i $individuJoin WHERE $bWhere GROUP BY i.pekerjaan',
-      bParams,
+      'SELECT i.pekerjaan, COUNT(*) as count FROM individu i \$individuJoin WHERE \$bWhere GROUP BY i.pekerjaan', bParams
     );
     final Map<String, int> pekerjaanGrouping = {};
     for (var row in pekerjaanRaw) {
@@ -148,16 +138,14 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final lakiLakiCount =
         Sqflite.firstIntValue(
           await db.rawQuery(
-            "SELECT COUNT(*) FROM individu i $individuJoin WHERE i.jenis_kelamin = 'Laki-laki' AND $bWhere",
-            bParams,
+            "SELECT COUNT(*) FROM individu i \$individuJoin WHERE i.jenis_kelamin = 'Laki-laki' AND \$bWhere", bParams
           ),
         ) ??
         0;
     final perempuanCount =
         Sqflite.firstIntValue(
           await db.rawQuery(
-            "SELECT COUNT(*) FROM individu i $individuJoin WHERE i.jenis_kelamin = 'Perempuan' AND $bWhere",
-            bParams,
+            "SELECT COUNT(*) FROM individu i \$individuJoin WHERE i.jenis_kelamin = 'Perempuan' AND \$bWhere", bParams
           ),
         ) ??
         0;
@@ -166,10 +154,10 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final anakCount =
         Sqflite.firstIntValue(
           await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
+      SELECT COUNT(*) FROM individu i \$individuJoin
       WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 5 
       AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) < 10
-      AND $bWhere
+      AND \$bWhere
     ''', bParams),
         ) ??
         0;
@@ -177,10 +165,10 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final remajaCount =
         Sqflite.firstIntValue(
           await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
+      SELECT COUNT(*) FROM individu i \$individuJoin
       WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 10 
       AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) < 25
-      AND $bWhere
+      AND \$bWhere
     ''', bParams),
         ) ??
         0;
@@ -188,10 +176,10 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final dewasaCount =
         Sqflite.firstIntValue(
           await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
+      SELECT COUNT(*) FROM individu i \$individuJoin
       WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 25 
       AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) < 60
-      AND $bWhere
+      AND \$bWhere
     ''', bParams),
         ) ??
         0;
@@ -206,61 +194,33 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     // Mutasi - LAMPID
     String mutasiJoin = 'JOIN bangunan b ON m.id_bangunan = b.id';
-
+    
     final mutasiCount =
         Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE $bWhere',
-            bParams,
-          ),
+          await db.rawQuery('SELECT COUNT(*) FROM mutasi m \$mutasiJoin WHERE \$bWhere', bParams),
         ) ??
         0;
-
-    final lahirCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'LAHIR' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
-    final matiCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'MENINGGAL' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
-    final pindahCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'PINDAH' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
-    final datangCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'DATANG' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
+        
+    final lahirCount = Sqflite.firstIntValue(
+      await db.rawQuery("SELECT COUNT(*) FROM mutasi m \$mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'LAHIR' AND \$bWhere", bParams),
+    ) ?? 0;
+    
+    final matiCount = Sqflite.firstIntValue(
+      await db.rawQuery("SELECT COUNT(*) FROM mutasi m \$mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'MENINGGAL' AND \$bWhere", bParams),
+    ) ?? 0;
+    
+    final pindahCount = Sqflite.firstIntValue(
+      await db.rawQuery("SELECT COUNT(*) FROM mutasi m \$mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'PINDAH' AND \$bWhere", bParams),
+    ) ?? 0;
+    
+    final datangCount = Sqflite.firstIntValue(
+      await db.rawQuery("SELECT COUNT(*) FROM mutasi m \$mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'DATANG' AND \$bWhere", bParams),
+    ) ?? 0;
+    
     // Disabilitas
-    final disabilitasCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM individu i $individuJoin WHERE i.kriteria_berkebutuhan_khusus IS NOT NULL AND i.kriteria_berkebutuhan_khusus != '' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
+    final disabilitasCount = Sqflite.firstIntValue(
+      await db.rawQuery("SELECT COUNT(*) FROM individu i \$individuJoin WHERE i.kriteria_berkebutuhan_khusus IS NOT NULL AND i.kriteria_berkebutuhan_khusus != '' AND \$bWhere", bParams),
+    ) ?? 0;
 
     return DashboardSummary(
       jumlahBangunan: bangunanCount,
@@ -282,4 +242,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
       jumlahDatang: datangCount,
     );
   }
+}
+""";
+  
+  await file.writeAsString(content);
 }
