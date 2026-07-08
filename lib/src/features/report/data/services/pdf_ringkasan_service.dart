@@ -2780,7 +2780,7 @@ class PdfRingkasanService {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             font: isHeader ? boldFont : regularFont,
-            fontSize: fontSize ?? (isHeader ? 7 : 8),
+            fontSize: fontSize ?? (isHeader ? 6 : 8),
           ),
         ),
       );
@@ -3145,7 +3145,7 @@ class PdfRingkasanService {
                                                   isHeader: true,
                                                   noRightBorder: true,
                                                   bottomBorder: true,
-                                                  fontSize: 8,
+                                                  fontSize: 6,
                                                 ),
                                                 pw.Expanded(
                                                   flex: 2,
@@ -3158,14 +3158,14 @@ class PdfRingkasanService {
                                                         'L',
                                                         flex: 1,
                                                         isHeader: true,
-                                                        fontSize: 8,
+                                                        fontSize: 6,
                                                       ),
                                                       buildCell(
                                                         'P',
                                                         flex: 1,
                                                         isHeader: true,
                                                         noRightBorder: true,
-                                                        fontSize: 8,
+                                                        fontSize: 6,
                                                       ),
                                                     ],
                                                   ),
@@ -3193,7 +3193,7 @@ class PdfRingkasanService {
                                                   isHeader: true,
                                                   noRightBorder: true,
                                                   bottomBorder: true,
-                                                  fontSize: 8,
+                                                  fontSize: 6,
                                                 ),
                                                 pw.Expanded(
                                                   flex: 2,
@@ -3206,14 +3206,14 @@ class PdfRingkasanService {
                                                         'ADA',
                                                         flex: 1,
                                                         isHeader: true,
-                                                        fontSize: 8,
+                                                        fontSize: 6,
                                                       ),
                                                       buildCell(
                                                         'TIDAK',
                                                         flex: 1,
                                                         isHeader: true,
                                                         noRightBorder: true,
-                                                        fontSize: 8,
+                                                        fontSize: 6,
                                                       ),
                                                     ],
                                                   ),
@@ -3288,7 +3288,7 @@ class PdfRingkasanService {
                                                   isHeader: true,
                                                   noRightBorder: true,
                                                   bottomBorder: true,
-                                                  fontSize: 8,
+                                                  fontSize: 6,
                                                 ),
                                                 pw.Expanded(
                                                   flex: 2,
@@ -3301,14 +3301,14 @@ class PdfRingkasanService {
                                                         'L',
                                                         flex: 1,
                                                         isHeader: true,
-                                                        fontSize: 8,
+                                                        fontSize: 6,
                                                       ),
                                                       buildCell(
                                                         'P',
                                                         flex: 1,
                                                         isHeader: true,
                                                         noRightBorder: true,
-                                                        fontSize: 8,
+                                                        fontSize: 6,
                                                       ),
                                                     ],
                                                   ),
@@ -3386,9 +3386,39 @@ class PdfRingkasanService {
                     ),
 
                     // Data Rows
-                    ...mutasiList.asMap().entries.map((entry) {
-                      final int i = entry.key + 1;
-                      final row = entry.value;
+                    ...List.generate(mutasiList.length < 12 ? 12 : mutasiList.length, (index) {
+                      if (index >= mutasiList.length) {
+                        return pw.Container(
+                          height: 18,
+                          decoration: const pw.BoxDecoration(
+                            border: pw.Border(top: pw.BorderSide(width: 0.5)),
+                          ),
+                          child: pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.center,
+                            children: [
+                              buildCell('', flex: 1, fontSize: 7),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 4),
+                              buildCell('', flex: 4),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 2),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 2),
+                              buildCell('', flex: 2),
+                              buildCell('', flex: 3, noRightBorder: true),
+                            ],
+                          ),
+                        );
+                      }
+                      final int i = index + 1;
+                      final row = mutasiList[index];
 
                       final jenisMutasi = row['jenis_mutasi']?.toString() ?? '';
                       final isKelahiran = jenisMutasi.toUpperCase() == 'LAHIR';
@@ -3439,6 +3469,7 @@ class PdfRingkasanService {
                       final ket = row['keterangan']?.toString() ?? '';
 
                       return pw.Container(
+                        height: 18,
                         decoration: const pw.BoxDecoration(
                           border: pw.Border(top: pw.BorderSide(width: 0.5)),
                         ),
@@ -3467,23 +3498,11 @@ class PdfRingkasanService {
                       );
                     }),
 
-                    if (mutasiList.isEmpty)
-                      pw.Container(
-                        height: 16,
-                        decoration: const pw.BoxDecoration(
-                          border: pw.Border(top: pw.BorderSide(width: 0.5)),
-                        ),
-                        child: pw.Center(
-                          child: pw.Text(
-                            'Tidak ada data mutasi',
-                            style: pw.TextStyle(font: regularFont, fontSize: 8),
-                          ),
-                        ),
-                      ),
+
 
                     // JUMLAH Row
                     pw.Container(
-                      height: 16,
+                      height: 18,
                       decoration: const pw.BoxDecoration(
                         border: pw.Border(top: pw.BorderSide(width: 1.0)),
                       ),
@@ -3491,16 +3510,14 @@ class PdfRingkasanService {
                         crossAxisAlignment: pw.CrossAxisAlignment.center,
                         children: [
                           pw.Expanded(
-                            flex:
-                                11, // NO(1)+NAMA IBU(3)+NAMA SUAMI(3)+STATUS(4)
+                            flex: 4, // NO(1)+NAMA IBU(3)
                             child: pw.Container(
                               decoration: const pw.BoxDecoration(
                                 border: pw.Border(
                                   right: pw.BorderSide(width: 0.5),
                                 ),
                               ),
-                              padding: const pw.EdgeInsets.only(left: 8),
-                              alignment: pw.Alignment.centerLeft,
+                              alignment: pw.Alignment.center,
                               child: pw.Text(
                                 'JUMLAH',
                                 style: pw.TextStyle(
@@ -3510,6 +3527,8 @@ class PdfRingkasanService {
                               ),
                             ),
                           ),
+                          buildCell('', flex: 3), // NAMA SUAMI
+                          buildCell('', flex: 4), // STATUS
                           buildCell('', flex: 4),
                           buildCell('', flex: 1),
                           buildCell('', flex: 1),

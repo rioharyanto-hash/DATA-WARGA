@@ -1128,10 +1128,19 @@ class ReportController extends Notifier<ReportState> {
       final repo = ref.read(reportRepositoryProvider);
       final pdfService = ref.read(pdfRingkasanServiceProvider);
       final allowedNames = await _getFilteredKelompokNames();
+      List<String> dasawismaList = [];
       List<Map<String, dynamic>> ringkasanRows = [];
       int globalIndex = 1;
 
       for (var name in allowedNames) {
+        final parts = name.split(' ');
+        if (parts.isNotEmpty) {
+          final noUrutStr = parts.last;
+          if (!dasawismaList.contains(noUrutStr)) {
+            dasawismaList.add(noUrutStr);
+          }
+        }
+
         final dataList = await repo.getLampidData(name);
         if (dataList.isEmpty) continue;
 
@@ -1176,12 +1185,15 @@ class ReportController extends Notifier<ReportState> {
         }
       }
 
+      final rwStr = rw == 'Semua' ? '...' : rw;
+      final rtStr = rt == 'Semua' ? '...' : rt;
       final pdfBytes = await pdfService.generateLampidPdfRingkasan(
         mutasiList: ringkasanRows,
-        namaKelompok:
-            'Semua Kelompok RT ${rt == 'Semua' ? '...' : rt} RW ${rw == 'Semua' ? '...' : rw}',
-        rt: rt == 'Semua' ? '...' : rt,
-        rw: rw == 'Semua' ? '...' : rw,
+        namaKelompok: dasawismaList.isNotEmpty
+            ? 'BUAH GOWOK $rwStr.$rtStr.${dasawismaList.join(',')}'
+            : 'BUAH GOWOK $rwStr.$rtStr',
+        rt: rtStr,
+        rw: rwStr,
         kelurahan: ref.read(regionProvider).kelurahan,
         tahun: DateTime.now().year.toString(),
         bulan: ref.read(reportBulanProvider),
