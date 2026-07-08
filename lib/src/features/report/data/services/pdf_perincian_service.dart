@@ -4457,9 +4457,39 @@ class PdfPerincianService {
                     ),
 
                     // Data Rows
-                    ...mutasiList.asMap().entries.map((entry) {
-                      final int i = entry.key + 1;
-                      final row = entry.value;
+                    ...List.generate(mutasiList.length < 12 ? 12 : mutasiList.length, (index) {
+                      if (index >= mutasiList.length) {
+                        return pw.Container(
+                          height: 18,
+                          decoration: const pw.BoxDecoration(
+                            border: pw.Border(top: pw.BorderSide(width: 0.5)),
+                          ),
+                          child: pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.center,
+                            children: [
+                              buildCell('', flex: 1, fontSize: 7),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 4),
+                              buildCell('', flex: 4),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 2),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 3),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 1),
+                              buildCell('', flex: 2),
+                              buildCell('', flex: 2),
+                              buildCell('', flex: 3, noRightBorder: true),
+                            ],
+                          ),
+                        );
+                      }
+                      final int i = index + 1;
+                      final row = mutasiList[index];
 
                       final jenisMutasi = row['jenis_mutasi']?.toString() ?? '';
                       final isKelahiran = jenisMutasi.toUpperCase() == 'LAHIR';
@@ -4510,6 +4540,7 @@ class PdfPerincianService {
                       final ket = row['keterangan']?.toString() ?? '';
 
                       return pw.Container(
+                        height: 18,
                         decoration: const pw.BoxDecoration(
                           border: pw.Border(top: pw.BorderSide(width: 0.5)),
                         ),
@@ -4538,19 +4569,7 @@ class PdfPerincianService {
                       );
                     }),
 
-                    if (mutasiList.isEmpty)
-                      pw.Container(
-                        height: 16,
-                        decoration: const pw.BoxDecoration(
-                          border: pw.Border(top: pw.BorderSide(width: 0.5)),
-                        ),
-                        child: pw.Center(
-                          child: pw.Text(
-                            'Tidak ada data mutasi',
-                            style: pw.TextStyle(font: regularFont, fontSize: 8),
-                          ),
-                        ),
-                      ),
+                    
 
                     // JUMLAH Row
                     pw.Container(

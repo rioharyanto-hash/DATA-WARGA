@@ -1135,7 +1135,7 @@ class ReportController extends Notifier<ReportState> {
       for (var name in allowedNames) {
         final parts = name.split(' ');
         if (parts.isNotEmpty) {
-          final noUrutStr = parts.last;
+          final noUrutStr = parts.last.split('.').last;
           if (!dasawismaList.contains(noUrutStr)) {
             dasawismaList.add(noUrutStr);
           }
