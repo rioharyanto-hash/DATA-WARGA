@@ -32,7 +32,6 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }) async {
     final db = await LocalDbHelper.database;
 
-    String bJoin = '';
     String bWhere = '1=1';
     List<Object?> bParams = [];
 

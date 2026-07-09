@@ -60,7 +60,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
                 border: Border.all(color: const Color(0xFFE2E8F0)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -154,7 +154,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
                     ),
                   ),
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                 ),
               ],
             ),
@@ -186,7 +186,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
+                          color: Colors.black.withValues(alpha: 0.02),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -258,7 +258,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
                               }
                             }
 
-                            final status = individu.hubunganKeluarga ?? '';
+                            final status = individu.hubunganKeluarga;
                             final statusColor = _getStatusColor(status);
                             final statusBgColor = _getStatusBgColor(status);
                             final isLaki = individu.jenisKelamin == 'Laki-laki';
@@ -358,7 +358,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                     Expanded(
                                       flex: 2,
                                       child: Text(
-                                        individu.nik ?? '-',
+                                        individu.nik,
                                         style: const TextStyle(color: Color(0xFF475569), fontSize: 13),
                                       ),
                                     ),

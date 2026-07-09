@@ -573,7 +573,7 @@ class DashboardScreen extends ConsumerWidget {
       },
       loading: () =>
           const Center(child: CircularProgressIndicator(color: Colors.white)),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 
@@ -591,7 +591,7 @@ class DashboardScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<String>(

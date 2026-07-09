@@ -1,3 +1,9 @@
+## [2026-07-09]
+### [PATCH] - Versi 1.9.3+26
+- Membersihkan puluhan file script temporary/scratch di root direktori project yang memicu linter warning.
+- Memperbaiki peringatan linter dengan `dart fix --apply` untuk mengganti fungsi deprecated seperti `.withOpacity` dan `.value`.
+- Memperbaiki manual dead code dan unused variables pada file `dashboard_repository_impl.dart`, `detail_keluarga_screen.dart`, dan `report_repository.dart`.
+
 ## [2026-07-07]
 ### [PATCH] - Versi 1.9.2+25
 - Memperbaiki data `NAMA` agar memuat nama Kader yang ditarik secara benar dari field `namaKader` pada report provider.

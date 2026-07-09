@@ -226,7 +226,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             }
 
             return DropdownButtonFormField<String>(
-              value: validRt,
+              initialValue: validRt,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -244,7 +244,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             );
           },
           loading: () => const LinearProgressIndicator(),
-          error: (_, __) => const Text('Error'),
+          error: (_, _) => const Text('Error'),
         ),
       ],
     );
@@ -286,7 +286,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             }
 
             return DropdownButtonFormField<String>(
-              value: validRw,
+              initialValue: validRw,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -304,7 +304,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             );
           },
           loading: () => const LinearProgressIndicator(),
-          error: (_, __) => const Text('Error'),
+          error: (_, _) => const Text('Error'),
         ),
       ],
     );

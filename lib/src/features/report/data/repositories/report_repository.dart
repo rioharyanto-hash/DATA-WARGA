@@ -180,7 +180,6 @@ class ReportRepository implements IReportRepository {
 
                 if (jk == 'Perempuan' && umur >= 15 && umur <= 49) {
                   wus++;
-                  final statusKawin = individu['status_perkawinan'] as String?;
                   final hubunganKeluarga =
                       (individu['hubungan_keluarga'] as String?)?.toUpperCase();
 
@@ -1017,18 +1016,11 @@ class ReportRepository implements IReportRepository {
           final indList = await _getIndividuAktif(db, idKk);
 
           // Find Kepala Keluarga in this KK
-          bool hasSuamiOrKk = false;
           String currentNamaKk = '';
           for (var ind in indList) {
             final hk = ind['hubungan_keluarga']?.toString() ?? '';
             final upperHk = hk.toUpperCase();
 
-            if (upperHk == 'KEPALA KELUARGA' ||
-                upperHk == 'SUAMI' ||
-                upperHk == 'KEPALA RUMAH TANGGA' ||
-                upperHk == 'KK') {
-              hasSuamiOrKk = true;
-            }
             if (upperHk == 'KEPALA KELUARGA' ||
                 upperHk == 'KK' ||
                 upperHk == 'KEPALA RUMAH TANGGA') {

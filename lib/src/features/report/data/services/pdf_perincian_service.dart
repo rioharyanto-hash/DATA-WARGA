@@ -5848,7 +5848,7 @@ pdf.addPage(
 
                 // Data Rows
                 ...(() {
-                  pw.Widget _buildCellCustom(String text, pw.Font font, bool isCentered, {double fontSize = 6, bool topBorder = false}) {
+                  pw.Widget buildCellCustom(String text, pw.Font font, bool isCentered, {double fontSize = 6, bool topBorder = false}) {
                     return pw.Container(
                       alignment: isCentered ? pw.Alignment.center : pw.Alignment.centerLeft,
                       padding: const pw.EdgeInsets.all(4),
@@ -5920,24 +5920,24 @@ pdf.addPage(
 
                     list.add(pw.TableRow(
                       children: [
-                        _buildCellCustom(isMidBangunan ? '$bangunanCounter' : '', ttfBold, true, topBorder: tbBangunan),
-                        _buildCellCustom(isMidBangunan ? val(currentRow, 'noUrutBangunan') : '', ttfBold, true, topBorder: tbBangunan),
-                        _buildCellCustom(isMidBangunan ? val(currentRow, 'namaBangunan') : '', ttfBold, true, topBorder: tbBangunan),
-                        _buildCellCustom(getValGrouped(i, 'namaKrt', 'krt'), ttf, false, topBorder: tbKrt),
-                        _buildCellCustom(getValGrouped(i, 'nikKrt', 'krt'), ttf, true, topBorder: tbKrt),
-                        _buildCellCustom(getValGrouped(i, 'noTlp', 'krt'), ttf, true, topBorder: tbKrt),
-                        _buildCellCustom(getValGrouped(i, 'namaKepalaKeluarga', 'kk'), ttf, false, topBorder: tbKk),
-                        _buildCellCustom(getValGrouped(i, 'noKk', 'kk'), ttf, true, topBorder: tbKk),
-                        _buildCellCustom(val(rowsList[i], 'individu'), ttf, false, topBorder: tbIndividu),
-                        _buildCellCustom(val(rowsList[i], 'lp'), ttf, true, topBorder: tbIndividu),
-                        _buildCellCustom(val(rowsList[i], 'nikIndividu'), ttf, true, topBorder: tbIndividu),
-                        _buildCellCustom(val(rowsList[i], 'tglLahir'), ttf, true, topBorder: tbIndividu),
-                        _buildCellCustom(val(rowsList[i], 'umur'), ttf, true, topBorder: tbIndividu),
-                        _buildCellCustom(val(rowsList[i], 'sttsKrt'), ttf, true, topBorder: tbIndividu),
-                        _buildCellCustom(val(rowsList[i], 'sttsKk'), ttf, true, topBorder: tbIndividu),
-                        _buildCellCustom(isMidBangunan ? val(currentRow, 'nop') : '', ttfBold, true, topBorder: tbBangunan),
-                        _buildCellCustom(isMidBangunan ? val(currentRow, 'lb') : '', ttfBold, true, topBorder: tbBangunan),
-                        _buildCellCustom(isMidBangunan ? val(currentRow, 'll') : '', ttfBold, true, topBorder: tbBangunan),
+                        buildCellCustom(isMidBangunan ? '$bangunanCounter' : '', ttfBold, true, topBorder: tbBangunan),
+                        buildCellCustom(isMidBangunan ? val(currentRow, 'noUrutBangunan') : '', ttfBold, true, topBorder: tbBangunan),
+                        buildCellCustom(isMidBangunan ? val(currentRow, 'namaBangunan') : '', ttfBold, true, topBorder: tbBangunan),
+                        buildCellCustom(getValGrouped(i, 'namaKrt', 'krt'), ttf, false, topBorder: tbKrt),
+                        buildCellCustom(getValGrouped(i, 'nikKrt', 'krt'), ttf, true, topBorder: tbKrt),
+                        buildCellCustom(getValGrouped(i, 'noTlp', 'krt'), ttf, true, topBorder: tbKrt),
+                        buildCellCustom(getValGrouped(i, 'namaKepalaKeluarga', 'kk'), ttf, false, topBorder: tbKk),
+                        buildCellCustom(getValGrouped(i, 'noKk', 'kk'), ttf, true, topBorder: tbKk),
+                        buildCellCustom(val(rowsList[i], 'individu'), ttf, false, topBorder: tbIndividu),
+                        buildCellCustom(val(rowsList[i], 'lp'), ttf, true, topBorder: tbIndividu),
+                        buildCellCustom(val(rowsList[i], 'nikIndividu'), ttf, true, topBorder: tbIndividu),
+                        buildCellCustom(val(rowsList[i], 'tglLahir'), ttf, true, topBorder: tbIndividu),
+                        buildCellCustom(val(rowsList[i], 'umur'), ttf, true, topBorder: tbIndividu),
+                        buildCellCustom(val(rowsList[i], 'sttsKrt'), ttf, true, topBorder: tbIndividu),
+                        buildCellCustom(val(rowsList[i], 'sttsKk'), ttf, true, topBorder: tbIndividu),
+                        buildCellCustom(isMidBangunan ? val(currentRow, 'nop') : '', ttfBold, true, topBorder: tbBangunan),
+                        buildCellCustom(isMidBangunan ? val(currentRow, 'lb') : '', ttfBold, true, topBorder: tbBangunan),
+                        buildCellCustom(isMidBangunan ? val(currentRow, 'll') : '', ttfBold, true, topBorder: tbBangunan),
                       ],
                     ));
                   }
