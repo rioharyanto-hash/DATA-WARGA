@@ -1,4 +1,8 @@
 ## [2026-07-09]
+### [PATCH] - Versi 1.9.4+27
+- Memperbaiki bug Data LAMPID kosong pada tampilan Kader tertentu dengan mengimplementasikan standarisasi (normalisasi) query `kelompok_dawis` dari database, sesuai dengan aturan *Zero Problems Code* (menghapus spasi, titik, dan menjadikannya *lowercase* saat mencocokkan).
+
+## [2026-07-09]
 ### [PATCH] - Versi 1.9.3+26
 - Membersihkan puluhan file script temporary/scratch di root direktori project yang memicu linter warning.
 - Memperbaiki peringatan linter dengan `dart fix --apply` untuk mengganti fungsi deprecated seperti `.withOpacity` dan `.value`.

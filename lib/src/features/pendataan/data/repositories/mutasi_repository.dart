@@ -57,15 +57,22 @@ class MutasiRepository {
 
   Future<List<Mutasi>> getMutasiByKelompokDawis(String kelompokDawis) async {
     final db = await LocalDbHelper.database;
+    final normalizedName =
+        kelompokDawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+
     final maps = await db.rawQuery(
       '''
-      SELECT mutasi.* FROM mutasi
+      SELECT mutasi.*, bangunan.kelompok_dawis as b_kelompok_dawis FROM mutasi
       JOIN bangunan ON mutasi.id_bangunan = bangunan.id
-      WHERE bangunan.kelompok_dawis = ?
       ORDER BY mutasi.tanggal_mutasi DESC
     ''',
-      [kelompokDawis],
     );
-    return maps.map((json) => MutasiModel.fromJson(json)).toList();
+
+    return maps.where((json) {
+      final dbName = json['b_kelompok_dawis']?.toString() ?? '';
+      final normalizedDbName =
+          dbName.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+      return normalizedDbName == normalizedName;
+    }).map((json) => MutasiModel.fromJson(json)).toList();
   }
 }
