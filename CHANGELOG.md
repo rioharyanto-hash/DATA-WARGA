@@ -1,3 +1,7 @@
+## [2026-07-10]
+### [PATCH] - Versi 1.9.5+28
+- Menambahkan pilihan 'Kakak' dan 'Adik' pada _dropdown_ "Status Hubungan dengan KRT" dan "Status Hubungan dengan KK" di halaman form pengisian data individu.
+
 ## [2026-07-09]
 ### [PATCH] - Versi 1.9.4+27
 - Memperbaiki bug Data LAMPID kosong pada tampilan Kader tertentu dengan mengimplementasikan standarisasi (normalisasi) query `kelompok_dawis` dari database, sesuai dengan aturan *Zero Problems Code* (menghapus spasi, titik, dan menjadikannya *lowercase* saat mencocokkan).

@@ -90,6 +90,8 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
     'Cucu',
     'Orang Tua',
     'Mertua',
+    'Kakak',
+    'Adik',
     'Famili Lain',
     'Lainnya',
   ];
@@ -238,6 +240,8 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           'Cucu',
           'Orang Tua',
           'Mertua',
+          'Kakak',
+          'Adik',
           'Famili Lain',
           'Lainnya',
         ];
@@ -692,6 +696,8 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                               'Cucu',
                               'Orang Tua',
                               'Mertua',
+                              'Kakak',
+                              'Adik',
                               'Famili Lain',
                               'Lainnya',
                             ]
