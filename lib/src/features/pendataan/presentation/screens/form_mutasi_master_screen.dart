@@ -115,10 +115,6 @@ class _FormMutasiMasterScreenState
 
       await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
       
-      if (_jenisMutasi == 'Meninggal' || _jenisMutasi == 'Pindah') {
-        await ref.read(individuRepositoryProvider).deleteIndividu(_selectedIndividu!.id);
-      }
-      
       ref.invalidate(allMutasiProvider);
 
       if (mounted) {

@@ -1,4 +1,12 @@
 ## [2026-07-11]
+### [PATCH] - Versi 1.9.9+32
+- Mengoreksi total filter data pada Laporan Form Ibu Hamil agar **hanya** menampilkan mutasi yang berkaitan dengan kehamilan, kelahiran, dan balita. Data kedatangan, perpindahan, maupun kematian orang dewasa (selain ibu hamil/melahirkan) tidak akan dimasukkan ke dalam form ini sesuai standar PKK.
+- Mengotomatiskan pengisian kolom **"STATUS (IBU/ BAYI/BALITA)"** pada pencatatan kematian berdasarkan pengecekan profil warga:
+  - **Ibu**: Otomatis mendeteksi jika yang bersangkutan memiliki status hubungan "Istri" di keluarganya, atau mengandung kata kunci kehamilan/persalinan pada keterangan mutasi.
+  - **Bayi**: Otomatis mendeteksi warga yang meninggal di usia di bawah 1 tahun.
+  - **Balita**: Otomatis mendeteksi warga yang meninggal di usia 1 hingga kurang dari 5 tahun.
+- Mencegah penghapusan rekaman `individu` secara permanen saat dicatat sebagai Meninggal/Pindah guna menjaga integritas riwayat relasi data (seperti jenis kelamin dan tanggal lahir yang dibutuhkan oleh rekapitulasi laporan).
+
 ### [PATCH] - Versi 1.9.8+31
 - Menambahkan skrip _Database Migration_ (v20 ke v21) untuk memperbaiki secara otomatis rekaman mutasi lama (seperti data "Turyati") yang telanjur tersimpan dengan `id_bangunan` kosong akibat bug dari versi sebelumnya. Begitu aplikasi dibuka ulang, data mutasi yang error akan diperbaiki dan warganya akan otomatis dihapus dari Daftar Anggota Keluarga.
 

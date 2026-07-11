@@ -132,11 +132,6 @@ class LocalDbHelper {
               final idB = res.first['id_bangunan'] as String;
               await db.update('mutasi', {'id_bangunan': idB}, where: 'id = ?', whereArgs: [m['id']]);
             }
-            
-            final jenis = (m['jenis_mutasi'] as String?)?.toUpperCase() ?? '';
-            if (jenis == 'MENINGGAL' || jenis == 'PINDAH') {
-              await db.delete('individu', where: 'id = ?', whereArgs: [idIndividu]);
-            }
           }
         }
       } catch (_) {}

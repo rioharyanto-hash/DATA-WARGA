@@ -3818,6 +3818,44 @@ class PdfPerincianService {
     required String bulan,
     required String tahun,
   }) async {
+    final filteredMutasiList = mutasiList.where((row) {
+      final jenisMutasi = row['jenis_mutasi']?.toString().toUpperCase() ?? '';
+      if (jenisMutasi == 'LAHIR') return true;
+      if (jenisMutasi.contains('IBU') || jenisMutasi.contains('HAMIL')) return true;
+      
+      if (jenisMutasi == 'MENINGGAL') {
+        bool isBayiOrBalita = false;
+        final tglLahirStr = row['tanggal_lahir']?.toString();
+        if (tglLahirStr != null && tglLahirStr.isNotEmpty) {
+          try {
+            final tglLahir = DateTime.parse(tglLahirStr);
+            final tglMutasiStr = row['tanggal_mutasi']?.toString();
+            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty 
+                ? DateTime.parse(tglMutasiStr) 
+                : DateTime.now();
+            final ageInDays = tglMutasi.difference(tglLahir).inDays;
+            if (ageInDays <= (5 * 365 + 2)) {
+              isBayiOrBalita = true;
+            }
+          } catch (_) {}
+        }
+        
+        final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+        final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
+        final isIstri = hub == 'ISTRI' || statusKrt == 'ISTRI';
+        
+        if (isBayiOrBalita || isIstri) {
+          return true;
+        }
+
+        final keterangan = row['keterangan']?.toString().toUpperCase() ?? '';
+        if (keterangan.contains('HAMIL') || keterangan.contains('MELAHIRKAN') || keterangan.contains('NIFAS') || keterangan.contains('IBU')) {
+          return true;
+        }
+      }
+      return false;
+    }).toList();
+
     final pdf = pw.Document();
 
     final boldFont = pw.Font.helveticaBold();
@@ -3887,7 +3925,7 @@ class PdfPerincianService {
               // Header Info
               pw.Row(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
-                mainAxisAlignment: pw.MainAxisAlignment.center,
+                mainAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -4457,8 +4495,8 @@ class PdfPerincianService {
                     ),
 
                     // Data Rows
-                    ...List.generate(mutasiList.length < 12 ? 12 : mutasiList.length, (index) {
-                      if (index >= mutasiList.length) {
+                    ...List.generate(filteredMutasiList.length < 12 ? 12 : filteredMutasiList.length, (index) {
+                      if (index >= filteredMutasiList.length) {
                         return pw.Container(
                           height: 18,
                           decoration: const pw.BoxDecoration(
@@ -4489,7 +4527,7 @@ class PdfPerincianService {
                         );
                       }
                       final int i = index + 1;
-                      final row = mutasiList[index];
+                      final row = filteredMutasiList[index];
 
                       final jenisMutasi = row['jenis_mutasi']?.toString() ?? '';
                       final isKelahiran = jenisMutasi.toUpperCase() == 'LAHIR';
@@ -4521,9 +4559,40 @@ class PdfPerincianService {
                       final namaMeninggal = isKematian
                           ? (row['nama_orang']?.toString() ?? '')
                           : '';
-                      final statusMeninggal = isKematian
-                          ? (row['status_ibu']?.toString() ?? '')
-                          : '';
+                      
+                      String statusMeninggal = '';
+                      if (isKematian) {
+                        final tglLahirStr = row['tanggal_lahir']?.toString();
+                        if (tglLahirStr != null && tglLahirStr.isNotEmpty) {
+                          try {
+                            final tglLahir = DateTime.parse(tglLahirStr);
+                            final tglMutasiStr = row['tanggal_mutasi']?.toString();
+                            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty 
+                                ? DateTime.parse(tglMutasiStr) 
+                                : DateTime.now();
+                            final ageInDays = tglMutasi.difference(tglLahir).inDays;
+                            if (ageInDays < 365) {
+                              statusMeninggal = 'Bayi';
+                            } else if (ageInDays < (5 * 365 + 2)) {
+                              statusMeninggal = 'Balita';
+                            }
+                          } catch (_) {}
+                        }
+                        
+                        if (statusMeninggal.isEmpty) {
+                          final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+                          final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
+                          if (hub == 'ISTRI' || statusKrt == 'ISTRI') {
+                            statusMeninggal = 'Ibu';
+                          } else {
+                            final keterangan = row['keterangan']?.toString().toUpperCase() ?? '';
+                            if (keterangan.contains('HAMIL') || keterangan.contains('MELAHIRKAN') || keterangan.contains('NIFAS') || keterangan.contains('IBU')) {
+                              statusMeninggal = 'Ibu';
+                            }
+                          }
+                        }
+                      }
+                      
                       final jkMatiL = isKematian && row['jenis_kelamin'] == 'L'
                           ? 'V'
                           : '';
@@ -4537,15 +4606,7 @@ class PdfPerincianService {
                           ? (row['sebab_kematian']?.toString() ?? '')
                           : '';
 
-                      String ket = row['keterangan']?.toString() ?? '';
-                      if (jenisMutasi.toUpperCase() == 'DATANG') {
-                        final nama = row['nama_orang']?.toString() ?? '';
-                        ket = 'DATANG: $nama\n$ket';
-                      } else if (jenisMutasi.toUpperCase() == 'PINDAH') {
-                        final nama = row['nama_orang']?.toString() ?? '';
-                        final tujuan = row['tujuan']?.toString() ?? '';
-                        ket = 'PINDAH: $nama\nKe: $tujuan\n$ket';
-                      }
+                      final ket = row['keterangan']?.toString() ?? '';
 
                       return pw.Container(
                         height: 18,

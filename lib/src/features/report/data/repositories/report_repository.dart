@@ -259,7 +259,7 @@ class ReportRepository implements IReportRepository {
     // We do a raw query to join mutasi and individu (for jenis_kelamin).
     // If we want to filter by kelompok_dawis, we should also join bangunan.
     String query = '''
-      SELECT m.*, i.jenis_kelamin, b.kelompok_dawis
+      SELECT m.*, i.jenis_kelamin, i.tanggal_lahir, i.status_dgn_krt, i.hubungan_keluarga, b.kelompok_dawis
       FROM mutasi m
       LEFT JOIN individu i ON m.id_individu_asal = i.id
       LEFT JOIN bangunan b ON m.id_bangunan = b.id
