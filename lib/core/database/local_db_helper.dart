@@ -29,7 +29,7 @@ class LocalDbHelper {
       return await factory.openDatabase(
         filePath,
         options: OpenDatabaseOptions(
-          version: 22,
+          version: 23,
           onCreate: _createDB,
           onUpgrade: _upgradeDB,
         ),
@@ -46,7 +46,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 22,
+        version: 23,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -152,6 +152,27 @@ class LocalDbHelper {
           if (!oldKet.toUpperCase().contains('IBU')) {
             final newKet = oldKet.isEmpty ? 'Ibu' : '\$oldKet (Ibu)';
             await db.update('mutasi', {'keterangan': newKet}, where: 'id = ?', whereArgs: [id]);
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (oldVersion < 23) {
+      try {
+        final mutasiList = await db.query('mutasi', where: 'jenis_mutasi = ?', whereArgs: ['Meninggal']);
+        for (final m in mutasiList) {
+          final id = m['id'];
+          String ket = m['keterangan']?.toString() ?? '';
+          String? statusIbu = m['status_ibu']?.toString();
+          
+          bool needsUpdate = false;
+          if (ket.contains('\$oldKet (Ibu)') || ket == 'Ibu') {
+            ket = ket.replaceAll('\$oldKet (Ibu)', '').replaceAll('Ibu', '').trim();
+            statusIbu = 'Ibu';
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await db.update('mutasi', {'keterangan': ket, 'status_ibu': statusIbu}, where: 'id = ?', whereArgs: [id]);
           }
         }
       } catch (_) {}

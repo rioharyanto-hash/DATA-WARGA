@@ -170,7 +170,6 @@ class _LampidListItem extends ConsumerWidget {
         side: BorderSide(color: iconColor.withValues(alpha: 0.3)),
       ),
       child: ListTile(
-        onTap: () => _showDetailDialog(context, bangunanAsync.valueOrNull),
         leading: CircleAvatar(child: Icon(icon, color: iconColor)),
         title: Text(
           mutasi.namaOrang,
@@ -255,9 +254,88 @@ class _LampidListItem extends ConsumerWidget {
               ),
           ],
         ),
-        onTap: () {
-          // Bisa navigasi ke detail mutasi jika diperlukan
-        },
+        onTap: () => _showDetailDialog(context, bangunanAsync.value),
+      ),
+    );
+  }
+
+  void _showDetailDialog(BuildContext context, dynamic bangunan) {
+    String dateStr = mutasi.tanggalMutasi;
+    try {
+      final date = DateTime.parse(mutasi.tanggalMutasi);
+      dateStr = DateFormat('dd MMMM yyyy').format(date);
+    } catch (_) {}
+
+    final bangunanStr = bangunan != null ? '\${bangunan.namaKepalaKeluarga}' : '-';
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                mutasi.jenisMutasi == 'Meninggal' || mutasi.jenisMutasi == 'Pindah'
+                    ? (mutasi.jenisMutasi == 'Meninggal' ? Icons.heart_broken : Icons.logout)
+                    : (mutasi.jenisMutasi == 'Lahir' ? Icons.child_friendly : Icons.login),
+                color: mutasi.jenisMutasi == 'Meninggal' || mutasi.jenisMutasi == 'Pindah' ? Colors.red : Colors.green,
+              ),
+              const SizedBox(width: 8),
+              Text('Detail \${mutasi.jenisMutasi}'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildDetailRow('Nama', mutasi.namaOrang),
+                if (mutasi.nik != null && mutasi.nik!.isNotEmpty) _buildDetailRow('NIK', mutasi.nik!),
+                _buildDetailRow('Tanggal', dateStr),
+                _buildDetailRow('Bangunan (KK)', bangunanStr),
+                if (mutasi.asal != null && mutasi.asal!.isNotEmpty) _buildDetailRow('Asal', mutasi.asal!),
+                if (mutasi.tujuan != null && mutasi.tujuan!.isNotEmpty) _buildDetailRow('Tujuan', mutasi.tujuan!),
+                if (mutasi.sebabKematian != null && mutasi.sebabKematian!.isNotEmpty) _buildDetailRow('Sebab Kematian', mutasi.sebabKematian!),
+                if (mutasi.namaIbu != null && mutasi.namaIbu!.isNotEmpty) _buildDetailRow('Nama Ibu', mutasi.namaIbu!),
+                if (mutasi.namaSuami != null && mutasi.namaSuami!.isNotEmpty) _buildDetailRow('Nama Suami', mutasi.namaSuami!),
+                if (mutasi.statusIbu != null && mutasi.statusIbu!.isNotEmpty) _buildDetailRow('Status Ibu', mutasi.statusIbu!),
+                if (mutasi.keterangan != null && mutasi.keterangan!.isNotEmpty) _buildDetailRow('Keterangan', mutasi.keterangan!),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
