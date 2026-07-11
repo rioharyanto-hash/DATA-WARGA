@@ -2771,7 +2771,8 @@ class PdfRingkasanService {
         
         final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
         final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
-        final isIstri = hub == 'ISTRI' || statusKrt == 'ISTRI';
+        final statusIbu = row['status_ibu']?.toString().toUpperCase() ?? '';
+        final isIstri = hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU';
         
         if (isBayiOrBalita || isIstri) {
           return true;
@@ -3511,7 +3512,8 @@ class PdfRingkasanService {
                         if (statusMeninggal.isEmpty) {
                           final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
                           final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
-                          if (hub == 'ISTRI' || statusKrt == 'ISTRI') {
+                          final statusIbu = row['status_ibu']?.toString().toUpperCase() ?? '';
+                          if (hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU') {
                             statusMeninggal = 'Ibu';
                           } else {
                             final keterangan = row['keterangan']?.toString().toUpperCase() ?? '';
