@@ -1,4 +1,8 @@
 ## [2026-07-11]
+### [PATCH] - Versi 1.9.7+30
+- Menambahkan sinkronisasi `id_bangunan` saat menginput warga LAHIR dan DATANG sehingga data mutasi masuk dalam laporan LAMPID.
+- Memperjelas pencetakan informasi mutasi jenis DATANG dan PINDAH pada Laporan Form Ibu Hamil (Terisi). Meskipun form resmi tersebut berfokus pada kehamilan/kelahiran/kematian, kini warga yang datang atau pindah akan tetap dimunculkan namanya dengan ditambahkan informasi ke dalam kolom `Keterangan`.
+
 ### [PATCH] - Versi 1.9.6+29
 - Memperbaiki _logic_ Form Mutasi. Kini mutasi baru otomatis menarik `id_bangunan` dari struktur keluarga/KRT sehingga data selalu muncul di halaman Data LAMPID.
 - Menambahkan prosedur penghapusan rekaman individu (`deleteIndividu`) secara otomatis dari "Detail Keluarga" apabila warga tersebut dimutasikan sebagai "Meninggal" atau "Pindah".

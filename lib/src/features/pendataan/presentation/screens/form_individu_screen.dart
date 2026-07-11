@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
+import 'package:dawis/core/database/local_db_helper.dart';
 import '../../domain/entities/individu.dart';
 import '../../domain/entities/krt.dart';
 import '../../domain/entities/mutasi.dart';
@@ -477,6 +478,16 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
         await repo.insertIndividu(individu);
 
         if (widget.jenisMutasi != null && widget.jenisMutasi!.isNotEmpty) {
+          final db = await LocalDbHelper.database;
+          final res = await db.rawQuery('''
+            SELECT krt.id_bangunan 
+            FROM keluarga 
+            JOIN krt ON keluarga.id_krt = krt.id 
+            WHERE keluarga.id = ?
+          ''', [assignedKeluargaId]);
+          
+          final resolvedIdBangunan = res.isNotEmpty ? res.first['id_bangunan'] as String : '';
+
           final mutasi = Mutasi(
             id: const Uuid().v4(),
             idIndividuAsal: individu.id,
@@ -486,7 +497,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
             asal: '',
             tujuan: '',
             keterangan: 'Pencatatan Otomatis',
-            idBangunan: '',
+            idBangunan: resolvedIdBangunan,
           );
           await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
           ref.invalidate(allMutasiProvider);

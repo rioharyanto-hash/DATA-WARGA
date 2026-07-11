@@ -4537,7 +4537,15 @@ class PdfPerincianService {
                           ? (row['sebab_kematian']?.toString() ?? '')
                           : '';
 
-                      final ket = row['keterangan']?.toString() ?? '';
+                      String ket = row['keterangan']?.toString() ?? '';
+                      if (jenisMutasi.toUpperCase() == 'DATANG') {
+                        final nama = row['nama_orang']?.toString() ?? '';
+                        ket = 'DATANG: $nama\n$ket';
+                      } else if (jenisMutasi.toUpperCase() == 'PINDAH') {
+                        final nama = row['nama_orang']?.toString() ?? '';
+                        final tujuan = row['tujuan']?.toString() ?? '';
+                        ket = 'PINDAH: $nama\nKe: $tujuan\n$ket';
+                      }
 
                       return pw.Container(
                         height: 18,
