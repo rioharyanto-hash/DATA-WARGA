@@ -1,3 +1,8 @@
+## [2026-07-11]
+### [PATCH] - Versi 1.9.6+29
+- Memperbaiki _logic_ Form Mutasi. Kini mutasi baru otomatis menarik `id_bangunan` dari struktur keluarga/KRT sehingga data selalu muncul di halaman Data LAMPID.
+- Menambahkan prosedur penghapusan rekaman individu (`deleteIndividu`) secara otomatis dari "Detail Keluarga" apabila warga tersebut dimutasikan sebagai "Meninggal" atau "Pindah".
+
 ## [2026-07-10]
 ### [PATCH] - Versi 1.9.5+28
 - Menambahkan pilihan 'Kakak' dan 'Adik' pada _dropdown_ "Status Hubungan dengan KRT" dan "Status Hubungan dengan KK" di halaman form pengisian data individu.

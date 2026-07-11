@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
+import 'package:dawis/core/database/local_db_helper.dart';
 
 import '../../domain/entities/mutasi.dart';
 import '../../domain/entities/individu.dart';
@@ -85,6 +86,17 @@ class _FormMutasiMasterScreenState
           ? DateFormat('yyyy-MM-dd').format(DateTime.now())
           : _tanggalMutasiController.text;
 
+      final db = await LocalDbHelper.database;
+      final res = await db.rawQuery('''
+        SELECT krt.id_bangunan 
+        FROM individu 
+        JOIN keluarga ON individu.id_keluarga = keluarga.id 
+        JOIN krt ON keluarga.id_krt = krt.id 
+        WHERE individu.id = ?
+      ''', [_selectedIndividu!.id]);
+      
+      final resolvedIdBangunan = res.isNotEmpty ? res.first['id_bangunan'] as String : '';
+
       final mutasi = Mutasi(
         id: id,
         idIndividuAsal: _selectedIndividu!.id,
@@ -98,12 +110,15 @@ class _FormMutasiMasterScreenState
             : (_jenisMutasi == 'Status Ibu (Hamil/Nifas)'
                   ? 'Status: $_statusIbu'
                   : _keteranganController.text),
-        idBangunan:
-            '', // Kita tidak punya bangunan ID secara langsung dari individu di sini,
-        // tapi repository sebenarnya bisa join untuk mencari bangunan jika dibutuhkan di kemudian hari.
+        idBangunan: resolvedIdBangunan,
       );
 
       await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
+      
+      if (_jenisMutasi == 'Meninggal' || _jenisMutasi == 'Pindah') {
+        await ref.read(individuRepositoryProvider).deleteIndividu(_selectedIndividu!.id);
+      }
+      
       ref.invalidate(allMutasiProvider);
 
       if (mounted) {

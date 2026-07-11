@@ -25,6 +25,15 @@ class IndividuRepository {
     );
   }
 
+  Future<void> deleteIndividu(String id) async {
+    final db = await LocalDbHelper.database;
+    await db.delete(
+      'individu',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<List<Individu>> getIndividuByKeluargaId(String keluargaId) async {
     final db = await LocalDbHelper.database;
     final maps = await db.rawQuery(
