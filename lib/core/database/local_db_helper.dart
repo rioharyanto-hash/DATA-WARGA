@@ -29,7 +29,7 @@ class LocalDbHelper {
       return await factory.openDatabase(
         filePath,
         options: OpenDatabaseOptions(
-          version: 21,
+          version: 22,
           onCreate: _createDB,
           onUpgrade: _upgradeDB,
         ),
@@ -46,7 +46,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 21,
+        version: 22,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -132,6 +132,26 @@ class LocalDbHelper {
               final idB = res.first['id_bangunan'] as String;
               await db.update('mutasi', {'id_bangunan': idB}, where: 'id = ?', whereArgs: [m['id']]);
             }
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (oldVersion < 22) {
+      try {
+        // Recover orphaned Meninggal mutasi by appending 'Ibu' to keterangan
+        final mutasiList = await db.rawQuery('''
+          SELECT m.id, m.keterangan 
+          FROM mutasi m 
+          LEFT JOIN individu i ON m.id_individu_asal = i.id 
+          WHERE m.jenis_mutasi = 'Meninggal' AND i.id IS NULL
+        ''');
+        for (final m in mutasiList) {
+          final id = m['id'];
+          final oldKet = m['keterangan']?.toString() ?? '';
+          if (!oldKet.toUpperCase().contains('IBU')) {
+            final newKet = oldKet.isEmpty ? 'Ibu' : '\$oldKet (Ibu)';
+            await db.update('mutasi', {'keterangan': newKet}, where: 'id = ?', whereArgs: [id]);
           }
         }
       } catch (_) {}

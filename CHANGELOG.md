@@ -1,4 +1,7 @@
 ## [2026-07-11]
+### [PATCH] - Versi 1.9.10+33
+- Menambahkan skrip pemulihan database (v21 ke v22) untuk mengembalikan/menyelamatkan riwayat mutasi warga yang sempat hilang dari daftar (seperti data kematian sebelumnya) akibat dampak langsung dari proses penghapusan profil individu pada update versi lawas.
+
 ### [PATCH] - Versi 1.9.9+32
 - Mengoreksi total filter data pada Laporan Form Ibu Hamil agar **hanya** menampilkan mutasi yang berkaitan dengan kehamilan, kelahiran, dan balita. Data kedatangan, perpindahan, maupun kematian orang dewasa (selain ibu hamil/melahirkan) tidak akan dimasukkan ke dalam form ini sesuai standar PKK.
 - Mengotomatiskan pengisian kolom **"STATUS (IBU/ BAYI/BALITA)"** pada pencatatan kematian berdasarkan pengecekan profil warga:
