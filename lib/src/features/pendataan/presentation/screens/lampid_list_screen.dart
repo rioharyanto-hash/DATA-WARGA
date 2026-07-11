@@ -170,6 +170,7 @@ class _LampidListItem extends ConsumerWidget {
         side: BorderSide(color: iconColor.withValues(alpha: 0.3)),
       ),
       child: ListTile(
+        onTap: () => _showDetailDialog(context, bangunanAsync.valueOrNull),
         leading: CircleAvatar(child: Icon(icon, color: iconColor)),
         title: Text(
           mutasi.namaOrang,
