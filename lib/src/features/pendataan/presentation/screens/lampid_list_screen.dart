@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/mutasi.dart';
 import '../providers/mutasi_provider.dart';
@@ -254,7 +255,13 @@ class _LampidListItem extends ConsumerWidget {
               ),
           ],
         ),
-        onTap: () => _showDetailDialog(context, bangunanAsync.value),
+        onTap: () {
+          if (mutasi.idIndividuAsal != null && mutasi.idIndividuAsal!.isNotEmpty) {
+            context.push('/view-individu/\${mutasi.idIndividuAsal}');
+          } else {
+            _showDetailDialog(context, bangunanAsync.value);
+          }
+        },
       ),
     );
   }
