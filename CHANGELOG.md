@@ -1,4 +1,7 @@
 ## [2026-07-11]
+### [PATCH] - Versi 1.9.8+31
+- Menambahkan skrip _Database Migration_ (v20 ke v21) untuk memperbaiki secara otomatis rekaman mutasi lama (seperti data "Turyati") yang telanjur tersimpan dengan `id_bangunan` kosong akibat bug dari versi sebelumnya. Begitu aplikasi dibuka ulang, data mutasi yang error akan diperbaiki dan warganya akan otomatis dihapus dari Daftar Anggota Keluarga.
+
 ### [PATCH] - Versi 1.9.7+30
 - Menambahkan sinkronisasi `id_bangunan` saat menginput warga LAHIR dan DATANG sehingga data mutasi masuk dalam laporan LAMPID.
 - Memperjelas pencetakan informasi mutasi jenis DATANG dan PINDAH pada Laporan Form Ibu Hamil (Terisi). Meskipun form resmi tersebut berfokus pada kehamilan/kelahiran/kematian, kini warga yang datang atau pindah akan tetap dimunculkan namanya dengan ditambahkan informasi ke dalam kolom `Keterangan`.

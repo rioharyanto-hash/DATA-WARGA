@@ -29,7 +29,7 @@ class LocalDbHelper {
       return await factory.openDatabase(
         filePath,
         options: OpenDatabaseOptions(
-          version: 20,
+          version: 21,
           onCreate: _createDB,
           onUpgrade: _upgradeDB,
         ),
@@ -46,7 +46,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 20,
+        version: 21,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -112,6 +112,33 @@ class LocalDbHelper {
         await db.execute(
           'ALTER TABLE individu ADD COLUMN status_yatim_piatu TEXT',
         );
+      } catch (_) {}
+    }
+
+    if (oldVersion < 21) {
+      try {
+        final mutasiList = await db.query('mutasi', where: 'id_bangunan = ?', whereArgs: ['']);
+        for (final m in mutasiList) {
+          final idIndividu = m['id_individu_asal'] as String?;
+          if (idIndividu != null && idIndividu.isNotEmpty) {
+            final res = await db.rawQuery('''
+              SELECT krt.id_bangunan 
+              FROM individu 
+              JOIN keluarga ON individu.id_keluarga = keluarga.id 
+              JOIN krt ON keluarga.id_krt = krt.id 
+              WHERE individu.id = ?
+            ''', [idIndividu]);
+            if (res.isNotEmpty) {
+              final idB = res.first['id_bangunan'] as String;
+              await db.update('mutasi', {'id_bangunan': idB}, where: 'id = ?', whereArgs: [m['id']]);
+            }
+            
+            final jenis = (m['jenis_mutasi'] as String?)?.toUpperCase() ?? '';
+            if (jenis == 'MENINGGAL' || jenis == 'PINDAH') {
+              await db.delete('individu', where: 'id = ?', whereArgs: [idIndividu]);
+            }
+          }
+        }
       } catch (_) {}
     }
   }
