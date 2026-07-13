@@ -105,17 +105,16 @@ class _FormMutasiMasterScreenState
         tanggalMutasi: date,
         asal: _asalController.text,
         tujuan: _tujuanController.text,
-        keterangan: _jenisMutasi == 'Meninggal'
-            ? 'Sebab Kematian: ${_sebabKematianController.text}'
-            : (_jenisMutasi == 'Status Ibu (Hamil/Nifas)'
-                  ? 'Status: $_statusIbu'
-                  : _keteranganController.text),
+        keterangan: _keteranganController.text,
+        sebabKematian: _sebabKematianController.text,
+        statusIbu: _jenisMutasi == 'Status Ibu (Hamil/Nifas)' ? _statusIbu : null,
         idBangunan: resolvedIdBangunan,
       );
 
       await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
       
       ref.invalidate(allMutasiProvider);
+      ref.invalidate(mutasiFilteredProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

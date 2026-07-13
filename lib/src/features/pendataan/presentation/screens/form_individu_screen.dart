@@ -38,15 +38,15 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
   // ── Bagian 1: Biodata Dasar ──
   final _nikController = TextEditingController();
   final _namaController = TextEditingController();
+  final _namaAyahController = TextEditingController();
+  final _namaIbuController = TextEditingController();
   final _noTlpController = TextEditingController();
   final _tempatLahirController = TextEditingController();
   final _tanggalLahirController = TextEditingController();
   final _alamatKtpController = TextEditingController();
-  final _alamatDomisiliController = TextEditingController();
   String _hubunganKeluarga = 'Kepala Keluarga';
   String _statusDgnKrt = 'Kepala Rumah Tangga';
   String _jenisKelamin = 'Laki-laki';
-  bool _isDomisiliSesuaiKtp = true;
   String _agama = 'Islam';
   bool _punyaAkteKelahiran = false;
   final _noAkteController = TextEditingController();
@@ -205,6 +205,26 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
     return defaultValue;
   }
 
+  Future<void> _fetchParentsIfAnak() async {
+    if (_hubunganKeluarga.toLowerCase() != 'anak') return;
+    
+    final assignedKeluargaId = _selectedKeluargaId ?? widget.keluargaId;
+    if (assignedKeluargaId.isNotEmpty) {
+      final repo = ref.read(individuRepositoryProvider);
+      final parents = await repo.getParentsNames(assignedKeluargaId);
+      if (mounted) {
+        setState(() {
+          if (parents['nama_ayah'] != null && _namaAyahController.text.isEmpty) {
+            _namaAyahController.text = parents['nama_ayah']!;
+          }
+          if (parents['nama_ibu'] != null && _namaIbuController.text.isEmpty) {
+            _namaIbuController.text = parents['nama_ibu']!;
+          }
+        });
+      }
+    }
+  }
+
   Future<void> _loadData() async {
     final individu = await ref.read(
       individuByIdProvider(widget.individuId!).future,
@@ -213,11 +233,12 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
       setState(() {
         _nikController.text = individu.nik;
         _namaController.text = individu.namaLengkap;
+        _namaAyahController.text = individu.namaAyah ?? '';
+        _namaIbuController.text = individu.namaIbu ?? '';
         _noTlpController.text = individu.noTlp ?? '';
         _tempatLahirController.text = individu.tempatLahir;
         _tanggalLahirController.text = individu.tanggalLahir;
         _alamatKtpController.text = individu.alamatKtp ?? '';
-        _alamatDomisiliController.text = individu.alamatDomisili ?? '';
         _tglBantuanController.text = individu.tglBantuan ?? '';
         _lamaBantuanController.text = individu.lamaBantuan ?? '';
         _jumlahBantuanController.text = individu.jumlahBantuan ?? '';
@@ -272,14 +293,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           'Belum/Tidak Bekerja',
         );
 
-        if (individu.alamatDomisili == null ||
-            individu.alamatDomisili!.isEmpty ||
-            individu.alamatDomisili == individu.alamatKtp) {
-          _isDomisiliSesuaiKtp = true;
-        } else {
-          _isDomisiliSesuaiKtp = false;
-        }
-
         _jenisBantuan = _ensureValidOption(
           individu.jenisBantuan,
           _bantuanSosialOptions,
@@ -320,6 +333,9 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           'Tidak',
         );
       });
+
+      // Coba fetch nama ayah dan ibu jika sebelumnya kosong
+      await _fetchParentsIfAnak();
     }
   }
 
@@ -362,11 +378,12 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
   void dispose() {
     _nikController.dispose();
     _namaController.dispose();
+    _namaAyahController.dispose();
+    _namaIbuController.dispose();
     _noTlpController.dispose();
     _tempatLahirController.dispose();
     _tanggalLahirController.dispose();
     _alamatKtpController.dispose();
-    _alamatDomisiliController.dispose();
     _makananPokokController.dispose();
     _berkebutuhanKhususController.dispose();
     _tglBantuanController.dispose();
@@ -425,9 +442,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
         pekerjaan: _pekerjaan,
         noTlp: _noTlpController.text.trim(),
         alamatKtp: _alamatKtpController.text.trim(),
-        alamatDomisili: _isDomisiliSesuaiKtp
-            ? _alamatKtpController.text
-            : _alamatDomisiliController.text,
+        alamatDomisili: '',
         jenisBantuan: _jenisBantuan,
         tglBantuan: _tglBantuanController.text.isEmpty
             ? null
@@ -467,6 +482,12 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
         statusYatimPiatu: _statusYatimPiatu == 'Tidak'
             ? null
             : _statusYatimPiatu,
+        namaAyah: _namaAyahController.text.isEmpty
+            ? null
+            : _namaAyahController.text,
+        namaIbu: _namaIbuController.text.isEmpty
+            ? null
+            : _namaIbuController.text,
         isSynced: 0,
       );
 
@@ -501,6 +522,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           );
           await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
           ref.invalidate(allMutasiProvider);
+          ref.invalidate(mutasiFilteredProvider);
         }
       }
 
@@ -682,15 +704,34 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    initialValue: _hubunganKeluarga,
+                    value: _hubunganKeluarga,
                     decoration: const InputDecoration(
                       labelText: 'Hubungan Keluarga',
                     ),
                     items: _hubunganOptions
                         .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                         .toList(),
-                    onChanged: (val) =>
-                        setState(() => _hubunganKeluarga = val!),
+                    onChanged: (val) async {
+                      if (val != null) {
+                        setState(() => _hubunganKeluarga = val);
+                        await _fetchParentsIfAnak();
+                      }
+                    },
+                    validator: (val) => val == null || val.isEmpty ? 'Wajib diisi' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _namaAyahController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama Ayah',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _namaIbuController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama Ibu',
+                    ),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
@@ -791,35 +832,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                         ? 'Alamat KTP wajib diisi'
                         : null,
                   ),
-                  const SizedBox(height: 16),
-                  CheckboxListTile(
-                    title: const Text('Alamat Domisili sama dengan KTP'),
-                    value: _isDomisiliSesuaiKtp,
-                    onChanged: (val) {
-                      setState(() {
-                        _isDomisiliSesuaiKtp = val ?? true;
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  if (!_isDomisiliSesuaiKtp) ...[
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _alamatDomisiliController,
-                      decoration: const InputDecoration(
-                        labelText: 'Alamat Domisili',
-                        hintText: 'Masukkan alamat tempat tinggal sekarang',
-                      ),
-                      validator: (value) {
-                        if (!_isDomisiliSesuaiKtp &&
-                            (value == null || value.isEmpty)) {
-                          return 'Alamat Domisili wajib diisi';
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
                   const SizedBox(height: 16),
                   CheckboxListTile(
                     title: const Text('Memiliki Akte Kelahiran'),

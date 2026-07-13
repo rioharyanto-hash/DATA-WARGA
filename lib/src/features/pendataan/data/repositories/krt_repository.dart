@@ -47,6 +47,20 @@ class KrtRepository {
     );
   }
 
+  Future<void> updateKrtNameAndNik(String krtId, String newName, String newNik) async {
+    final db = await LocalDbHelper.database;
+    await db.update(
+      'krt',
+      {
+        'nama_krt': newName,
+        'nik_krt': newNik,
+        'is_synced': 0,
+      },
+      where: 'id = ?',
+      whereArgs: [krtId],
+    );
+  }
+
   Future<void> deleteKrt(String id) async {
     final db = await LocalDbHelper.database;
     await db.delete('krt', where: 'id = ?', whereArgs: [id]);

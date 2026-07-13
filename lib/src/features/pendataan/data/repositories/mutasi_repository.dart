@@ -40,11 +40,12 @@ class MutasiRepository {
     final db = await LocalDbHelper.database;
 
     // Clean up orphaned mutasi (where id_bangunan doesn't exist in bangunan table)
-    // but only if id_bangunan is not empty, because some mutasi are created without id_bangunan.
-    await db.rawDelete('''
-      DELETE FROM mutasi 
-      WHERE id_bangunan != '' AND id_bangunan NOT IN (SELECT id FROM bangunan)
-    ''');
+    // by setting id_bangunan to empty string so they are not lost.
+    await db.rawUpdate('''
+        UPDATE mutasi 
+        SET id_bangunan = ''
+        WHERE id_bangunan != '' AND id_bangunan NOT IN (SELECT id FROM bangunan)
+      ''');
 
     final maps = await db.query('mutasi', orderBy: 'tanggal_mutasi DESC');
     return maps.map((json) => MutasiModel.fromJson(json)).toList();
@@ -74,5 +75,51 @@ class MutasiRepository {
           dbName.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
       return normalizedDbName == normalizedName;
     }).map((json) => MutasiModel.fromJson(json)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getLampidReportData({
+    String? kelompokDawis,
+    String? bulan,
+    String? tahun,
+  }) async {
+    final db = await LocalDbHelper.database;
+    
+    String dateFilter = "";
+    List<dynamic> args = [];
+    
+    if (bulan != null && tahun != null) {
+      // bulan is expected to be '01' through '12'
+      dateFilter = " AND substr(mutasi.tanggal_mutasi, 1, 7) = ?";
+      args.add("$tahun-$bulan");
+    }
+
+    final maps = await db.rawQuery(
+      '''
+      SELECT 
+        mutasi.*, 
+        bangunan.nama_bangunan, 
+        bangunan.alamat_lengkap, 
+        bangunan.kelompok_dawis as b_kelompok_dawis,
+        individu.jenis_kelamin,
+        individu.tanggal_lahir
+      FROM mutasi
+      LEFT JOIN bangunan ON mutasi.id_bangunan = bangunan.id
+      LEFT JOIN individu ON mutasi.id_individu_asal = individu.id
+      WHERE 1=1 $dateFilter
+      ORDER BY mutasi.tanggal_mutasi ASC
+    ''',
+      args
+    );
+
+    if (kelompokDawis != null && kelompokDawis.isNotEmpty && kelompokDawis != 'Semua Dawis') {
+      final normalizedName = kelompokDawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+      return maps.where((json) {
+        final dbName = json['b_kelompok_dawis']?.toString() ?? '';
+        final normalizedDbName = dbName.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normalizedDbName == normalizedName;
+      }).toList();
+    }
+    
+    return maps;
   }
 }

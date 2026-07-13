@@ -10,12 +10,12 @@ class LocalDbHelper {
 
   static Future<Database> get database async {
     if (_database != null) return _database!;
-    
+
     if (_initDbFuture != null) {
       await _initDbFuture;
       return _database!;
     }
-    
+
     _initDbFuture = _initDB('dasawisma.db');
     _database = await _initDbFuture;
     _initDbFuture = null;
@@ -29,7 +29,7 @@ class LocalDbHelper {
       return await factory.openDatabase(
         filePath,
         options: OpenDatabaseOptions(
-          version: 23,
+          version: 25,
           onCreate: _createDB,
           onUpgrade: _upgradeDB,
         ),
@@ -46,7 +46,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 23,
+        version: 26,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -117,20 +117,32 @@ class LocalDbHelper {
 
     if (oldVersion < 21) {
       try {
-        final mutasiList = await db.query('mutasi', where: 'id_bangunan = ?', whereArgs: ['']);
+        final mutasiList = await db.query(
+          'mutasi',
+          where: 'id_bangunan = ?',
+          whereArgs: [''],
+        );
         for (final m in mutasiList) {
           final idIndividu = m['id_individu_asal'] as String?;
           if (idIndividu != null && idIndividu.isNotEmpty) {
-            final res = await db.rawQuery('''
+            final res = await db.rawQuery(
+              '''
               SELECT krt.id_bangunan 
               FROM individu 
               JOIN keluarga ON individu.id_keluarga = keluarga.id 
               JOIN krt ON keluarga.id_krt = krt.id 
               WHERE individu.id = ?
-            ''', [idIndividu]);
+            ''',
+              [idIndividu],
+            );
             if (res.isNotEmpty) {
               final idB = res.first['id_bangunan'] as String;
-              await db.update('mutasi', {'id_bangunan': idB}, where: 'id = ?', whereArgs: [m['id']]);
+              await db.update(
+                'mutasi',
+                {'id_bangunan': idB},
+                where: 'id = ?',
+                whereArgs: [m['id']],
+              );
             }
           }
         }
@@ -151,7 +163,12 @@ class LocalDbHelper {
           final oldKet = m['keterangan']?.toString() ?? '';
           if (!oldKet.toUpperCase().contains('IBU')) {
             final newKet = oldKet.isEmpty ? 'Ibu' : '\$oldKet (Ibu)';
-            await db.update('mutasi', {'keterangan': newKet}, where: 'id = ?', whereArgs: [id]);
+            await db.update(
+              'mutasi',
+              {'keterangan': newKet},
+              where: 'id = ?',
+              whereArgs: [id],
+            );
           }
         }
       } catch (_) {}
@@ -159,22 +176,113 @@ class LocalDbHelper {
 
     if (oldVersion < 23) {
       try {
-        final mutasiList = await db.query('mutasi', where: 'jenis_mutasi = ?', whereArgs: ['Meninggal']);
+        final mutasiList = await db.query(
+          'mutasi',
+          where: 'jenis_mutasi = ?',
+          whereArgs: ['Meninggal'],
+        );
         for (final m in mutasiList) {
           final id = m['id'];
           String ket = m['keterangan']?.toString() ?? '';
           String? statusIbu = m['status_ibu']?.toString();
-          
+
           bool needsUpdate = false;
           if (ket.contains('\$oldKet (Ibu)') || ket == 'Ibu') {
-            ket = ket.replaceAll('\$oldKet (Ibu)', '').replaceAll('Ibu', '').trim();
+            ket = ket
+                .replaceAll('\$oldKet (Ibu)', '')
+                .replaceAll('Ibu', '')
+                .trim();
             statusIbu = 'Ibu';
             needsUpdate = true;
           }
           if (needsUpdate) {
-            await db.update('mutasi', {'keterangan': ket, 'status_ibu': statusIbu}, where: 'id = ?', whereArgs: [id]);
+            await db.update(
+              'mutasi',
+              {'keterangan': ket, 'status_ibu': statusIbu},
+              where: 'id = ?',
+              whereArgs: [id],
+            );
           }
         }
+      } catch (_) {}
+    }
+
+    if (oldVersion < 24) {
+      try {
+        final mutasiList = await db.query(
+          'mutasi',
+          where: 'jenis_mutasi = ?',
+          whereArgs: ['Meninggal'],
+        );
+        for (final m in mutasiList) {
+          final id = m['id'];
+          String ket = m['keterangan']?.toString() ?? '';
+          String? sebab = m['sebab_kematian']?.toString();
+
+          bool needsUpdate = false;
+          if (ket.contains('Sebab Kematian:')) {
+            final idx = ket.indexOf('Sebab Kematian:');
+            final extracted = ket.substring(idx + 15).trim();
+            ket = ket
+                .substring(0, idx)
+                .trim(); // remove 'Sebab Kematian: ...' from keterangan
+            if (sebab == null || sebab.isEmpty) {
+              sebab = extracted;
+            }
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await db.update(
+              'mutasi',
+              {'keterangan': ket, 'sebab_kematian': sebab},
+              where: 'id = ?',
+              whereArgs: [id],
+            );
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (oldVersion < 25) {
+      try {
+        final mutasiList = await db.query(
+          'mutasi',
+          where: 'jenis_mutasi = ?',
+          whereArgs: ['Meninggal'],
+        );
+        for (final m in mutasiList) {
+          final id = m['id'];
+          String ket = m['keterangan']?.toString() ?? '';
+          String? sebab = m['sebab_kematian']?.toString();
+
+          bool needsUpdate = false;
+          if (ket.contains('Sebab Kematian:')) {
+            final idx = ket.indexOf('Sebab Kematian:');
+            final extracted = ket.substring(idx + 15).trim();
+            ket = ket
+                .substring(0, idx)
+                .trim(); // remove 'Sebab Kematian: ...' from keterangan
+            if (sebab == null || sebab.isEmpty) {
+              sebab = extracted;
+            }
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await db.update(
+              'mutasi',
+              {'keterangan': ket, 'sebab_kematian': sebab},
+              where: 'id = ?',
+              whereArgs: [id],
+            );
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (oldVersion < 26) {
+      try {
+        await db.execute('ALTER TABLE individu ADD COLUMN nama_ayah TEXT');
+        await db.execute('ALTER TABLE individu ADD COLUMN nama_ibu TEXT');
       } catch (_) {}
     }
   }
@@ -278,6 +386,8 @@ class LocalDbHelper {
         is_ikut_up2k $intNullable DEFAULT 0,
         is_industri_rumah_tangga $intNullable DEFAULT 0,
         status_yatim_piatu $textNullable,
+        nama_ayah $textNullable,
+        nama_ibu $textNullable,
         is_synced $intType DEFAULT 0,
         FOREIGN KEY (id_keluarga) REFERENCES keluarga (id) ON DELETE CASCADE
       )

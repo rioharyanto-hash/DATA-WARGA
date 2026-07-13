@@ -40,6 +40,8 @@ class IndividuModel extends Individu {
     super.isIbuMenyusui,
     super.isIkutUp2k,
     super.isIndustriRumahTangga,
+    super.namaAyah,
+    super.namaIbu,
     super.isSynced = 0,
   });
 
@@ -83,6 +85,8 @@ class IndividuModel extends Individu {
       isIbuMenyusui: json['is_ibu_menyusui'] as int?,
       isIkutUp2k: json['is_ikut_up2k'] as int?,
       isIndustriRumahTangga: json['is_industri_rumah_tangga'] as int?,
+      namaAyah: json['nama_ayah'],
+      namaIbu: json['nama_ibu'],
       isSynced: json['is_synced'] as int? ?? 0,
     );
   }
@@ -127,6 +131,8 @@ class IndividuModel extends Individu {
       'is_ibu_menyusui': isIbuMenyusui,
       'is_ikut_up2k': isIkutUp2k,
       'is_industri_rumah_tangga': isIndustriRumahTangga,
+      'nama_ayah': namaAyah,
+      'nama_ibu': namaIbu,
       'is_synced': isSynced,
     };
   }
@@ -167,6 +173,11 @@ class IndividuModel extends Individu {
       aktifPosyandu: entity.aktifPosyandu,
       frekuensiPosyandu: entity.frekuensiPosyandu,
       ikutKerjaBakti: entity.ikutKerjaBakti,
+      isIbuMenyusui: entity.isIbuMenyusui,
+      isIkutUp2k: entity.isIkutUp2k,
+      isIndustriRumahTangga: entity.isIndustriRumahTangga,
+      namaAyah: entity.namaAyah,
+      namaIbu: entity.namaIbu,
       isSynced: entity.isSynced,
     );
   }

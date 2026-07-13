@@ -45,6 +45,8 @@ class Individu {
   final int? isIbuMenyusui;
   final int? isIkutUp2k;
   final int? isIndustriRumahTangga;
+  final String? namaAyah;
+  final String? namaIbu;
   final int? isSynced;
 
   Individu({
@@ -86,6 +88,8 @@ class Individu {
     this.isIbuMenyusui,
     this.isIkutUp2k,
     this.isIndustriRumahTangga,
+    this.namaAyah,
+    this.namaIbu,
     this.isSynced = 0,
   });
 }

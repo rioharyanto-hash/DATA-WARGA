@@ -2799,11 +2799,13 @@ class PdfRingkasanService {
       bool noRightBorder = false,
       bool bottomBorder = false,
       double? fontSize,
+      pw.Alignment alignment = pw.Alignment.center,
+      pw.TextAlign textAlign = pw.TextAlign.center,
     }) {
       final content = pw.Container(
         width: width,
         padding: const pw.EdgeInsets.all(2),
-        alignment: pw.Alignment.center,
+        alignment: alignment,
         decoration: pw.BoxDecoration(
           border: pw.Border(
             right: noRightBorder
@@ -2816,7 +2818,7 @@ class PdfRingkasanService {
         ),
         child: pw.Text(
           text,
-          textAlign: pw.TextAlign.center,
+          textAlign: textAlign,
           style: pw.TextStyle(
             font: isHeader ? boldFont : regularFont,
             fontSize: fontSize ?? (isHeader ? 6 : 8),
@@ -3459,6 +3461,18 @@ class PdfRingkasanService {
                       final int i = index + 1;
                       final row = filteredMutasiList[index];
 
+                      String jkVal = '';
+                      final nik = row['nik']?.toString() ?? '';
+                      if (nik.length == 16) {
+                        try {
+                          final dd = int.parse(nik.substring(6, 8));
+                          jkVal = dd > 40 ? 'P' : 'L';
+                        } catch (_) {}
+                      }
+                      if (jkVal.isEmpty) {
+                        jkVal = row['jenis_kelamin']?.toString() ?? '';
+                      }
+
                       final jenisMutasi = row['jenis_mutasi']?.toString() ?? '';
                       final isKelahiran = jenisMutasi.toUpperCase() == 'LAHIR';
                       final isKematian =
@@ -3477,9 +3491,9 @@ class PdfRingkasanService {
                           ? (row['nama_orang']?.toString() ?? '')
                           : '';
                       final jkLahirL =
-                          isKelahiran && row['jenis_kelamin'] == 'L' ? 'V' : '';
+                          isKelahiran && jkVal.toUpperCase().startsWith('L') ? 'V' : '';
                       final jkLahirP =
-                          isKelahiran && row['jenis_kelamin'] == 'P' ? 'V' : '';
+                          isKelahiran && jkVal.toUpperCase().startsWith('P') ? 'V' : '';
                       final tglLahir = isKelahiran
                           ? (row['tanggal_mutasi']?.toString() ?? '')
                           : '';
@@ -3523,10 +3537,14 @@ class PdfRingkasanService {
                           }
                         }
                       }
-                      final jkMatiL = isKematian && row['jenis_kelamin'] == 'L'
+                      String jk = jkVal;
+                      if (jk.isEmpty && isKematian && statusMeninggal.toLowerCase() == 'ibu') {
+                        jk = 'P';
+                      }
+                      final jkMatiL = isKematian && jk.toUpperCase().startsWith('L')
                           ? 'V'
                           : '';
-                      final jkMatiP = isKematian && row['jenis_kelamin'] == 'P'
+                      final jkMatiP = isKematian && jk.toUpperCase().startsWith('P')
                           ? 'V'
                           : '';
                       final tglMeninggal = isKematian
@@ -3547,7 +3565,7 @@ class PdfRingkasanService {
                           crossAxisAlignment: pw.CrossAxisAlignment.center,
                           children: [
                             buildCell('$i', flex: 1, fontSize: 7),
-                            buildCell(namaIbu, flex: 3),
+                            buildCell(namaIbu, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
                             buildCell(namaSuami, flex: 3),
                             buildCell(statusIbu, flex: 4),
                             buildCell(namaAnak, flex: 4),
@@ -3556,7 +3574,7 @@ class PdfRingkasanService {
                             buildCell(tglLahir, flex: 2),
                             buildCell(akteAda, flex: 1),
                             buildCell(akteTidak, flex: 1),
-                            buildCell(namaMeninggal, flex: 3),
+                            buildCell(namaMeninggal, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
                             buildCell(statusMeninggal, flex: 3),
                             buildCell(jkMatiL, flex: 1),
                             buildCell(jkMatiP, flex: 1),

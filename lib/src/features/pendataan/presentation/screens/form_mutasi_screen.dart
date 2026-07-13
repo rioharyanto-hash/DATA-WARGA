@@ -4,7 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/mutasi.dart';
+import '../../domain/entities/individu.dart';
 import '../providers/mutasi_provider.dart';
+import '../providers/individu_provider.dart';
+import '../providers/keluarga_provider.dart';
+import '../providers/bangunan_provider.dart';
+import '../providers/krt_provider.dart';
 
 class FormMutasiScreen extends ConsumerStatefulWidget {
   final String bangunanId;
@@ -52,6 +57,14 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
   final List<String> _statusIbuList = ['Hamil', 'Melahirkan', 'Nifas'];
 
   String? _idBangunan;
+  
+  Individu? _asalIndividu;
+  bool _isKk = false;
+  bool _isKrt = false;
+  List<Individu> _kkCandidates = [];
+  List<Individu> _krtCandidates = [];
+  String? _selectedReplacementKkId;
+  String? _selectedReplacementKrtId;
 
   @override
   void initState() {
@@ -65,6 +78,35 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
     }
     if (widget.defaultNik != null) {
       _nikController.text = widget.defaultNik!;
+    }
+    _loadIndividuDetails();
+  }
+
+  Future<void> _loadIndividuDetails() async {
+    if (widget.idIndividuAsal == null) return;
+    
+    final individuRepo = ref.read(individuRepositoryProvider);
+    final individu = await individuRepo.getIndividuById(widget.idIndividuAsal!);
+    if (individu == null || !mounted) return;
+
+    setState(() {
+      _asalIndividu = individu;
+      
+      final hk = individu.hubunganKeluarga.toUpperCase();
+      _isKk = (hk == 'KK' || hk == 'KEPALA KELUARGA');
+      
+      final stKrt = (individu.statusDgnKrt ?? '').toUpperCase();
+      _isKrt = (stKrt == 'KEPALA RUMAH TANGGA' || stKrt == 'KK' || stKrt == 'KEPALA KELUARGA');
+    });
+
+    if (_isKk) {
+      final candidates = await individuRepo.getPenggantiKkCandidates(individu.idKeluarga, individu.id);
+      if (mounted) setState(() => _kkCandidates = candidates);
+    }
+
+    if (_isKrt) {
+      final candidates = await individuRepo.getPenggantiKrtCandidates(widget.bangunanId, individu.id);
+      if (mounted) setState(() => _krtCandidates = candidates);
     }
   }
 
@@ -142,7 +184,121 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
       );
 
       await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
+      
+      final individuRepo = ref.read(individuRepositoryProvider);
+      
+      if (_jenisMutasi == 'Meninggal' || _jenisMutasi == 'Pindah') {
+        if (_isKk && _selectedReplacementKkId != null) {
+          final newKk = await individuRepo.getIndividuById(_selectedReplacementKkId!);
+          if (newKk != null) {
+            final updatedKk = Individu(
+              id: newKk.id,
+              idKeluarga: newKk.idKeluarga,
+              namaLengkap: newKk.namaLengkap,
+              nik: newKk.nik,
+              hubunganKeluarga: 'Kepala Keluarga',
+              statusDgnKrt: newKk.statusDgnKrt,
+              jenisKelamin: newKk.jenisKelamin,
+              tempatLahir: newKk.tempatLahir,
+              tanggalLahir: newKk.tanggalLahir,
+              statusPerkawinan: newKk.statusPerkawinan,
+              pendidikanTerakhir: newKk.pendidikanTerakhir,
+              pekerjaan: newKk.pekerjaan,
+              noTlp: newKk.noTlp,
+              alamatKtp: newKk.alamatKtp,
+              alamatDomisili: newKk.alamatDomisili,
+              jenisBantuan: newKk.jenisBantuan,
+              tglBantuan: newKk.tglBantuan,
+              lamaBantuan: newKk.lamaBantuan,
+              jumlahBantuan: newKk.jumlahBantuan,
+              metodeKb: newKk.metodeKb,
+              alasanBukanKb: newKk.alasanBukanKb,
+              isButaHuruf: newKk.isButaHuruf,
+              isButaAngka: newKk.isButaAngka,
+              isButaBahasa: newKk.isButaBahasa,
+              kriteriaBerkebutuhanKhusus: newKk.kriteriaBerkebutuhanKhusus,
+              statusYatimPiatu: newKk.statusYatimPiatu,
+              makananPokok: newKk.makananPokok,
+              agama: newKk.agama,
+              punyaAkteKelahiran: newKk.punyaAkteKelahiran,
+              noAkteKelahiran: newKk.noAkteKelahiran,
+              punyaBpjs: newKk.punyaBpjs,
+              jenisBpjs: newKk.jenisBpjs,
+              aktifPosyandu: newKk.aktifPosyandu,
+              frekuensiPosyandu: newKk.frekuensiPosyandu,
+              ikutKerjaBakti: newKk.ikutKerjaBakti,
+              isIbuMenyusui: newKk.isIbuMenyusui,
+              isIkutUp2k: newKk.isIkutUp2k,
+              isIndustriRumahTangga: newKk.isIndustriRumahTangga,
+              isSynced: newKk.isSynced,
+            );
+            await individuRepo.updateIndividu(updatedKk);
+          }
+        }
+        
+        if (_isKrt && _selectedReplacementKrtId != null && _asalIndividu != null) {
+          final newKrt = await individuRepo.getIndividuById(_selectedReplacementKrtId!);
+          if (newKrt != null) {
+            final updatedKrt = Individu(
+              id: newKrt.id,
+              idKeluarga: newKrt.idKeluarga,
+              namaLengkap: newKrt.namaLengkap,
+              nik: newKrt.nik,
+              hubunganKeluarga: newKrt.hubunganKeluarga,
+              statusDgnKrt: 'Kepala Rumah Tangga',
+              jenisKelamin: newKrt.jenisKelamin,
+              tempatLahir: newKrt.tempatLahir,
+              tanggalLahir: newKrt.tanggalLahir,
+              statusPerkawinan: newKrt.statusPerkawinan,
+              pendidikanTerakhir: newKrt.pendidikanTerakhir,
+              pekerjaan: newKrt.pekerjaan,
+              noTlp: newKrt.noTlp,
+              alamatKtp: newKrt.alamatKtp,
+              alamatDomisili: newKrt.alamatDomisili,
+              jenisBantuan: newKrt.jenisBantuan,
+              tglBantuan: newKrt.tglBantuan,
+              lamaBantuan: newKrt.lamaBantuan,
+              jumlahBantuan: newKrt.jumlahBantuan,
+              metodeKb: newKrt.metodeKb,
+              alasanBukanKb: newKrt.alasanBukanKb,
+              isButaHuruf: newKrt.isButaHuruf,
+              isButaAngka: newKrt.isButaAngka,
+              isButaBahasa: newKrt.isButaBahasa,
+              kriteriaBerkebutuhanKhusus: newKrt.kriteriaBerkebutuhanKhusus,
+              statusYatimPiatu: newKrt.statusYatimPiatu,
+              makananPokok: newKrt.makananPokok,
+              agama: newKrt.agama,
+              punyaAkteKelahiran: newKrt.punyaAkteKelahiran,
+              noAkteKelahiran: newKrt.noAkteKelahiran,
+              punyaBpjs: newKrt.punyaBpjs,
+              jenisBpjs: newKrt.jenisBpjs,
+              aktifPosyandu: newKrt.aktifPosyandu,
+              frekuensiPosyandu: newKrt.frekuensiPosyandu,
+              ikutKerjaBakti: newKrt.ikutKerjaBakti,
+              isIbuMenyusui: newKrt.isIbuMenyusui,
+              isIkutUp2k: newKrt.isIkutUp2k,
+              isIndustriRumahTangga: newKrt.isIndustriRumahTangga,
+              isSynced: newKrt.isSynced,
+            );
+            await individuRepo.updateIndividu(updatedKrt);
+            
+            final keluargaRepo = ref.read(keluargaRepositoryProvider);
+            final keluarga = await keluargaRepo.getKeluargaById(_asalIndividu!.idKeluarga);
+            if (keluarga != null) {
+               final krtRepo = ref.read(krtRepositoryProvider);
+               await krtRepo.updateKrtNameAndNik(keluarga.idKrt, newKrt.namaLengkap, newKrt.nik);
+            }
+          }
+        }
+        
+        ref.invalidate(individuByIdProvider);
+        ref.invalidate(individuByKeluargaProvider);
+        ref.invalidate(krtByBangunanProvider);
+      }
+
       ref.invalidate(mutasiByBangunanProvider(widget.bangunanId));
+      ref.invalidate(allMutasiProvider);
+      ref.invalidate(mutasiFilteredProvider);
 
       // Data individu tetap dipertahankan sesuai permintaan agar masuk ke laporan LAMPID.
 
@@ -276,6 +432,60 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
                       _statusIbu = newValue;
                     });
                   },
+                ),
+              ],
+              if ((_jenisMutasi == 'Meninggal' || _jenisMutasi == 'Pindah') && _isKk && _kkCandidates.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _selectedReplacementKkId,
+                  decoration: const InputDecoration(
+                    labelText: 'Pilih Pengganti Kepala Keluarga (KK)',
+                    helperText: 'Wajib dipilih karena warga yang mutasi adalah KK',
+                  ),
+                  items: _kkCandidates.map((individu) {
+                    return DropdownMenuItem<String>(
+                      value: individu.id,
+                      child: Text(individu.namaLengkap),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedReplacementKkId = newValue;
+                      // Jika dia juga memilih KRT pengganti tapi blm terpilih, bisa otomatis,
+                      // tapi kita biarkan user milih saja di dropdown bawah.
+                    });
+                  },
+                  validator: (value) => value == null ? 'Wajib pilih pengganti KK' : null,
+                ),
+              ],
+              if ((_jenisMutasi == 'Meninggal' || _jenisMutasi == 'Pindah') && _isKrt && (_krtCandidates.isNotEmpty || (_isKk && _selectedReplacementKkId != null))) ...[
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _selectedReplacementKrtId,
+                  decoration: const InputDecoration(
+                    labelText: 'Pilih Pengganti KRT',
+                    helperText: 'Pilih KK di bangunan ini yang akan menjadi KRT baru',
+                  ),
+                  items: [
+                    if (_isKk && _selectedReplacementKkId != null) 
+                      // Tambahkan calon KK yang baru saja dipilih
+                      DropdownMenuItem<String>(
+                        value: _selectedReplacementKkId,
+                        child: Text('${_kkCandidates.firstWhere((e) => e.id == _selectedReplacementKkId).namaLengkap} (KK Baru)'),
+                      ),
+                    ..._krtCandidates.map((individu) {
+                      return DropdownMenuItem<String>(
+                        value: individu.id,
+                        child: Text(individu.namaLengkap),
+                      );
+                    }).toList(),
+                  ],
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedReplacementKrtId = newValue;
+                    });
+                  },
+                  validator: (value) => value == null ? 'Wajib pilih pengganti KRT' : null,
                 ),
               ],
               const SizedBox(height: 16),

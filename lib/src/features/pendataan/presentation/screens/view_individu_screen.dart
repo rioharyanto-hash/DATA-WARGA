@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/individu_provider.dart';
 import '../providers/mutasi_provider.dart';
+import '../providers/keluarga_provider.dart';
+import '../providers/bangunan_provider.dart';
 
 class ViewIndividuScreen extends ConsumerWidget {
   final String individuId;
+  final bool isReadOnly;
 
-  const ViewIndividuScreen({super.key, required this.individuId});
+  const ViewIndividuScreen({super.key, required this.individuId, this.isReadOnly = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +27,7 @@ class ViewIndividuScreen extends ConsumerWidget {
             loading: () => const SizedBox.shrink(),
             error: (_, _) => const SizedBox.shrink(),
             data: (individu) {
-              if (individu == null) return const SizedBox.shrink();
+              if (individu == null || isReadOnly) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.edit),
                 tooltip: 'Edit Data Warga',
@@ -46,9 +49,21 @@ class ViewIndividuScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
         data: (individu) {
-          if (individu == null) {
-            return const Center(child: Text('Data tidak ditemukan'));
+          if (individu == null) return const Center(child: Text('Data tidak ditemukan'));
+              
+          final idBangunanAsync = ref.watch(idBangunanByKeluargaProvider(individu.idKeluarga));
+          final bangunanId = idBangunanAsync.value;
+          
+          final bangunanAsync = bangunanId != null 
+              ? ref.watch(bangunanByIdProvider(bangunanId))
+              : const AsyncValue.loading();
+          final bangunan = bangunanAsync.value;
+
+          String alamatDomisili = '-';
+          if (bangunan != null) {
+            alamatDomisili = '${bangunan.alamatLengkap} RT ${bangunan.rt} / RW ${bangunan.rw}';
           }
+
           int calculateAge(String dateStr) {
             if (dateStr.isEmpty) return -1;
             try {
@@ -97,13 +112,13 @@ class ViewIndividuScreen extends ConsumerWidget {
                       '${individu.tempatLahir}, ${individu.tanggalLahir}',
                   'Umur': umurStr,
                   'Jenis Kelamin': individu.jenisKelamin,
+                  'Nama Ayah': individu.namaAyah ?? '-',
+                  'Nama Ibu': individu.namaIbu ?? '-',
                   'Agama': individu.agama ?? '-',
                   'Alamat KTP': individu.alamatKtp?.isNotEmpty == true
                       ? individu.alamatKtp!
                       : '-',
-                  'Alamat Domisili': individu.alamatDomisili?.isNotEmpty == true
-                      ? individu.alamatDomisili!
-                      : '-',
+                  'Alamat Domisili': alamatDomisili,
 
                   'Status Perkawinan': individu.statusPerkawinan,
                   'Pendidikan Terakhir': individu.pendidikanTerakhir,

@@ -6,6 +6,11 @@ import '../../domain/entities/mutasi.dart';
 import '../providers/mutasi_provider.dart';
 import '../providers/bangunan_provider.dart';
 import '../../../settings/presentation/providers/app_user_provider.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import '../../../report/data/services/pdf_lampid_service.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
 class LampidListScreen extends ConsumerStatefulWidget {
   const LampidListScreen({super.key});
@@ -16,6 +21,155 @@ class LampidListScreen extends ConsumerStatefulWidget {
 
 class _LampidListScreenState extends ConsumerState<LampidListScreen> {
   String? _selectedKelompokDawis;
+
+  Future<void> _showPrintDialog(BuildContext context) async {
+    final allUsersAsync = ref.read(allUsersProvider);
+    final kaderList = allUsersAsync.value?.where((u) => u.role == 'KADER').toList() ?? [];
+    
+    DateTime selectedDate = DateTime.now();
+    String? selectedDawis = _selectedKelompokDawis;
+
+    const List<String> monthNames = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (setStateContext, setState) {
+            return AlertDialog(
+              title: const Text('Export Laporan LAMPID'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: selectedDawis,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Kelompok Kader'),
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null,
+                        child: Text('Semua Kader'),
+                      ),
+                      ...kaderList.map((k) {
+                        return DropdownMenuItem<String>(
+                          value: k.kelompokDawis,
+                          child: Text('Dawis: ${k.kelompokDawis ?? "-"}'),
+                        );
+                      }),
+                    ],
+                    onChanged: (newValue) {
+                      setState(() => selectedDawis = newValue);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: setStateContext,
+                        initialDate: selectedDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                        initialDatePickerMode: DatePickerMode.year,
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          selectedDate = picked;
+                        });
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: 'Bulan & Tahun',
+                        border: OutlineInputBorder(),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('${monthNames[selectedDate.month - 1]} ${selectedDate.year}'),
+                          const Icon(Icons.calendar_today, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(dialogContext);
+                    
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Sedang mengekspor PDF...')),
+                    );
+
+                    final bulanStr = selectedDate.month.toString().padLeft(2, '0');
+                    final tahunStr = selectedDate.year.toString();
+
+                    try {
+                      final mutasiRepo = ref.read(mutasiRepositoryProvider);
+                      final data = await mutasiRepo.getLampidReportData(
+                        kelompokDawis: selectedDawis,
+                        bulan: bulanStr,
+                        tahun: tahunStr,
+                      );
+                      
+                      final pdfService = PdfLampidService();
+                      final bytes = await pdfService.generateLampidPdf(
+                        kelompokDawis: selectedDawis,
+                        bulan: bulanStr,
+                        tahun: tahunStr,
+                        data: data,
+                      );
+
+                      final String? outputFile = await FilePicker.saveFile(
+                        dialogTitle: 'Simpan Laporan PDF',
+                        fileName: 'Laporan_LAMPID_${selectedDawis ?? "Semua"}_${bulanStr}_${tahunStr}.pdf',
+                        type: FileType.custom,
+                        allowedExtensions: ['pdf'],
+                      );
+
+                      if (outputFile != null) {
+                        final file = File(outputFile);
+                        await file.writeAsBytes(bytes);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Berhasil diekspor ke $outputFile'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e, stack) {
+                      print('Error exporting PDF: $e');
+                      print(stack);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Gagal mengekspor: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Export'),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +258,10 @@ class _LampidListScreenState extends ConsumerState<LampidListScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => const SizedBox.shrink(),
             ),
+          IconButton(
+            icon: const Icon(Icons.print, color: Colors.white),
+            onPressed: () => _showPrintDialog(context),
+          ),
         ],
       ),
       body: Column(
@@ -257,7 +415,7 @@ class _LampidListItem extends ConsumerWidget {
         ),
         onTap: () {
           if (mutasi.idIndividuAsal != null && mutasi.idIndividuAsal!.isNotEmpty) {
-            context.push('/view-individu/\${mutasi.idIndividuAsal}');
+            context.push('/view-individu/${mutasi.idIndividuAsal}?isReadOnly=true');
           } else {
             _showDetailDialog(context, bangunanAsync.value);
           }
@@ -278,44 +436,98 @@ class _LampidListItem extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Row(
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(
-                mutasi.jenisMutasi == 'Meninggal' || mutasi.jenisMutasi == 'Pindah'
-                    ? (mutasi.jenisMutasi == 'Meninggal' ? Icons.heart_broken : Icons.logout)
-                    : (mutasi.jenisMutasi == 'Lahir' ? Icons.child_friendly : Icons.login),
-                color: mutasi.jenisMutasi == 'Meninggal' || mutasi.jenisMutasi == 'Pindah' ? Colors.red : Colors.green,
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: mutasi.jenisMutasi == 'Meninggal' || mutasi.jenisMutasi == 'Pindah'
+                      ? Colors.red.shade600
+                      : Colors.green.shade600,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      mutasi.jenisMutasi == 'Meninggal' || mutasi.jenisMutasi == 'Pindah'
+                          ? (mutasi.jenisMutasi == 'Meninggal' ? Icons.heart_broken : Icons.logout)
+                          : (mutasi.jenisMutasi == 'Lahir' ? Icons.child_friendly : Icons.login),
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Detail ${mutasi.jenisMutasi}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
-              Text('Detail \${mutasi.jenisMutasi}'),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.amber.shade200),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.amber, size: 20),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Data ini ditambahkan secara manual dan tidak terhubung dengan Profil Warga secara spesifik.',
+                                style: TextStyle(fontSize: 12, color: Colors.black87),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _buildDetailRow('Nama', mutasi.namaOrang),
+                      if (mutasi.nik != null && mutasi.nik!.isNotEmpty) _buildDetailRow('NIK', mutasi.nik!),
+                      _buildDetailRow('Tanggal', dateStr),
+                      _buildDetailRow('Bangunan (KK)', bangunanStr),
+                      if (mutasi.asal != null && mutasi.asal!.isNotEmpty) _buildDetailRow('Asal', mutasi.asal!),
+                      if (mutasi.tujuan != null && mutasi.tujuan!.isNotEmpty) _buildDetailRow('Tujuan', mutasi.tujuan!),
+                      if (mutasi.sebabKematian != null && mutasi.sebabKematian!.isNotEmpty) _buildDetailRow('Sebab Kematian', mutasi.sebabKematian!),
+                      if (mutasi.namaIbu != null && mutasi.namaIbu!.isNotEmpty) _buildDetailRow('Nama Ibu', mutasi.namaIbu!),
+                      if (mutasi.namaSuami != null && mutasi.namaSuami!.isNotEmpty) _buildDetailRow('Nama Suami', mutasi.namaSuami!),
+                      if (mutasi.statusIbu != null && mutasi.statusIbu!.isNotEmpty) _buildDetailRow('Status Ibu', mutasi.statusIbu!),
+                      if (mutasi.keterangan != null && mutasi.keterangan!.isNotEmpty) _buildDetailRow('Keterangan', mutasi.keterangan!),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade200,
+                    foregroundColor: Colors.black87,
+                    elevation: 0,
+                  ),
+                  child: const Text('Tutup'),
+                ),
+              ),
             ],
           ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildDetailRow('Nama', mutasi.namaOrang),
-                if (mutasi.nik != null && mutasi.nik!.isNotEmpty) _buildDetailRow('NIK', mutasi.nik!),
-                _buildDetailRow('Tanggal', dateStr),
-                _buildDetailRow('Bangunan (KK)', bangunanStr),
-                if (mutasi.asal != null && mutasi.asal!.isNotEmpty) _buildDetailRow('Asal', mutasi.asal!),
-                if (mutasi.tujuan != null && mutasi.tujuan!.isNotEmpty) _buildDetailRow('Tujuan', mutasi.tujuan!),
-                if (mutasi.sebabKematian != null && mutasi.sebabKematian!.isNotEmpty) _buildDetailRow('Sebab Kematian', mutasi.sebabKematian!),
-                if (mutasi.namaIbu != null && mutasi.namaIbu!.isNotEmpty) _buildDetailRow('Nama Ibu', mutasi.namaIbu!),
-                if (mutasi.namaSuami != null && mutasi.namaSuami!.isNotEmpty) _buildDetailRow('Nama Suami', mutasi.namaSuami!),
-                if (mutasi.statusIbu != null && mutasi.statusIbu!.isNotEmpty) _buildDetailRow('Status Ibu', mutasi.statusIbu!),
-                if (mutasi.keterangan != null && mutasi.keterangan!.isNotEmpty) _buildDetailRow('Keterangan', mutasi.keterangan!),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Tutup'),
-            ),
-          ],
         );
       },
     );

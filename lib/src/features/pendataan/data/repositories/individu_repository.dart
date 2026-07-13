@@ -51,6 +51,45 @@ class IndividuRepository {
     return maps.map((json) => IndividuModel.fromJson(json)).toList();
   }
 
+  Future<List<Individu>> getPenggantiKkCandidates(String keluargaId, String excludeId) async {
+    final db = await LocalDbHelper.database;
+    final maps = await db.rawQuery(
+      '''
+      SELECT * FROM individu 
+      WHERE id_keluarga = ? 
+      AND id != ?
+      AND id NOT IN (
+        SELECT id_individu_asal FROM mutasi 
+        WHERE id_individu_asal IS NOT NULL 
+        AND jenis_mutasi IN ('Meninggal', 'Pindah')
+      )
+      ''',
+      [keluargaId, excludeId],
+    );
+    return maps.map((json) => IndividuModel.fromJson(json)).toList();
+  }
+
+  Future<List<Individu>> getPenggantiKrtCandidates(String bangunanId, String excludeId) async {
+    final db = await LocalDbHelper.database;
+    final maps = await db.rawQuery(
+      '''
+      SELECT individu.* FROM individu 
+      JOIN keluarga ON individu.id_keluarga = keluarga.id
+      JOIN krt ON keluarga.id_krt = krt.id
+      WHERE krt.id_bangunan = ? 
+      AND individu.id != ?
+      AND (UPPER(individu.hubungan_keluarga) IN ('KK', 'KEPALA KELUARGA'))
+      AND individu.id NOT IN (
+        SELECT id_individu_asal FROM mutasi 
+        WHERE id_individu_asal IS NOT NULL 
+        AND jenis_mutasi IN ('Meninggal', 'Pindah')
+      )
+      ''',
+      [bangunanId, excludeId],
+    );
+    return maps.map((json) => IndividuModel.fromJson(json)).toList();
+  }
+
   Future<List<Individu>> searchIndividu(
     String query, {
     String? kelompokDawis,
@@ -98,5 +137,38 @@ class IndividuRepository {
       return IndividuModel.fromJson(maps.first);
     }
     return null;
+  }
+
+  Future<Map<String, String?>> getParentsNames(String idKeluarga) async {
+    final db = await LocalDbHelper.database;
+    
+    // Fetch ayah (Kepala Keluarga and Laki-laki)
+    final ayahMaps = await db.query(
+      'individu',
+      where: "id_keluarga = ? AND UPPER(REPLACE(hubungan_keluarga, '.', '')) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA') AND UPPER(jenis_kelamin) = 'LAKI-LAKI'",
+      whereArgs: [idKeluarga],
+      limit: 1,
+    );
+    String? namaAyah;
+    if (ayahMaps.isNotEmpty) {
+      namaAyah = ayahMaps.first['nama_lengkap'] as String?;
+    }
+
+    // Fetch ibu (Istri OR (Kepala Keluarga and Perempuan))
+    final ibuMaps = await db.query(
+      'individu',
+      where: "id_keluarga = ? AND (UPPER(REPLACE(hubungan_keluarga, '.', '')) = 'ISTRI' OR (UPPER(REPLACE(hubungan_keluarga, '.', '')) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA') AND UPPER(jenis_kelamin) = 'PEREMPUAN'))",
+      whereArgs: [idKeluarga],
+      limit: 1,
+    );
+    String? namaIbu;
+    if (ibuMaps.isNotEmpty) {
+      namaIbu = ibuMaps.first['nama_lengkap'] as String?;
+    }
+
+    return {
+      'nama_ayah': namaAyah,
+      'nama_ibu': namaIbu,
+    };
   }
 }

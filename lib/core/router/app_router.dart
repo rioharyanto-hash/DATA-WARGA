@@ -146,7 +146,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: '/view-individu/:individuId',
                 builder: (context, state) {
                   final individuId = state.pathParameters['individuId']!;
-                  return ViewIndividuScreen(individuId: individuId);
+                  final isReadOnly = state.uri.queryParameters['isReadOnly'] == 'true';
+                  return ViewIndividuScreen(individuId: individuId, isReadOnly: isReadOnly);
                 },
               ),
               GoRoute(

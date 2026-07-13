@@ -65,7 +65,17 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
     }
 
     if (searchQuery != null && searchQuery.isNotEmpty) {
-      where += ' AND (b.nama_bangunan LIKE ? OR b.alamat_lengkap LIKE ?)';
+      where += ''' AND (b.nama_bangunan LIKE ? 
+                    OR b.alamat_lengkap LIKE ? 
+                    OR EXISTS (
+                      SELECT 1 FROM krt k
+                      LEFT JOIN keluarga kel ON k.id = kel.id_krt
+                      LEFT JOIN individu i ON kel.id = i.id_keluarga
+                      WHERE k.id_bangunan = b.id 
+                      AND (k.nama_krt LIKE ? OR i.nama_lengkap LIKE ?)
+                    ))''';
+      params.add('%$searchQuery%');
+      params.add('%$searchQuery%');
       params.add('%$searchQuery%');
       params.add('%$searchQuery%');
     }

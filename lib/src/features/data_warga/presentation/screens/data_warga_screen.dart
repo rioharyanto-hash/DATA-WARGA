@@ -144,7 +144,7 @@ class DataWargaScreen extends ConsumerWidget {
                           .updateQuery(val);
                     },
                     decoration: InputDecoration(
-                      hintText: 'Cari bangunan...',
+                      hintText: 'Cari bangunan atau nama warga...',
                       hintStyle: const TextStyle(
                         color: _textMuted,
                         fontSize: 14,
