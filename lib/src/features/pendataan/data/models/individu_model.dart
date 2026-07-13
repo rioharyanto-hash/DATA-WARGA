@@ -151,6 +151,7 @@ class IndividuModel extends Individu {
       statusPerkawinan: entity.statusPerkawinan,
       pendidikanTerakhir: entity.pendidikanTerakhir,
       pekerjaan: entity.pekerjaan,
+      noTlp: entity.noTlp,
       alamatKtp: entity.alamatKtp,
       alamatDomisili: entity.alamatDomisili,
       jenisBantuan: entity.jenisBantuan,

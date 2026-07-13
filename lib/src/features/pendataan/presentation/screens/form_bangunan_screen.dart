@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../domain/entities/bangunan.dart';
 import '../providers/bangunan_provider.dart';
 import '../../../settings/presentation/providers/app_user_provider.dart';
+import '../../../../../core/database/local_db_helper.dart';
 
 class FormBangunanScreen extends ConsumerStatefulWidget {
   final String? bangunanId;
@@ -46,6 +47,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
   bool _hasStikerP4k = false;
 
   String? _existingKelompokDawis;
+  List<String> _kelompokDawisOptions = [];
 
   final List<String> _statusHunianOptions = ['Dihuni', 'Kosong', 'Dibongkar'];
   final List<String> _kepemilikanOptions = [
@@ -84,7 +86,26 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchKelompokDawisOptions();
     _loadExistingData();
+  }
+
+  Future<void> _fetchKelompokDawisOptions() async {
+    try {
+      final db = await LocalDbHelper.database;
+      final result = await db.rawQuery(
+        "SELECT DISTINCT kelompok_dawis FROM app_user WHERE kelompok_dawis IS NOT NULL AND kelompok_dawis != '' ORDER BY kelompok_dawis ASC",
+      );
+      if (mounted) {
+        setState(() {
+          _kelompokDawisOptions = result
+              .map((e) => e['kelompok_dawis'] as String)
+              .toList();
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   Future<void> _loadExistingData() async {
@@ -251,17 +272,81 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text(
-          'Form Data Bangunan',
-          style: TextStyle(
-            color: Color(0xFF1E293B),
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
+        title: const Text('Form Data Bangunan'),
+        actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final user = ref.watch(loggedInUserProvider);
+              if (user != null && user.role == 'ADMIN') {
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    right: 16.0,
+                    top: 10,
+                    bottom: 10,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      color: Colors
+                          .blue
+                          .shade700, // or a darker blue like Colors.blue.shade900
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        dropdownColor: Colors.white,
+                        value:
+                            _existingKelompokDawis != null &&
+                                _kelompokDawisOptions.contains(
+                                  _existingKelompokDawis,
+                                )
+                            ? _existingKelompokDawis
+                            : null,
+                        hint: const Text(
+                          'Pilih Kelompok',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        icon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.white,
+                        ),
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        selectedItemBuilder: (BuildContext context) {
+                          return _kelompokDawisOptions.map((String value) {
+                            return Center(
+                              child: Text(
+                                'Dawis: $value',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }).toList();
+                        },
+                        items: _kelompokDawisOptions.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            _existingKelompokDawis = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
-        ),
-
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF6366F1)),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

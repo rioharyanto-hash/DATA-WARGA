@@ -67,7 +67,8 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
   bool _isButaBahasa = false;
   final _berkebutuhanKhususController = TextEditingController();
   bool _punyaBpjs = false;
-  String? _jenisBpjs;
+  bool _isBpjsKesehatan = false;
+  bool _isBpjsKetenagakerjaan = false;
   bool _aktifPosyandu = false;
   final _frekuensiPosyanduController = TextEditingController();
   bool _isIbuMenyusui = false;
@@ -94,6 +95,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
     'Kakak',
     'Adik',
     'Famili Lain',
+    'Pembantu',
     'Lainnya',
   ];
 
@@ -113,8 +115,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
     'Konghucu',
     'Kepercayaan Lain',
   ];
-
-  final List<String> _jenisBpjsOptions = ['Mandiri', 'Askes', 'KJS', 'Lainnya'];
 
   final List<String> _yatimPiatuOptions = [
     'Tidak',
@@ -171,6 +171,13 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
 
   final List<String> _alasanBukanKbOptions = ['TIAL', 'IAT', 'IAS', 'Hamil'];
 
+  String? _getJenisBpjs() {
+    List<String> list = [];
+    if (_isBpjsKesehatan) list.add('BPJS KESEHATAN');
+    if (_isBpjsKetenagakerjaan) list.add('BPJS KETENAGA KERJAAN');
+    return list.isEmpty ? null : list.join(', ');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -207,14 +214,15 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
 
   Future<void> _fetchParentsIfAnak() async {
     if (_hubunganKeluarga.toLowerCase() != 'anak') return;
-    
+
     final assignedKeluargaId = _selectedKeluargaId ?? widget.keluargaId;
     if (assignedKeluargaId.isNotEmpty) {
       final repo = ref.read(individuRepositoryProvider);
       final parents = await repo.getParentsNames(assignedKeluargaId);
       if (mounted) {
         setState(() {
-          if (parents['nama_ayah'] != null && _namaAyahController.text.isEmpty) {
+          if (parents['nama_ayah'] != null &&
+              _namaAyahController.text.isEmpty) {
             _namaAyahController.text = parents['nama_ayah']!;
           }
           if (parents['nama_ibu'] != null && _namaIbuController.text.isEmpty) {
@@ -316,12 +324,13 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
         _agama = _ensureValidOption(individu.agama, _agamaOptions, 'Islam');
         _punyaAkteKelahiran = individu.punyaAkteKelahiran == 1;
         _punyaBpjs = individu.punyaBpjs == 1;
-        _jenisBpjs = _ensureValidOption(
-          individu.jenisBpjs,
-          _jenisBpjsOptions,
-          '',
-        );
-        if (_jenisBpjs == '') _jenisBpjs = null;
+
+        if (individu.jenisBpjs != null) {
+          final jbpjs = individu.jenisBpjs!.toUpperCase();
+          _isBpjsKesehatan = jbpjs.contains('BPJS KESEHATAN');
+          _isBpjsKetenagakerjaan = jbpjs.contains('BPJS KETENAGA KERJAAN');
+        }
+
         _aktifPosyandu = individu.aktifPosyandu == 1;
         _ikutKerjaBakti = individu.ikutKerjaBakti == 1;
         _isIbuMenyusui = individu.isIbuMenyusui == 1;
@@ -470,7 +479,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
             ? null
             : _noAkteController.text,
         punyaBpjs: _punyaBpjs ? 1 : 0,
-        jenisBpjs: _jenisBpjs,
+        jenisBpjs: _getJenisBpjs(),
         aktifPosyandu: _aktifPosyandu ? 1 : 0,
         frekuensiPosyandu: _frekuensiPosyanduController.text.isEmpty
             ? null
@@ -500,14 +509,19 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
 
         if (widget.jenisMutasi != null && widget.jenisMutasi!.isNotEmpty) {
           final db = await LocalDbHelper.database;
-          final res = await db.rawQuery('''
+          final res = await db.rawQuery(
+            '''
             SELECT krt.id_bangunan 
             FROM keluarga 
             JOIN krt ON keluarga.id_krt = krt.id 
             WHERE keluarga.id = ?
-          ''', [assignedKeluargaId]);
-          
-          final resolvedIdBangunan = res.isNotEmpty ? res.first['id_bangunan'] as String : '';
+          ''',
+            [assignedKeluargaId],
+          );
+
+          final resolvedIdBangunan = res.isNotEmpty
+              ? res.first['id_bangunan'] as String
+              : '';
 
           final mutasi = Mutasi(
             id: const Uuid().v4(),
@@ -717,21 +731,18 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                         await _fetchParentsIfAnak();
                       }
                     },
-                    validator: (val) => val == null || val.isEmpty ? 'Wajib diisi' : null,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Wajib diisi' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _namaAyahController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nama Ayah',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Nama Ayah'),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _namaIbuController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nama Ibu',
-                    ),
+                    decoration: const InputDecoration(labelText: 'Nama Ibu'),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
@@ -985,22 +996,29 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                     contentPadding: EdgeInsets.zero,
                   ),
                   if (_punyaBpjs) ...[
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      initialValue: _jenisBpjs,
-                      decoration: const InputDecoration(
-                        labelText: 'Jenis BPJS',
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Column(
+                        children: [
+                          CheckboxListTile(
+                            title: const Text('BPJS KESEHATAN'),
+                            value: _isBpjsKesehatan,
+                            onChanged: (val) =>
+                                setState(() => _isBpjsKesehatan = val ?? false),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          CheckboxListTile(
+                            title: const Text('BPJS KETENAGA KERJAAN'),
+                            value: _isBpjsKetenagakerjaan,
+                            onChanged: (val) => setState(
+                              () => _isBpjsKetenagakerjaan = val ?? false,
+                            ),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ],
                       ),
-                      items: [
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text('- Pilih Jenis -'),
-                        ),
-                        ..._jenisBpjsOptions.map(
-                          (e) => DropdownMenuItem(value: e, child: Text(e)),
-                        ),
-                      ],
-                      onChanged: (val) => setState(() => _jenisBpjs = val),
                     ),
                   ],
                   const SizedBox(height: 16),
