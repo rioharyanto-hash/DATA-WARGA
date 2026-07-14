@@ -156,10 +156,82 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     );
   }
 
+  Widget _buildDropdownField(
+    String label,
+    TextEditingController controller,
+    List<String> items,
+  ) {
+    String? currentValue = items.contains(controller.text) ? controller.text : null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        initialValue: currentValue,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        items: items.map((item) {
+          return DropdownMenuItem(
+            value: item,
+            child: Text(item),
+          );
+        }).toList(),
+        onChanged: (val) {
+          if (val != null) {
+            controller.text = val;
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildDateField(
+    String label,
+    TextEditingController controller,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        readOnly: true,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          suffixIcon: const Icon(Icons.calendar_today),
+        ),
+        onTap: () async {
+          final now = DateTime.now();
+          final initial = controller.text.isNotEmpty ? DateTime.tryParse(controller.text) ?? now : now;
+          final selectedDate = await showDatePicker(
+            context: context,
+            initialDate: initial,
+            firstDate: DateTime(1900),
+            lastDate: now,
+          );
+          if (selectedDate != null) {
+            controller.text = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(loggedInUserProvider);
     final isAdmin = currentUser?.role == 'ADMIN';
+
+    final pendidikanList = [
+      'Tidak/Belum Sekolah',
+      'SD/MI',
+      'SMP/MTs',
+      'SMA/SMK/MA',
+      'D1/D2/D3',
+      'S1/D4',
+      'S2',
+      'S3',
+    ];
+    final rtRwList = List.generate(20, (i) => (i + 1).toString().padLeft(3, '0'));
 
     return Scaffold(
       appBar: AppBar(
@@ -193,36 +265,71 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // 1. Informasi Akun
               Card(
                 elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Text(
+                        'Informasi Akun',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       _buildField('Nama Kelompok', _kelompokDawisController, readOnly: !isAdmin),
                       _buildField(
-                        'Nama Kader',
-                        _namaController,
-                        required: true,
-                      ),
-                      _buildField(
-                        'No ID Kader',
+                        'ID Kader / Username',
                         _idKaderController,
                         required: true,
                         readOnly: !isAdmin,
-                      ),
-                      _buildField('NIK Kader', _nikController),
-                      _buildField('Tempat Lahir', _tempatLahirController),
-                      _buildField('Tanggal Lahir', _tanggalLahirController),
-                      _buildField(
-                        'Pendidikan Terakhir',
-                        _pendidikanTerakhirController,
                       ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
+              
+              // 2. Data Diri
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Data Diri',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildField(
+                        'Nama Lengkap',
+                        _namaController,
+                        required: true,
+                      ),
+                      _buildField('NIK Kader', _nikController),
+                      _buildField('Tempat Lahir', _tempatLahirController),
+                      _buildDateField('Tanggal Lahir', _tanggalLahirController),
+                      _buildDropdownField(
+                        'Pendidikan Terakhir',
+                        _pendidikanTerakhirController,
+                        pendidikanList
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 3. Alamat & Kontak
               Card(
                 elevation: 2,
                 child: Padding(
@@ -241,9 +348,9 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                       _buildField('Alamat', _alamatController),
                       Row(
                         children: [
-                          Expanded(child: _buildField('RT', _rtController)),
+                          Expanded(child: _buildDropdownField('RT', _rtController, rtRwList)),
                           const SizedBox(width: 16),
-                          Expanded(child: _buildField('RW', _rwController)),
+                          Expanded(child: _buildDropdownField('RW', _rwController, rtRwList)),
                         ],
                       ),
                       _buildField('Kelurahan', _kelurahanController),

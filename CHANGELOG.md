@@ -1,4 +1,10 @@
 ## [2026-07-14]
+### [PATCH] - Versi 1.9.14+37
+- Menyempurnakan desain antarmuka (UI) form edit Profil Kader Dawis agar terstruktur rapi ke dalam beberapa kelompok (*Informasi Akun*, *Data Diri*, *Alamat & Kontak*) layaknya form admin.
+- Menyeragamkan opsi menu *dropdown* Pendidikan Terakhir di Profil Kader dengan yang ada di menu Form Data Individu.
+- Menambahkan fungsionalitas kalender (*Date Picker*) interaktif untuk memudahkan pengisian tanggal lahir Kader.
+- Mengganti isian manual RT dan RW menjadi opsi *dropdown* (001-020).
+
 ### [PATCH] - Versi 1.9.13+36
 - Memisahkan secara penuh peran **Kepala Keluarga (KK)** dengan **Kepala Rumah Tangga (KRT)**. KRT tidak lagi dipaksa sinkron secara otomatis dengan orang yang berstatus "Kepala Keluarga", sehingga mengakomodasi kondisi di mana suami adalah KK namun Istri/keluarga lain yang bertindak sebagai KRT.
 - Menambahkan **Dropdown Pemilihan KRT** pada saat mengedit Data KRT. Dropdown ini memuat seluruh anggota keluarga yang ada dalam KRT tersebut, sehingga Kader tinggal memilih orangnya tanpa harus mengetik NIK dan Nama dari awal.
