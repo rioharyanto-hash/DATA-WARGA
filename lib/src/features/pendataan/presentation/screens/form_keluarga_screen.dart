@@ -58,7 +58,7 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
   }
 
   Future<void> _loadBangunanList() async {
-    final list = await ref.read(bangunanRepositoryProvider).getAllBangunan();
+    final list = await ref.read(daftarBangunanProvider.future);
     setState(() {
       _bangunanList = list;
     });

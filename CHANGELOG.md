@@ -1,3 +1,14 @@
+## [2026-07-14]
+### [PATCH] - Versi 1.9.13+36
+- Memisahkan secara penuh peran **Kepala Keluarga (KK)** dengan **Kepala Rumah Tangga (KRT)**. KRT tidak lagi dipaksa sinkron secara otomatis dengan orang yang berstatus "Kepala Keluarga", sehingga mengakomodasi kondisi di mana suami adalah KK namun Istri/keluarga lain yang bertindak sebagai KRT.
+- Menambahkan **Dropdown Pemilihan KRT** pada saat mengedit Data KRT. Dropdown ini memuat seluruh anggota keluarga yang ada dalam KRT tersebut, sehingga Kader tinggal memilih orangnya tanpa harus mengetik NIK dan Nama dari awal.
+- Memperbaiki perhitungan pada **Dashboard** sehingga hanya merangkum data wilayah/bangunan yang dikelola secara spesifik oleh Kader yang sedang login.
+- Menyempurnakan filter **Laporan Form Lampid (Form 1 & 2)** agar tidak bercampur dengan data Kader atau kelompok Dasawisma lain.
+- Membedakan warna identitas visual *(header, appbar)* pada **Laporan Ringkasan** menjadi kuning agar tidak tertukar dengan **Laporan Rincian** yang berwarna biru.
+- Mencegah perubahan sembarangan pada `Nama Kelompok` dan `ID Kader` di menu Profil jika yang login adalah Kader. Kolom tersebut akan dinonaktifkan *(Read Only)* dan hanya dapat diedit oleh peran Admin.
+- Menambahkan visibilitas **Nomor Bangunan** pada antarmuka *Daftar Bangunan* agar mudah diidentifikasi.
+- Memperbaiki isu *SQLite logic error (no such column)* yang terjadi saat menyimpan perubahan data Kartu Keluarga.
+
 ## [2026-07-11]
 ### [PATCH] - Versi 1.9.10+33
 - Menambahkan skrip pemulihan database (v21 ke v22) untuk mengembalikan/menyelamatkan riwayat mutasi warga yang sempat hilang dari daftar (seperti data kematian sebelumnya) akibat dampak langsung dari proses penghapusan profil individu pada update versi lawas.

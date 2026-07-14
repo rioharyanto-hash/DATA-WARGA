@@ -35,17 +35,57 @@ class DashboardRepositoryImpl implements DashboardRepository {
     String bWhere = '1=1';
     List<Object?> bParams = [];
 
-    if (rw != null && rw.isNotEmpty) {
-      bWhere += ' AND b.rw = ?';
-      bParams.add(rw);
+    if (kelompokDawis == null || kelompokDawis.isEmpty) {
+      if (rw != null && rw.isNotEmpty) {
+        bWhere += ' AND b.rw = ?';
+        bParams.add(rw);
+      }
+      if (rt != null && rt.isNotEmpty) {
+        bWhere += ' AND b.rt = ?';
+        bParams.add(rt);
+      }
     }
-    if (rt != null && rt.isNotEmpty) {
-      bWhere += ' AND b.rt = ?';
-      bParams.add(rt);
-    }
+
     if (kelompokDawis != null && kelompokDawis.isNotEmpty) {
-      bWhere += ' AND b.kelompok_dawis = ?';
-      bParams.add(kelompokDawis);
+      // Manual filter in Dart due to naming inconsistencies
+      final normalizedName = kelompokDawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+      
+      final bQuery = bWhere.replaceAll('b.', '');
+      final bangunanData = await db.rawQuery(
+        'SELECT id, kelompok_dawis FROM bangunan WHERE $bQuery',
+        bParams,
+      );
+      
+      final filteredBangunan = bangunanData.where((e) {
+        final kd = e['kelompok_dawis']?.toString() ?? '';
+        final normalizedKd = kd.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normalizedKd == normalizedName;
+      }).toList();
+      
+      if (filteredBangunan.isEmpty) {
+        return DashboardSummary(
+          jumlahBangunan: 0,
+          jumlahKk: 0,
+          jumlahMutasi: 0,
+          jumlahBalita: 0,
+          jumlahLansia: 0,
+          jumlahWus: 0,
+          jumlahPus: 0,
+          jumlahLakiLaki: 0,
+          jumlahPerempuan: 0,
+          pendidikanGrouping: {},
+          pekerjaanGrouping: {},
+          umurGrouping: {},
+          jumlahDisabilitas: 0,
+          jumlahLahir: 0,
+          jumlahMeninggal: 0,
+          jumlahPindah: 0,
+          jumlahDatang: 0,
+        );
+      }
+      
+      final ids = filteredBangunan.map((e) => "'${e['id']}'").join(',');
+      bWhere += ' AND b.id IN ($ids)';
     }
 
     String bangunanWhere = bWhere.replaceAll('b.', '');

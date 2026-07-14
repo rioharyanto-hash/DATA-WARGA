@@ -10,10 +10,12 @@ class DataWargaBangunan {
   final int lakiLaki;
   final int perempuan;
   final int? kategoriBangunan;
+  final String? nomorBangunan;
 
   const DataWargaBangunan({
     required this.id,
     required this.namaBangunan,
+    this.nomorBangunan,
     required this.alamat,
     required this.rt,
     required this.rw,

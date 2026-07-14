@@ -19,7 +19,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
 
   final _namaController = TextEditingController();
   final _idKaderController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _passwordController = TextEditingController(text: 'dawis010');
   final _rwController = TextEditingController();
   final _rtController = TextEditingController();
   final _dawisController = TextEditingController();
@@ -43,6 +43,9 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  String? _dawisRt = '001';
+  String? _dawisNoUrut = '001';
 
   final List<String> _roles = ['ADMIN', 'RW', 'RT', 'KADER'];
   final List<String> _pendidikanList = [
@@ -86,6 +89,15 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
       _rwController.text = user.rw ?? '';
       _rtController.text = user.rt ?? '';
       _dawisController.text = user.kelompokDawis ?? '';
+      
+      if (user.kelompokDawis != null && user.kelompokDawis!.startsWith('BUAH GOWOK 010.')) {
+        final parts = user.kelompokDawis!.substring('BUAH GOWOK 010.'.length).split('.');
+        if (parts.length >= 2) {
+          _dawisRt = parts[0];
+          _dawisNoUrut = parts[1];
+        }
+      }
+      
       _nikController.text = user.nik ?? '';
       _tempatLahirController.text = user.tempatLahir ?? '';
       String initialDate = user.tanggalLahir ?? '';
@@ -160,7 +172,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
             ? _rtController.text.trim()
             : null,
         kelompokDawis: _selectedRole == 'KADER'
-            ? _dawisController.text.trim()
+            ? 'BUAH GOWOK 010.${_dawisRt ?? '001'}.${_dawisNoUrut ?? '001'}'
             : null,
         nik: _nikController.text.trim(),
         tempatLahir: _tempatLahirController.text.trim(),
@@ -280,7 +292,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           flex: 2,
                                           child:
                                               DropdownButtonFormField<String>(
-                                                initialValue: _selectedRole,
+                                                value: _selectedRole,
                                                 decoration:
                                                     const InputDecoration(
                                                       labelText: 'Role',
@@ -302,9 +314,9 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                     .toList(),
                                                 onChanged: (val) {
                                                   if (val != null) {
-                                                    setState(
-                                                      () => _selectedRole = val,
-                                                    );
+                                                    setState(() {
+                                                      _selectedRole = val;
+                                                    });
                                                   }
                                                 },
                                               ),
@@ -397,21 +409,56 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                       children: [
                                         if (_selectedRole == 'KADER')
                                           Expanded(
-                                            child: TextFormField(
-                                              controller: _dawisController,
-                                              decoration: const InputDecoration(
-                                                labelText: 'Nama Kelompok',
-                                                border: OutlineInputBorder(),
-                                                contentPadding:
-                                                    EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 8,
-                                                    ),
-                                              ),
-                                              validator: (val) =>
-                                                  val == null || val.isEmpty
-                                                  ? 'Wajib diisi'
-                                                  : null,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Nama Kelompok',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.black54,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Container(
+                                                  height: 48,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(color: Colors.grey.shade400),
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                                  child: Row(
+                                                    children: [
+                                                      const Text('BUAH GOWOK 010.', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                                                      const SizedBox(width: 4),
+                                                      DropdownButtonHideUnderline(
+                                                        child: DropdownButton<String>(
+                                                          value: _dawisRt,
+                                                          icon: const Icon(Icons.arrow_drop_down, size: 16),
+                                                          items: List.generate(20, (index) {
+                                                            final val = (index + 1).toString().padLeft(3, '0');
+                                                            return DropdownMenuItem(value: val, child: Text(val, style: const TextStyle(fontSize: 13)));
+                                                          }),
+                                                          onChanged: (val) => setState(() => _dawisRt = val),
+                                                        ),
+                                                      ),
+                                                      const Text('.', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                                                      const SizedBox(width: 4),
+                                                      DropdownButtonHideUnderline(
+                                                        child: DropdownButton<String>(
+                                                          value: _dawisNoUrut,
+                                                          icon: const Icon(Icons.arrow_drop_down, size: 16),
+                                                          items: List.generate(5, (index) {
+                                                            final val = (index + 1).toString().padLeft(3, '0');
+                                                            return DropdownMenuItem(value: val, child: Text(val, style: const TextStyle(fontSize: 13)));
+                                                          }),
+                                                          onChanged: (val) => setState(() => _dawisNoUrut = val),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         if (_selectedRole == 'KADER')
@@ -495,8 +542,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                         Expanded(
                                           child:
                                               DropdownButtonFormField<String>(
-                                                initialValue:
-                                                    _selectedPendidikan,
+                                                value: _selectedPendidikan,
                                                 decoration:
                                                     const InputDecoration(
                                                       labelText:
@@ -574,6 +620,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           flex: 1,
                                           child: TextFormField(
                                             controller: _rtController,
+                                            keyboardType: TextInputType.number,
                                             decoration: const InputDecoration(
                                               labelText: 'RT',
                                               border: OutlineInputBorder(),
@@ -590,6 +637,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           flex: 1,
                                           child: TextFormField(
                                             controller: _rwController,
+                                            keyboardType: TextInputType.number,
                                             decoration: const InputDecoration(
                                               labelText: 'RW',
                                               border: OutlineInputBorder(),

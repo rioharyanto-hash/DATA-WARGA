@@ -16,11 +16,19 @@ class KeluargaRepository {
 
   Future<List<Keluarga>> getKeluargaByKrtId(String krtId) async {
     final db = await LocalDbHelper.database;
-    final maps = await db.query(
-      'keluarga',
-      where: 'id_krt = ?',
-      whereArgs: [krtId],
-    );
+    final query = '''
+      SELECT kel.*,
+      COALESCE(
+        (SELECT nama_lengkap FROM individu i 
+         WHERE i.id_keluarga = kel.id 
+         AND UPPER(i.hubungan_keluarga) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA') 
+         LIMIT 1),
+        'Tanpa Nama'
+      ) as nama_kepala_keluarga
+      FROM keluarga kel
+      WHERE kel.id_krt = ?
+    ''';
+    final maps = await db.rawQuery(query, [krtId]);
     return maps.map((json) => KeluargaModel.fromJson(json)).toList();
   }
 
@@ -69,11 +77,9 @@ class KeluargaRepository {
       LEFT JOIN krt ON k.id_krt = krt.id
       LEFT JOIN bangunan b ON krt.id_bangunan = b.id
       LEFT JOIN individu i ON i.id_keluarga = k.id AND (
-        UPPER(i.status_dgn_krt) IN ('KEPALA RUMAH TANGGA', 'KEPALA KELUARGA', 'KK')
-        OR UPPER(i.status_dgn_krt) LIKE 'KK %'
-        OR UPPER(i.hubungan_keluarga) IN ('KEPALA KELUARGA', 'KK', 'KEPALA RUMAH TANGGA')
-        OR UPPER(i.hubungan_keluarga) LIKE 'KK %'
-      )
+          UPPER(i.hubungan_keluarga) IN ('KEPALA KELUARGA', 'KK', 'KEPALA RUMAH TANGGA')
+          OR UPPER(i.hubungan_keluarga) LIKE 'KK %'
+        )
       WHERE (k.no_kk LIKE ? OR COALESCE(i.nama_lengkap, krt.nama_krt) LIKE ? OR EXISTS (SELECT 1 FROM individu WHERE id_keluarga = k.id AND nama_lengkap LIKE ?))
     ''';
 

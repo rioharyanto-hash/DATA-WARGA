@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/dashboard_provider.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -540,34 +541,41 @@ class DashboardScreen extends ConsumerWidget {
     final selectedRw = ref.watch(dashboardRwFilterProvider);
     final selectedRt = ref.watch(dashboardRtFilterProvider);
     final selectedKader = ref.watch(dashboardKaderFilterProvider);
+    final user = ref.watch(loggedInUserProvider);
 
     return filterOptionsAsync.when(
       data: (options) {
         return Row(
           children: [
-            _buildDropdown(
-              value: selectedRw,
-              items: options['rw'] ?? [],
-              hint: 'RW',
-              onChanged: (val) =>
-                  ref.read(dashboardRwFilterProvider.notifier).update(val),
-            ),
-            const SizedBox(width: 8),
-            _buildDropdown(
-              value: selectedRt,
-              items: options['rt'] ?? [],
-              hint: 'RT',
-              onChanged: (val) =>
-                  ref.read(dashboardRtFilterProvider.notifier).update(val),
-            ),
-            const SizedBox(width: 8),
-            _buildDropdown(
-              value: selectedKader,
-              items: options['kader'] ?? [],
-              hint: 'Kader',
-              onChanged: (val) =>
-                  ref.read(dashboardKaderFilterProvider.notifier).update(val),
-            ),
+            if (user?.role == 'ADMIN') ...[
+              _buildDropdown(
+                value: selectedRw,
+                items: options['rw'] ?? [],
+                hint: 'RW',
+                onChanged: (val) =>
+                    ref.read(dashboardRwFilterProvider.notifier).update(val),
+              ),
+              const SizedBox(width: 8),
+            ],
+            if (user?.role == 'ADMIN' || user?.role == 'RW') ...[
+              _buildDropdown(
+                value: selectedRt,
+                items: options['rt'] ?? [],
+                hint: 'RT',
+                onChanged: (val) =>
+                    ref.read(dashboardRtFilterProvider.notifier).update(val),
+              ),
+              const SizedBox(width: 8),
+            ],
+            if (user?.role != 'KADER') ...[
+              _buildDropdown(
+                value: selectedKader,
+                items: options['kader'] ?? [],
+                hint: 'Kader',
+                onChanged: (val) =>
+                    ref.read(dashboardKaderFilterProvider.notifier).update(val),
+              ),
+            ],
           ],
         );
       },

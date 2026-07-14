@@ -299,17 +299,11 @@ class ReportController extends Notifier<ReportState> {
           targetKaders = allList
               .where((map) => map['rw'] == currentUser.rw)
               .toList();
-        } else if (currentUser.role == 'RT') {
+        } else if (currentUser.role == 'RT' || currentUser.role == 'KADER') {
           targetKaders = allList
               .where(
                 (map) =>
                     map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
-              )
-              .toList();
-        } else if (currentUser.role == 'KADER') {
-          targetKaders = allList
-              .where(
-                (map) => map['kelompok_dawis'] == currentUser.kelompokDawis,
               )
               .toList();
         }
@@ -362,17 +356,11 @@ class ReportController extends Notifier<ReportState> {
           targetKaders = allList
               .where((map) => map['rw'] == currentUser.rw)
               .toList();
-        } else if (currentUser.role == 'RT') {
+        } else if (currentUser.role == 'RT' || currentUser.role == 'KADER') {
           targetKaders = allList
               .where(
                 (map) =>
                     map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
-              )
-              .toList();
-        } else if (currentUser.role == 'KADER') {
-          targetKaders = allList
-              .where(
-                (map) => map['kelompok_dawis'] == currentUser.kelompokDawis,
               )
               .toList();
         }
@@ -620,16 +608,12 @@ class ReportController extends Notifier<ReportState> {
         targetKaders = allList
             .where((map) => map['rw'] == currentUser.rw)
             .toList();
-      } else if (currentUser.role == 'RT') {
+      } else if (currentUser.role == 'RT' || currentUser.role == 'KADER') {
         targetKaders = allList
             .where(
               (map) =>
                   map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
             )
-            .toList();
-      } else if (currentUser.role == 'KADER') {
-        targetKaders = allList
-            .where((map) => map['kelompok_dawis'] == currentUser.kelompokDawis)
             .toList();
       }
     }

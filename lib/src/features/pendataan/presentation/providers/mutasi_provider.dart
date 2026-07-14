@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/mutasi.dart';
 import '../../data/repositories/mutasi_repository.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
 
 final mutasiRepositoryProvider = Provider<MutasiRepository>((ref) {
   return MutasiRepository();
@@ -32,7 +33,13 @@ final mutasiFilteredProvider = FutureProvider.family<List<Mutasi>, String?>((
   kelompokDawis,
 ) async {
   final repo = ref.watch(mutasiRepositoryProvider);
-  if (kelompokDawis == null || kelompokDawis.isEmpty) {
+  final user = ref.watch(loggedInUserProvider);
+
+  if (user?.role == 'KADER') {
+    return await repo.getMutasiByKelompokDawis(user!.kelompokDawis ?? '');
+  }
+
+  if (kelompokDawis == null || kelompokDawis.isEmpty || kelompokDawis == 'Semua') {
     return await repo.getAllMutasi();
   } else {
     return await repo.getMutasiByKelompokDawis(kelompokDawis);

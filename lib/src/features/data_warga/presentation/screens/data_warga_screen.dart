@@ -255,20 +255,36 @@ class DataWargaScreen extends ConsumerWidget {
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: isSelected ? const Color(0xFFDBEAFE) : const Color(0xFFF1F5F9),
-                                                    borderRadius: BorderRadius.circular(4),
-                                                  ),
-                                                  child: Text(
-                                                    item.jenisBangunan,
-                                                    style: TextStyle(
-                                                      fontSize: 10,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: isSelected ? const Color(0xFF1E40AF) : _textMuted,
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                                  children: [
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: isSelected ? const Color(0xFFDBEAFE) : const Color(0xFFF1F5F9),
+                                                        borderRadius: BorderRadius.circular(4),
+                                                      ),
+                                                      child: Text(
+                                                        item.jenisBangunan,
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: isSelected ? const Color(0xFF1E40AF) : _textMuted,
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ),
+                                                    if (item.nomorBangunan != null && item.nomorBangunan!.isNotEmpty) ...[
+                                                      const SizedBox(height: 4),
+                                                      Text(
+                                                        'No. ${item.nomorBangunan}',
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: isSelected ? const Color(0xFF1E40AF) : Colors.black87,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ],
                                                 ),
                                               ],
                                             ),

@@ -136,14 +136,18 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     String label,
     TextEditingController controller, {
     bool required = false,
+    bool readOnly = false,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
+        readOnly: readOnly,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
+          filled: readOnly,
+          fillColor: readOnly ? Colors.grey.shade200 : null,
         ),
         validator: required
             ? (v) => v == null || v.isEmpty ? 'Wajib diisi' : null
@@ -154,6 +158,9 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = ref.watch(loggedInUserProvider);
+    final isAdmin = currentUser?.role == 'ADMIN';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -192,7 +199,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      _buildField('Nama Kelompok', _kelompokDawisController),
+                      _buildField('Nama Kelompok', _kelompokDawisController, readOnly: !isAdmin),
                       _buildField(
                         'Nama Kader',
                         _namaController,
@@ -202,6 +209,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                         'No ID Kader',
                         _idKaderController,
                         required: true,
+                        readOnly: !isAdmin,
                       ),
                       _buildField('NIK Kader', _nikController),
                       _buildField('Tempat Lahir', _tempatLahirController),

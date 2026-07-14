@@ -19,20 +19,30 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
       where += ' AND rw = ? AND rt = ?';
       params.add(user.rw);
       params.add(user.rt);
-    } else if (user.role == 'KADER') {
-      where += ' AND kelompok_dawis = ?';
-      params.add(user.kelompokDawis);
     }
 
     final query = '''
-      SELECT DISTINCT rt 
+      SELECT DISTINCT rt, kelompok_dawis 
       FROM bangunan 
       WHERE $where AND rt IS NOT NULL AND rt != ''
-      ORDER BY rt ASC
     ''';
     
     final results = await db.rawQuery(query, params);
-    return results.map((e) => e['rt'].toString()).toList();
+    
+    // Manual filter for KADER due to naming inconsistencies
+    Iterable<Map<String, Object?>> filteredResults = results;
+    if (user.role == 'KADER' && user.kelompokDawis != null) {
+      final normalizedName = user.kelompokDawis!.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+      filteredResults = results.where((e) {
+        final kd = e['kelompok_dawis']?.toString() ?? '';
+        final normalizedKd = kd.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normalizedKd == normalizedName;
+      });
+    }
+    
+    final rtSet = filteredResults.map((e) => e['rt'].toString()).toSet();
+    final rtList = rtSet.toList()..sort();
+    return rtList;
   }
 
   @override
@@ -54,9 +64,6 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
       where += ' AND b.rw = ? AND b.rt = ?';
       params.add(user.rw);
       params.add(user.rt);
-    } else if (user.role == 'KADER') {
-      where += ' AND b.kelompok_dawis = ?';
-      params.add(user.kelompokDawis);
     }
 
     if (rtFilter != null && rtFilter.isNotEmpty && rtFilter != 'Semua') {
@@ -83,7 +90,7 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
     final query =
         '''
       SELECT 
-        b.id, b.nama_bangunan, b.alamat_lengkap as alamat, b.rt, b.rw, '' as kelurahan, b.kategori_bangunan,
+        b.id, b.nama_bangunan, b.nomor_urut_bangunan, b.alamat_lengkap as alamat, b.rt, b.rw, '' as kelurahan, b.kategori_bangunan, b.kelompok_dawis,
         (SELECT COUNT(*) FROM keluarga kel JOIN krt k ON kel.id_krt = k.id WHERE k.id_bangunan = b.id) as total_kk,
         (SELECT COUNT(*) FROM individu i JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id WHERE k.id_bangunan = b.id) as total_penghuni,
         (SELECT COUNT(*) FROM individu i JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id WHERE k.id_bangunan = b.id AND i.jenis_kelamin = 'Laki-laki') as laki_laki,
@@ -95,10 +102,22 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
 
     final results = await db.rawQuery(query, params);
 
-    return results.map((e) {
+    // Manual filter for KADER due to naming inconsistencies
+    Iterable<Map<String, Object?>> filteredResults = results;
+    if (user.role == 'KADER' && user.kelompokDawis != null) {
+      final normalizedName = user.kelompokDawis!.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+      filteredResults = results.where((e) {
+        final kd = e['kelompok_dawis']?.toString() ?? '';
+        final normalizedKd = kd.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        return normalizedKd == normalizedName;
+      });
+    }
+
+    return filteredResults.map((e) {
       return DataWargaBangunan(
         id: e['id']?.toString() ?? '',
         namaBangunan: e['nama_bangunan']?.toString() ?? '',
+        nomorBangunan: e['nomor_urut_bangunan']?.toString(),
         alamat: e['alamat']?.toString() ?? '',
         rt: e['rt']?.toString() ?? '',
         rw: e['rw']?.toString() ?? '',
@@ -141,7 +160,10 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
         kel.id, 
         k.id as id_krt,
         COALESCE(
-          (SELECT nama_lengkap FROM individu i WHERE i.id_keluarga = kel.id AND UPPER(i.status_dgn_krt) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA') LIMIT 1),
+          (SELECT nama_lengkap FROM individu i 
+           WHERE i.id_keluarga = kel.id 
+           AND UPPER(i.hubungan_keluarga) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA') 
+           LIMIT 1),
           k.nama_krt,
           'Tanpa Nama'
         ) as nama_kepala_keluarga, 

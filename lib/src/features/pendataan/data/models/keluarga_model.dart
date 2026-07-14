@@ -7,6 +7,7 @@ class KeluargaModel extends Keluarga {
     required super.noKk,
     required super.statusVisitasi,
     super.isSynced = 0,
+    super.namaKepalaKeluarga,
   });
 
   factory KeluargaModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +17,7 @@ class KeluargaModel extends Keluarga {
       noKk: json['no_kk'] as String,
       statusVisitasi: json['status_visitasi'] as String,
       isSynced: json['is_synced'] as int? ?? 0,
+      namaKepalaKeluarga: json['nama_kepala_keluarga'] as String?,
     );
   }
 
@@ -36,6 +38,7 @@ class KeluargaModel extends Keluarga {
       noKk: entity.noKk,
       statusVisitasi: entity.statusVisitasi,
       isSynced: entity.isSynced,
+      namaKepalaKeluarga: entity.namaKepalaKeluarga,
     );
   }
 }

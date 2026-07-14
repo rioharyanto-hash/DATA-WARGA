@@ -354,7 +354,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: _isRingkasan ? Colors.amber.shade700 : Colors.blue.shade700,
 
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,6 +471,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Form I & II'),
                           generatePdf: () {
                             final name = _isRingkasan
@@ -494,6 +495,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Kuantitas'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -518,6 +520,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Rekapitulasi'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -542,6 +545,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Profil Kependudukan'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -566,6 +570,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Potensi Warga'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -590,6 +595,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Form Ibu Hamil'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -614,6 +620,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Manual'),
                           generatePdf: () => ref
                               .read(reportControllerProvider.notifier)
@@ -634,6 +641,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
+                            isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Yatim Piatu'),
                           generatePdf: () => ref
                               .read(reportControllerProvider.notifier)

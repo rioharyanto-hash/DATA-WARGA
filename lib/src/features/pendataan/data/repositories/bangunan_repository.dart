@@ -22,12 +22,17 @@ class BangunanRepository {
 
   Future<List<Bangunan>> getBangunanByKelompokDawis(String kelompok) async {
     final db = await LocalDbHelper.database;
-    final maps = await db.query(
-      'bangunan',
-      where: 'kelompok_dawis = ?',
-      whereArgs: [kelompok],
-    );
-    return maps.map((json) => BangunanModel.fromJson(json)).toList();
+    final maps = await db.query('bangunan');
+    
+    final normalizedInput = kelompok.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+    
+    final filteredMaps = maps.where((row) {
+      final dbKelompok = (row['kelompok_dawis'] as String?) ?? '';
+      final normalizedDb = dbKelompok.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+      return normalizedDb == normalizedInput;
+    }).toList();
+    
+    return filteredMaps.map((json) => BangunanModel.fromJson(json)).toList();
   }
 
   Future<List<Bangunan>> getBangunanByRw(String rw) async {

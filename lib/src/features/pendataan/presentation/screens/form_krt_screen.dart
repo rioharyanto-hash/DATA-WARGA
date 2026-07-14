@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/krt.dart';
 import '../providers/krt_provider.dart';
+import '../../../../../core/database/local_db_helper.dart';
 
 class FormKrtScreen extends ConsumerStatefulWidget {
   final String? bangunanId;
@@ -26,6 +27,8 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
   final _noKkController = TextEditingController();
 
   String? _existingBangunanId;
+  List<Map<String, dynamic>> _krtCandidates = [];
+  String? _selectedCandidateId;
 
   @override
   void initState() {
@@ -38,12 +41,46 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
       final repository = ref.read(krtRepositoryProvider);
       final krt = await repository.getKrtById(widget.krtId!);
       if (krt != null) {
-        setState(() {
-          _existingBangunanId = krt.idBangunan;
-          _namaController.text = krt.namaKrt;
-          _nikController.text = krt.nikKrt;
-          _noKkController.text = krt.noKkKrt;
-        });
+        try {
+          final db = await LocalDbHelper.database;
+          final result = await db.rawQuery('''
+            SELECT i.id, i.nama_lengkap, i.nik
+            FROM individu i
+            JOIN keluarga k ON i.id_keluarga = k.id
+            WHERE k.id_krt = ?
+            AND i.id NOT IN (
+                 SELECT id_individu_asal FROM mutasi 
+                 WHERE id_individu_asal IS NOT NULL 
+                 AND jenis_mutasi IN ('Meninggal', 'Pindah')
+            )
+          ''', [widget.krtId]);
+          
+          if (mounted) {
+            setState(() {
+              _existingBangunanId = krt.idBangunan;
+              _namaController.text = krt.namaKrt;
+              _nikController.text = krt.nikKrt;
+              _noKkController.text = krt.noKkKrt;
+              _krtCandidates = result;
+              
+              for (var c in _krtCandidates) {
+                if (c['nama_lengkap'] == krt.namaKrt) {
+                  _selectedCandidateId = c['id'] as String;
+                  break;
+                }
+              }
+            });
+          }
+        } catch (e) {
+          if (mounted) {
+            setState(() {
+              _existingBangunanId = krt.idBangunan;
+              _namaController.text = krt.namaKrt;
+              _nikController.text = krt.nikKrt;
+              _noKkController.text = krt.noKkKrt;
+            });
+          }
+        }
       }
     } else {
       _existingBangunanId = widget.bangunanId;
@@ -222,6 +259,72 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                       style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                     ),
                     const SizedBox(height: 24),
+                    if (widget.krtId != null && _krtCandidates.isNotEmpty) ...[
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Text(
+                                'Pilih dari Anggota Keluarga (Opsional)',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF475569),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            initialValue: _selectedCandidateId,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                              ),
+                            ),
+                            items: [
+                              const DropdownMenuItem<String>(
+                                value: null,
+                                child: Text('- Ketik Manual / Pilih -'),
+                              ),
+                              ..._krtCandidates.map((c) {
+                                return DropdownMenuItem<String>(
+                                  value: c['id'] as String,
+                                  child: Text(c['nama_lengkap'] as String),
+                                );
+                              })
+                            ],
+                            onChanged: (val) {
+                              setState(() {
+                                _selectedCandidateId = val;
+                                if (val != null) {
+                                  final selected = _krtCandidates.firstWhere((e) => e['id'] == val);
+                                  _namaController.text = selected['nama_lengkap'] as String;
+                                  _nikController.text = selected['nik'] as String;
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ],
                     _buildOutlinedInput(
                       'Nama KRT',
                       _namaController,

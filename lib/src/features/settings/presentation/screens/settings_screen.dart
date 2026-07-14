@@ -421,32 +421,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildProfileCard(user),
-                  const SizedBox(height: 32),
-                  _buildMasterDataSection(user),
-                  const SizedBox(height: 32),
-                  if (isDesktop)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(flex: 1, child: _buildTransferMentahSection()),
-                        const SizedBox(width: 32),
-                        Expanded(
-                          flex: 1,
-                          child: _buildTransferBangunanSection(),
-                        ),
-                      ],
-                    )
-                  else
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildTransferMentahSection(),
-                        const SizedBox(height: 32),
-                        _buildTransferBangunanSection(),
-                      ],
-                    ),
-                  const SizedBox(height: 32),
-                  _buildDangerZone(),
+                  if (user.role == 'ADMIN') ...[
+                    _buildMasterDataSection(user),
+                    const SizedBox(height: 32),
+                    if (isDesktop)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 1, child: _buildTransferMentahSection()),
+                          const SizedBox(width: 32),
+                          Expanded(
+                            flex: 1,
+                            child: _buildTransferBangunanSection(),
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildTransferMentahSection(),
+                          const SizedBox(height: 32),
+                          _buildTransferBangunanSection(),
+                        ],
+                      ),
+                    const SizedBox(height: 32),
+                  ],
+                  _buildDangerZone(user.role == 'ADMIN'),
                 ],
               ),
             ),
@@ -666,7 +667,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildDangerZone() {
+  Widget _buildDangerZone(bool isAdmin) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -675,75 +676,77 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       child: Column(
         children: [
-          _buildListTile(
-            icon: Icons.delete_forever,
-            iconColor: Colors.red.shade700,
-            iconBg: Colors.red.shade50,
-            title: 'Kosongkan Semua Data',
-            titleColor: Colors.red.shade700,
-            subtitle:
-                'Hapus seluruh data bangunan & warga. Tindakan ini tidak dapat dibatalkan.',
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Konfirmasi Hapus Data'),
-                  content: const Text(
-                    'Apakah Anda yakin ingin MENGHAPUS SEMUA DATA di aplikasi ini? Tindakan ini tidak dapat dibatalkan.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Batal'),
+          if (isAdmin) ...[
+            _buildListTile(
+              icon: Icons.delete_forever,
+              iconColor: Colors.red.shade700,
+              iconBg: Colors.red.shade50,
+              title: 'Kosongkan Semua Data',
+              titleColor: Colors.red.shade700,
+              subtitle:
+                  'Hapus seluruh data bangunan & warga. Tindakan ini tidak dapat dibatalkan.',
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Konfirmasi Hapus Data'),
+                    content: const Text(
+                      'Apakah Anda yakin ingin MENGHAPUS SEMUA DATA di aplikasi ini? Tindakan ini tidak dapat dibatalkan.',
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Batal'),
                       ),
-                      onPressed: () async {
-                        Navigator.pop(ctx);
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (ctx2) =>
-                              const Center(child: CircularProgressIndicator()),
-                        );
-                        try {
-                          final db = await LocalDbHelper.database;
-                          await db.delete('bangunan');
-                          await db.delete('krt');
-                          await db.delete('keluarga');
-                          await db.delete('individu');
-                          await db.delete('mutasi');
-                          if (!mounted) return;
-                          Navigator.of(
-                            context,
-                            rootNavigator: true,
-                          ).pop(); // close loading
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Semua data berhasil dihapus!'),
-                            ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (ctx2) =>
+                                const Center(child: CircularProgressIndicator()),
                           );
-                        } catch (e) {
-                          if (!mounted) return;
-                          Navigator.of(
-                            context,
-                            rootNavigator: true,
-                          ).pop(); // close loading
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Gagal hapus data: $e')),
-                          );
-                        }
-                      },
-                      child: const Text('Hapus Semua'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          Divider(color: Colors.red.shade100, height: 1),
+                          try {
+                            final db = await LocalDbHelper.database;
+                            await db.delete('bangunan');
+                            await db.delete('krt');
+                            await db.delete('keluarga');
+                            await db.delete('individu');
+                            await db.delete('mutasi');
+                            if (!mounted) return;
+                            Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            ).pop(); // close loading
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Semua data berhasil dihapus!'),
+                              ),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            Navigator.of(
+                              context,
+                              rootNavigator: true,
+                            ).pop(); // close loading
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Gagal hapus data: $e')),
+                            );
+                          }
+                        },
+                        child: const Text('Hapus Semua'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            Divider(color: Colors.red.shade100, height: 1),
+          ],
           _buildListTile(
             icon: Icons.logout,
             iconColor: Colors.black87,

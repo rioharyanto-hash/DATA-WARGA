@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../../data/repositories/dashboard_repository_impl.dart';
@@ -39,10 +40,22 @@ final dashboardFilterOptionsProvider = FutureProvider<Map<String, List<String>>>
 // Provider untuk state management UI (memanggil data secara asynchronous)
 final dashboardSummaryProvider = FutureProvider<DashboardSummary>((ref) async {
   final repository = ref.watch(dashboardRepositoryProvider);
+  final user = ref.watch(loggedInUserProvider);
   
-  final rw = ref.watch(dashboardRwFilterProvider);
-  final rt = ref.watch(dashboardRtFilterProvider);
-  final kader = ref.watch(dashboardKaderFilterProvider);
+  String? rw = ref.watch(dashboardRwFilterProvider);
+  String? rt = ref.watch(dashboardRtFilterProvider);
+  String? kader = ref.watch(dashboardKaderFilterProvider);
+  
+  if (user?.role == 'RW') {
+    rw = user?.rw;
+  } else if (user?.role == 'RT') {
+    rw = user?.rw;
+    rt = user?.rt;
+  } else if (user?.role == 'KADER') {
+    rw = user?.rw;
+    rt = user?.rt;
+    kader = user?.kelompokDawis;
+  }
   
   return await repository.getDashboardSummary(
     rw: rw,

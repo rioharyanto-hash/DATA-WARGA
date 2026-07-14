@@ -25,9 +25,11 @@ class _LampidListScreenState extends ConsumerState<LampidListScreen> {
   Future<void> _showPrintDialog(BuildContext context) async {
     final allUsersAsync = ref.read(allUsersProvider);
     final kaderList = allUsersAsync.value?.where((u) => u.role == 'KADER').toList() ?? [];
+    final currentUser = ref.read(loggedInUserProvider);
+    final isKader = currentUser?.role == 'KADER';
     
     DateTime selectedDate = DateTime.now();
-    String? selectedDawis = _selectedKelompokDawis;
+    String? selectedDawis = isKader ? currentUser?.kelompokDawis : _selectedKelompokDawis;
 
     const List<String> monthNames = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -44,26 +46,27 @@ class _LampidListScreenState extends ConsumerState<LampidListScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  DropdownButtonFormField<String>(
-                    value: selectedDawis,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Kelompok Kader'),
-                    items: [
-                      const DropdownMenuItem<String>(
-                        value: null,
-                        child: Text('Semua Kader'),
-                      ),
-                      ...kaderList.map((k) {
-                        return DropdownMenuItem<String>(
-                          value: k.kelompokDawis,
-                          child: Text('Dawis: ${k.kelompokDawis ?? "-"}'),
-                        );
-                      }),
-                    ],
-                    onChanged: (newValue) {
-                      setState(() => selectedDawis = newValue);
-                    },
-                  ),
+                  if (!isKader)
+                    DropdownButtonFormField<String>(
+                      value: selectedDawis,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Kelompok Kader'),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('Semua Kader'),
+                        ),
+                        ...kaderList.map((k) {
+                          return DropdownMenuItem<String>(
+                            value: k.kelompokDawis,
+                            child: Text('Dawis: ${k.kelompokDawis ?? "-"}'),
+                          );
+                        }),
+                      ],
+                      onChanged: (newValue) {
+                        setState(() => selectedDawis = newValue);
+                      },
+                    ),
                   const SizedBox(height: 16),
                   InkWell(
                     onTap: () async {

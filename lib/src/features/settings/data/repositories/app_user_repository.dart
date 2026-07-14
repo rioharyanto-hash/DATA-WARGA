@@ -28,10 +28,15 @@ class AppUserRepository implements IAppUserRepository {
   @override
   Future<void> updateUser(AppUser user) async {
     final db = await LocalDbHelper.database;
-    // We assume if you call updateUser with a raw password it should be hashed.
-    // If it's already hashed, it will be hashed again. A better approach is
-    // only hashing if it's a new password. But we'll keep it simple for now.
-    final model = AppUserModel.fromEntity(user);
+    
+    // Check if the password is already a 64-character hex string (SHA-256 hash)
+    final isAlreadyHashed = RegExp(r'^[a-fA-F0-9]{64}$').hasMatch(user.password);
+    
+    final updatedUser = isAlreadyHashed 
+        ? user 
+        : user.copyWith(password: _hashPassword(user.password));
+        
+    final model = AppUserModel.fromEntity(updatedUser);
     await db.update(
       'app_user',
       model.toJson(),
