@@ -1,107 +1,180 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:dawis/core/database/local_db_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/keluarga_model.dart';
 import '../../domain/entities/keluarga.dart';
 
 class KeluargaRepository {
+  final SupabaseClient _supabase = Supabase.instance.client;
+
   Future<void> insertKeluarga(Keluarga keluarga) async {
-    final db = await LocalDbHelper.database;
     final model = KeluargaModel.fromEntity(keluarga);
-    await db.insert(
-      'keluarga',
-      model.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _supabase.from('keluarga').upsert(model.toJson());
   }
 
   Future<List<Keluarga>> getKeluargaByKrtId(String krtId) async {
-    final db = await LocalDbHelper.database;
-    final query = '''
-      SELECT kel.*,
-      COALESCE(
-        (SELECT nama_lengkap FROM individu i 
-         WHERE i.id_keluarga = kel.id 
-         AND UPPER(i.hubungan_keluarga) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA') 
-         LIMIT 1),
-        'Tanpa Nama'
-      ) as nama_kepala_keluarga
-      FROM keluarga kel
-      WHERE kel.id_krt = ?
-    ''';
-    final maps = await db.rawQuery(query, [krtId]);
-    return maps.map((json) => KeluargaModel.fromJson(json)).toList();
+    final response = await _supabase
+        .from('keluarga')
+        .select()
+        .eq('id_krt', krtId);
+    if (response.isEmpty) return [];
+
+    final kelIds = response.map((e) => e['id'] as String).toList();
+    final individuList = await _supabase
+        .from('individu')
+        .select('id_keluarga, nama_lengkap, hubungan_keluarga')
+        .inFilter('id_keluarga', kelIds);
+
+    Map<String, List<dynamic>> kelToInds = {};
+    for (var ind in individuList) {
+      kelToInds.putIfAbsent(ind['id_keluarga'], () => []).add(ind);
+    }
+
+    List<Keluarga> results = [];
+    for (var kel in response) {
+      final iList = kelToInds[kel['id']] ?? [];
+      String namaKepala = 'Tanpa Nama';
+      for (var ind in iList) {
+        final hk = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+        if (hk == 'KK' ||
+            hk == 'KEPALA KELUARGA' ||
+            hk == 'KEPALA RUMAH TANGGA') {
+          namaKepala = ind['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+          break;
+        }
+      }
+
+      final mod = Map<String, dynamic>.from(kel);
+      mod['nama_kepala_keluarga'] = namaKepala;
+      results.add(KeluargaModel.fromJson(mod));
+    }
+    return results;
   }
 
   Future<Keluarga?> getKeluargaById(String id) async {
-    final db = await LocalDbHelper.database;
-    final maps = await db.query(
-      'keluarga',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-    if (maps.isEmpty) return null;
-    return KeluargaModel.fromJson(maps.first);
+    final response = await _supabase
+        .from('keluarga')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    if (response == null) return null;
+    return KeluargaModel.fromJson(response);
   }
 
   Future<void> updateKeluarga(Keluarga keluarga) async {
-    final db = await LocalDbHelper.database;
     final model = KeluargaModel.fromEntity(keluarga);
-    await db.update(
-      'keluarga',
-      model.toJson(),
-      where: 'id = ?',
-      whereArgs: [keluarga.id],
-    );
+    await _supabase
+        .from('keluarga')
+        .update(model.toJson())
+        .eq('id', keluarga.id);
   }
 
   Future<void> deleteKeluarga(String id) async {
-    final db = await LocalDbHelper.database;
-    await db.delete('keluarga', where: 'id = ?', whereArgs: [id]);
+    await _supabase.from('keluarga').delete().eq('id', id);
   }
 
   Future<List<Map<String, dynamic>>> searchKeluargaWithKrtName(
     String query, {
     String? kelompokDawis,
   }) async {
-    final db = await LocalDbHelper.database;
+    final kels = await _supabase.from('keluarga').select();
+    final krts = await _supabase.from('krt').select();
+    final bs = await _supabase.from('bangunan').select();
+    final inds = await _supabase.from('individu').select();
 
-    String sql = '''
-      SELECT k.id as keluarga_id, 
-             k.no_kk, 
-             COALESCE(i.nama_lengkap, krt.nama_krt) as nama_krt, 
-             i.id as individu_krt_id, 
-             b.kelompok_dawis,
-             (SELECT GROUP_CONCAT(nama_lengkap, ', ') FROM individu WHERE id_keluarga = k.id AND nama_lengkap IS NOT NULL) as anggota_keluarga
-      FROM keluarga k
-      LEFT JOIN krt ON k.id_krt = krt.id
-      LEFT JOIN bangunan b ON krt.id_bangunan = b.id
-      LEFT JOIN individu i ON i.id_keluarga = k.id AND (
-          UPPER(i.hubungan_keluarga) IN ('KEPALA KELUARGA', 'KK', 'KEPALA RUMAH TANGGA')
-          OR UPPER(i.hubungan_keluarga) LIKE 'KK %'
-        )
-      WHERE (k.no_kk LIKE ? OR COALESCE(i.nama_lengkap, krt.nama_krt) LIKE ? OR EXISTS (SELECT 1 FROM individu WHERE id_keluarga = k.id AND nama_lengkap LIKE ?))
-    ''';
-
-    final args = <Object?>['%$query%', '%$query%', '%$query%'];
-
-    if (kelompokDawis != null &&
-        kelompokDawis != 'Semua' &&
-        kelompokDawis.isNotEmpty) {
-      // Apply exact normalization matching as per AGENTS.md rules
-      final normalizedDawis = kelompokDawis
-          .replaceAll('.', '')
-          .replaceAll(' ', '')
-          .toLowerCase();
-      sql +=
-          " AND REPLACE(REPLACE(LOWER(b.kelompok_dawis), '.', ''), ' ', '') = ?";
-      args.add(normalizedDawis);
+    final krtMap = {for (var x in krts) x['id']: x};
+    final bMap = {for (var x in bs) x['id']: x};
+    final kelToInds = <String, List<dynamic>>{};
+    for (var ind in inds) {
+      kelToInds
+          .putIfAbsent(ind['id_keluarga']?.toString() ?? '', () => [])
+          .add(ind);
     }
 
-    sql +=
-        ' GROUP BY k.id ORDER BY b.kelompok_dawis ASC, i.nama_lengkap ASC, k.no_kk ASC LIMIT 50';
+    final String q = query.toLowerCase();
+    List<Map<String, dynamic>> results = [];
 
-    final maps = await db.rawQuery(sql, args);
-    return maps;
+    for (var kel in kels) {
+      final kId = kel['id'] as String;
+      final krtId = kel['id_krt'];
+      final krt = krtMap[krtId];
+      final b = bMap[krt?['id_bangunan']];
+
+      final kDawis = b?['kelompok_dawis']?.toString() ?? '';
+
+      if (kelompokDawis != null &&
+          kelompokDawis != 'Semua' &&
+          kelompokDawis.isNotEmpty) {
+        final normReq = kelompokDawis
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        final normAct = kDawis
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        if (normReq != normAct) continue;
+      }
+
+      final iList = kelToInds[kId] ?? [];
+
+      dynamic kkInd;
+      for (var ind in iList) {
+        final hk = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+        if (hk == 'KEPALA KELUARGA' ||
+            hk == 'KK' ||
+            hk == 'KEPALA RUMAH TANGGA' ||
+            hk.startsWith('KK ')) {
+          kkInd = ind;
+          break;
+        }
+      }
+
+      final namaKrt =
+          kkInd?['nama_lengkap'] ?? krt?['nama_krt'] ?? 'Tanpa Nama';
+      final noKk = kel['no_kk']?.toString() ?? '';
+
+      bool isMatch = false;
+      if (q.isEmpty) {
+        isMatch = true;
+      } else {
+        if (noKk.toLowerCase().contains(q) ||
+            namaKrt.toString().toLowerCase().contains(q)) {
+          isMatch = true;
+        } else {
+          for (var ind in iList) {
+            if (ind['nama_lengkap']?.toString().toLowerCase().contains(q) ==
+                true) {
+              isMatch = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!isMatch) continue;
+
+      final anggota = iList
+          .map((i) => i['nama_lengkap'])
+          .where((n) => n != null && n.toString().isNotEmpty)
+          .join(', ');
+
+      results.add({
+        'keluarga_id': kId,
+        'no_kk': noKk,
+        'nama_krt': namaKrt,
+        'individu_krt_id': kkInd?['id'],
+        'kelompok_dawis': kDawis,
+        'anggota_keluarga': anggota,
+      });
+    }
+
+    results.sort((a, b) {
+      int c1 = (a['kelompok_dawis'] ?? '').compareTo(b['kelompok_dawis'] ?? '');
+      if (c1 != 0) return c1;
+      int c2 = (a['nama_krt'] ?? '').compareTo(b['nama_krt'] ?? '');
+      if (c2 != 0) return c2;
+      return (a['no_kk'] ?? '').compareTo(b['no_kk'] ?? '');
+    });
+
+    return results.take(50).toList();
   }
 }

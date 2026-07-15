@@ -11,20 +11,33 @@ final dataWargaRepositoryProvider = Provider<DataWargaRepository>((ref) {
 
 class DataWargaSearchQuery extends Notifier<String> {
   @override
-  String build() => '';
+  String build() {
+    ref.listen(loggedInUserProvider, (prev, next) {
+      if (prev?.idKader != next?.idKader) {
+        state = '';
+      }
+    });
+    return '';
+  }
 
   void updateQuery(String query) {
     state = query;
   }
 }
 
-final dataWargaSearchQueryProvider = NotifierProvider<DataWargaSearchQuery, String>(
-  DataWargaSearchQuery.new,
-);
+final dataWargaSearchQueryProvider =
+    NotifierProvider<DataWargaSearchQuery, String>(DataWargaSearchQuery.new);
 
 class DataWargaRtFilter extends Notifier<String?> {
   @override
-  String? build() => null;
+  String? build() {
+    ref.listen(loggedInUserProvider, (prev, next) {
+      if (prev?.idKader != next?.idKader) {
+        state = null;
+      }
+    });
+    return null;
+  }
 
   void setFilter(String? rt) {
     state = rt;
@@ -37,16 +50,22 @@ final dataWargaRtFilterProvider = NotifierProvider<DataWargaRtFilter, String?>(
 
 class SelectedBangunanId extends Notifier<String?> {
   @override
-  String? build() => null;
+  String? build() {
+    ref.listen(loggedInUserProvider, (prev, next) {
+      if (prev?.idKader != next?.idKader) {
+        state = null;
+      }
+    });
+    return null;
+  }
 
   void select(String? id) {
     state = id;
   }
 }
 
-final selectedBangunanIdProvider = NotifierProvider<SelectedBangunanId, String?>(
-  SelectedBangunanId.new,
-);
+final selectedBangunanIdProvider =
+    NotifierProvider<SelectedBangunanId, String?>(SelectedBangunanId.new);
 
 final dataWargaRtListProvider = FutureProvider<List<String>>((ref) async {
   final repository = ref.watch(dataWargaRepositoryProvider);
@@ -57,7 +76,9 @@ final dataWargaRtListProvider = FutureProvider<List<String>>((ref) async {
   return repository.getRtList(user);
 });
 
-final dataWargaBangunanListProvider = FutureProvider<List<DataWargaBangunan>>((ref) async {
+final dataWargaBangunanListProvider = FutureProvider<List<DataWargaBangunan>>((
+  ref,
+) async {
   final repository = ref.watch(dataWargaRepositoryProvider);
   final user = ref.watch(loggedInUserProvider);
   final searchQuery = ref.watch(dataWargaSearchQueryProvider);
@@ -65,15 +86,19 @@ final dataWargaBangunanListProvider = FutureProvider<List<DataWargaBangunan>>((r
 
   if (user == null) return [];
 
-  return repository.getBangunanList(user, searchQuery: searchQuery, rtFilter: rtFilter);
+  return repository.getBangunanList(
+    user,
+    searchQuery: searchQuery,
+    rtFilter: rtFilter,
+  );
 });
 
 final dataWargaSelectedBangunanProvider = Provider<DataWargaBangunan?>((ref) {
   final listAsync = ref.watch(dataWargaBangunanListProvider);
   final selectedId = ref.watch(selectedBangunanIdProvider);
-  
+
   if (selectedId == null) return null;
-  
+
   return listAsync.maybeWhen(
     data: (list) {
       try {
@@ -86,7 +111,9 @@ final dataWargaSelectedBangunanProvider = Provider<DataWargaBangunan?>((ref) {
   );
 });
 
-final dataWargaKeluargaListProvider = FutureProvider<List<DataWargaKeluarga>>((ref) async {
+final dataWargaKeluargaListProvider = FutureProvider<List<DataWargaKeluarga>>((
+  ref,
+) async {
   final repository = ref.watch(dataWargaRepositoryProvider);
   final selectedId = ref.watch(selectedBangunanIdProvider);
 

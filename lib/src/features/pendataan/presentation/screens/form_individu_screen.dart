@@ -715,10 +715,13 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                       hintText: 'Contoh: 081234567890',
                     ),
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _hubunganKeluarga,
+                    initialValue: _hubunganKeluarga,
                     decoration: const InputDecoration(
                       labelText: 'Hubungan Keluarga',
                     ),

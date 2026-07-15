@@ -114,7 +114,9 @@ class DetailKrtScreen extends ConsumerWidget {
                           keluarga.namaKepalaKeluarga ?? 'Tanpa Nama',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text('No. KK: ${keluarga.noKk}\nStatus: ${keluarga.statusVisitasi}'),
+                        subtitle: Text(
+                          'No. KK: ${keluarga.noKk}\nStatus: ${keluarga.statusVisitasi}',
+                        ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

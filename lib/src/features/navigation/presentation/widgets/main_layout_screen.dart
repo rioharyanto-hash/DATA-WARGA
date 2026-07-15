@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:dawis/src/features/settings/presentation/providers/app_user_provider.dart';
 
-class MainLayoutScreen extends StatelessWidget {
+class MainLayoutScreen extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const MainLayoutScreen({super.key, required this.navigationShell});
@@ -20,36 +23,55 @@ class MainLayoutScreen extends StatelessWidget {
   static const _textMuted = Color(0xFF64748B); // Slate 500
 
   // Navigation items definition
-  static const List<_NavItem> _navItems = [
+  static const List<_NavItem> _allNavItems = [
     _NavItem(
       icon: Icons.dashboard_outlined,
       activeIcon: Icons.dashboard,
       label: 'Dashboard',
+      branchIndex: 0,
     ),
     _NavItem(
       icon: Icons.assignment_outlined,
       activeIcon: Icons.assignment,
       label: 'Pendataan',
+      branchIndex: 1,
     ),
     _NavItem(
       icon: Icons.pie_chart_outline,
       activeIcon: Icons.pie_chart,
       label: 'Laporan',
+      branchIndex: 2,
     ),
     _NavItem(
       icon: Icons.people_outline,
       activeIcon: Icons.people,
       label: 'DATA WARGA',
+      branchIndex: 3,
     ),
     _NavItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings,
       label: 'Pengaturan',
+      branchIndex: 4,
     ),
   ];
 
+  List<_NavItem> _getFilteredNavItems(String? role) {
+    if (role == 'RW' || role == 'RT') {
+      return _allNavItems
+          .where((item) => [0, 3, 4].contains(item.branchIndex))
+          .toList();
+    }
+    return _allNavItems;
+  }
+
+  int _getDisplayIndex(List<_NavItem> items, int branchIndex) {
+    final index = items.indexWhere((item) => item.branchIndex == branchIndex);
+    return index != -1 ? index : 0;
+  }
+
   // ── Desktop sidebar ────────────────────────────────────────────────
-  Widget _buildSidebar(int currentIndex) {
+  Widget _buildSidebar(int currentIndex, List<_NavItem> navItems, var user) {
     return Container(
       width: 260,
       decoration: const BoxDecoration(
@@ -88,15 +110,15 @@ class MainLayoutScreen extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _navItems.length,
+              itemCount: navItems.length,
               itemBuilder: (context, i) {
-                final item = _navItems[i];
-                final selected = i == currentIndex;
+                final item = navItems[i];
+                final selected = item.branchIndex == currentIndex;
                 return _SidebarNavTile(
                       icon: selected ? item.activeIcon : item.icon,
                       label: item.label,
                       selected: selected,
-                      onTap: () => _goBranch(i),
+                      onTap: () => _goBranch(item.branchIndex),
                     )
                     .animate()
                     .fadeIn(delay: (100 * i).ms)
@@ -106,15 +128,23 @@ class MainLayoutScreen extends StatelessWidget {
           ),
 
           // ── Version label ──────────────────────────────────────────
-          const Padding(
-            padding: EdgeInsets.only(bottom: 24),
-            child: Text(
-              'Dasawisma App v1.0.0',
-              style: TextStyle(
-                fontSize: 12,
-                color: _textMuted,
-                fontWeight: FontWeight.w500,
-              ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                final version = snapshot.hasData
+                    ? snapshot.data!.version
+                    : '1.0.0';
+                return Text(
+                  'Dasawisma App v$version',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: _textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -124,7 +154,25 @@ class MainLayoutScreen extends StatelessWidget {
 
   // ── Build ──────────────────────────────────────────────────────────
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(loggedInUserProvider);
+
+    if (user == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.go('/login');
+      });
+      return const Scaffold(
+        backgroundColor: _bgBody,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final navItems = _getFilteredNavItems(user.role);
+    final displayIndex = _getDisplayIndex(
+      navItems,
+      navigationShell.currentIndex,
+    );
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Desktop / Web Wide Screen
@@ -133,7 +181,7 @@ class MainLayoutScreen extends StatelessWidget {
             backgroundColor: _bgBody,
             body: Row(
               children: [
-                _buildSidebar(navigationShell.currentIndex),
+                _buildSidebar(navigationShell.currentIndex, navItems, user),
                 Expanded(
                   child: Container(
                     color: _bgBody,
@@ -166,48 +214,20 @@ class MainLayoutScreen extends StatelessWidget {
               ],
             ),
             child: NavigationBar(
-              selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: _goBranch,
+              selectedIndex: displayIndex,
+              onDestinationSelected: (idx) =>
+                  _goBranch(navItems[idx].branchIndex),
               backgroundColor: Colors.white,
               surfaceTintColor: Colors.transparent,
               indicatorColor: const Color(0xFFEEF2FF), // Indigo 50
               height: 72,
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.dashboard_outlined, color: _textMuted),
-                  selectedIcon: Icon(
-                    Icons.dashboard_rounded,
-                    color: _primaryDark,
-                  ),
-                  label: 'Dashboard',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.assignment_outlined, color: _textMuted),
-                  selectedIcon: Icon(
-                    Icons.assignment_rounded,
-                    color: _primaryDark,
-                  ),
-                  label: 'Pendataan',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.pie_chart_outline, color: _textMuted),
-                  selectedIcon: Icon(Icons.pie_chart, color: _primaryDark),
-                  label: 'Laporan',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.people_outline, color: _textMuted),
-                  selectedIcon: Icon(Icons.people, color: _primaryDark),
-                  label: 'DATA WARGA',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.settings_outlined, color: _textMuted),
-                  selectedIcon: Icon(
-                    Icons.settings_rounded,
-                    color: _primaryDark,
-                  ),
-                  label: 'Pengaturan',
-                ),
-              ],
+              destinations: navItems.map((item) {
+                return NavigationDestination(
+                  icon: Icon(item.icon, color: _textMuted),
+                  selectedIcon: Icon(item.activeIcon, color: _primaryDark),
+                  label: item.label,
+                );
+              }).toList(),
             ),
           ),
         );
@@ -221,11 +241,13 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
+  final int branchIndex;
 
   const _NavItem({
     required this.icon,
     required this.activeIcon,
     required this.label,
+    required this.branchIndex,
   });
 }
 

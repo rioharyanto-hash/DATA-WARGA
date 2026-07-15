@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
@@ -9,6 +10,7 @@ import '../providers/region_provider.dart';
 import '../../services/csv_transfer_service.dart';
 import '../../../pendataan/presentation/providers/bangunan_provider.dart';
 import '../../../../../core/database/local_db_helper.dart';
+import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -132,9 +134,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
+        withData: true,
       );
 
-      if (result != null && result.files.single.path != null) {
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.single;
         if (!mounted) return;
         showDialog(
           context: context,
@@ -145,7 +149,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         dialogShown = true;
 
         final summary = await _csvService.importBulkCsv(
-          result.files.single.path!,
+          filePath: kIsWeb ? null : file.path,
+          bytes: file.bytes,
         );
 
         if (mounted) {
@@ -252,9 +257,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
+        withData: true,
       );
 
-      if (result != null && result.files.single.path != null) {
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.single;
         if (!mounted) return;
         showDialog(
           context: context,
@@ -265,7 +272,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         dialogShown = true;
 
         final summary = await _csvService.importBangunanCsv(
-          result.files.single.path!,
+          filePath: kIsWeb ? null : file.path,
+          bytes: file.bytes,
         );
 
         if (mounted) {
@@ -385,22 +393,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pengaturan',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Kelola preferensi dan manajemen data sistem DAWIS.',
-              style: TextStyle(fontSize: 13, color: Colors.white70),
-            ),
-          ],
+        title: const SharedAppBarTitle(
+          title: 'Pengaturan',
+          subtitle: 'Kelola preferensi dan manajemen data sistem DAWIS.',
         ),
         actions: const [
           Padding(
@@ -428,7 +423,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(flex: 1, child: _buildTransferMentahSection()),
+                          Expanded(
+                            flex: 1,
+                            child: _buildTransferMentahSection(),
+                          ),
                           const SizedBox(width: 32),
                           Expanded(
                             flex: 1,
@@ -557,6 +555,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: 'Daftar Kader Dawis',
                   subtitle: 'Kelola data seluruh kader',
                   onTap: () => context.push('/user-list'),
+                  showArrow: true,
+                ),
+                _buildDivider(),
+                _buildListTile(
+                  icon: Icons.manage_accounts,
+                  iconColor: Colors.orange.shade700,
+                  iconBg: Colors.orange.shade50,
+                  title: 'Daftar Pengurus',
+                  subtitle: 'Kelola data Admin, RW, dan RT',
+                  onTap: () => context.push('/pengurus-list'),
                   showArrow: true,
                 ),
                 _buildDivider(),
@@ -707,8 +715,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (ctx2) =>
-                                const Center(child: CircularProgressIndicator()),
+                            builder: (ctx2) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           );
                           try {
                             final db = await LocalDbHelper.database;

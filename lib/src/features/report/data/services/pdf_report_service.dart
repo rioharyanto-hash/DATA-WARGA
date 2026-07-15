@@ -8437,19 +8437,28 @@ class PdfReportService {
 
           String getValGrouped(int idx, String key, String level) {
             if (idx == 0) return val(data['rows'][idx], key);
-            
+
             final currentRow = data['rows'][idx];
             final prevRow = data['rows'][idx - 1];
-            
-            bool isSameBangunan = val(currentRow, 'noUrutBangunan') == val(prevRow, 'noUrutBangunan') && 
-                                  val(currentRow, 'namaBangunan') == val(prevRow, 'namaBangunan');
-            bool isSameKrt = isSameBangunan && val(currentRow, 'namaKrt') == val(prevRow, 'namaKrt') && val(currentRow, 'nikKrt') == val(prevRow, 'nikKrt');
-            bool isSameKk = isSameKrt && val(currentRow, 'namaKepalaKeluarga') == val(prevRow, 'namaKepalaKeluarga') && val(currentRow, 'noKk') == val(prevRow, 'noKk');
-            
+
+            bool isSameBangunan =
+                val(currentRow, 'noUrutBangunan') ==
+                    val(prevRow, 'noUrutBangunan') &&
+                val(currentRow, 'namaBangunan') == val(prevRow, 'namaBangunan');
+            bool isSameKrt =
+                isSameBangunan &&
+                val(currentRow, 'namaKrt') == val(prevRow, 'namaKrt') &&
+                val(currentRow, 'nikKrt') == val(prevRow, 'nikKrt');
+            bool isSameKk =
+                isSameKrt &&
+                val(currentRow, 'namaKepalaKeluarga') ==
+                    val(prevRow, 'namaKepalaKeluarga') &&
+                val(currentRow, 'noKk') == val(prevRow, 'noKk');
+
             if (level == 'bangunan' && isSameBangunan) return '';
             if (level == 'krt' && isSameKrt) return '';
             if (level == 'kk' && isSameKk) return '';
-            
+
             return val(currentRow, key);
           }
 
@@ -9622,9 +9631,13 @@ class PdfReportService {
                           ? (row['nama_orang']?.toString() ?? '')
                           : '';
                       final jkLahirL =
-                          isKelahiran && jkVal.toUpperCase().startsWith('L') ? 'V' : '';
+                          isKelahiran && jkVal.toUpperCase().startsWith('L')
+                          ? 'V'
+                          : '';
                       final jkLahirP =
-                          isKelahiran && jkVal.toUpperCase().startsWith('P') ? 'V' : '';
+                          isKelahiran && jkVal.toUpperCase().startsWith('P')
+                          ? 'V'
+                          : '';
                       final tglLahir = isKelahiran
                           ? (row['tanggal_mutasi']?.toString() ?? '')
                           : '';
@@ -9638,13 +9651,17 @@ class PdfReportService {
                           ? (row['status_ibu']?.toString() ?? '')
                           : '';
                       String jk = jkVal;
-                      if (jk.isEmpty && isKematian && statusMeninggal.toLowerCase() == 'ibu') {
+                      if (jk.isEmpty &&
+                          isKematian &&
+                          statusMeninggal.toLowerCase() == 'ibu') {
                         jk = 'P';
                       }
-                      final jkMatiL = isKematian && jk.toUpperCase().startsWith('L')
+                      final jkMatiL =
+                          isKematian && jk.toUpperCase().startsWith('L')
                           ? 'V'
                           : '';
-                      final jkMatiP = isKematian && jk.toUpperCase().startsWith('P')
+                      final jkMatiP =
+                          isKematian && jk.toUpperCase().startsWith('P')
                           ? 'V'
                           : '';
                       final tglMeninggal = isKematian
@@ -9664,7 +9681,12 @@ class PdfReportService {
                           crossAxisAlignment: pw.CrossAxisAlignment.center,
                           children: [
                             buildCell('$i', flex: 1, fontSize: 7),
-                            buildCell(namaIbu, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
+                            buildCell(
+                              namaIbu,
+                              flex: 3,
+                              alignment: pw.Alignment.centerLeft,
+                              textAlign: pw.TextAlign.left,
+                            ),
                             buildCell(namaSuami, flex: 3),
                             buildCell(statusIbu, flex: 4),
                             buildCell(namaAnak, flex: 4),
@@ -9673,7 +9695,12 @@ class PdfReportService {
                             buildCell(tglLahir, flex: 2),
                             buildCell(akteAda, flex: 1),
                             buildCell(akteTidak, flex: 1),
-                            buildCell(namaMeninggal, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
+                            buildCell(
+                              namaMeninggal,
+                              flex: 3,
+                              alignment: pw.Alignment.centerLeft,
+                              textAlign: pw.TextAlign.left,
+                            ),
                             buildCell(statusMeninggal, flex: 3),
                             buildCell(jkMatiL, flex: 1),
                             buildCell(jkMatiP, flex: 1),

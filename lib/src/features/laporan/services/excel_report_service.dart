@@ -65,8 +65,8 @@ class ExcelReportService {
     // Query data
     final bangunanList = await db.query(
       'bangunan',
-      where: 'rt = ? AND rw = ?',
-      whereArgs: [rt, rw],
+      where: 'CAST(rt AS INTEGER) = ? AND CAST(rw AS INTEGER) = ?',
+      whereArgs: [int.tryParse(rt) ?? 0, int.tryParse(rw) ?? 0],
     );
 
     int rowProfil = 1;

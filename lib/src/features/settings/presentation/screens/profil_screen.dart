@@ -53,8 +53,12 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
       text: user?.pendidikanTerakhir ?? '',
     );
     _alamatController = TextEditingController(text: user?.alamat ?? '');
-    _rtController = TextEditingController(text: user?.rt ?? '');
-    _rwController = TextEditingController(text: user?.rw ?? '');
+    _rtController = TextEditingController(
+      text: user?.rt?.isNotEmpty == true ? user!.rt!.padLeft(2, '0') : '',
+    );
+    _rwController = TextEditingController(
+      text: user?.rw?.isNotEmpty == true ? user!.rw!.padLeft(2, '0') : '',
+    );
     _kelurahanController = TextEditingController(text: user?.kelurahan ?? '');
     _kecamatanController = TextEditingController(text: user?.kecamatan ?? '');
     _propinsiController = TextEditingController(text: user?.propinsi ?? '');
@@ -161,7 +165,9 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     TextEditingController controller,
     List<String> items,
   ) {
-    String? currentValue = items.contains(controller.text) ? controller.text : null;
+    String? currentValue = items.contains(controller.text)
+        ? controller.text
+        : null;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<String>(
@@ -171,10 +177,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
           border: const OutlineInputBorder(),
         ),
         items: items.map((item) {
-          return DropdownMenuItem(
-            value: item,
-            child: Text(item),
-          );
+          return DropdownMenuItem(value: item, child: Text(item));
         }).toList(),
         onChanged: (val) {
           if (val != null) {
@@ -185,10 +188,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     );
   }
 
-  Widget _buildDateField(
-    String label,
-    TextEditingController controller,
-  ) {
+  Widget _buildDateField(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
@@ -201,7 +201,9 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
         ),
         onTap: () async {
           final now = DateTime.now();
-          final initial = controller.text.isNotEmpty ? DateTime.tryParse(controller.text) ?? now : now;
+          final initial = controller.text.isNotEmpty
+              ? DateTime.tryParse(controller.text) ?? now
+              : now;
           final selectedDate = await showDatePicker(
             context: context,
             initialDate: initial,
@@ -209,7 +211,8 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
             lastDate: now,
           );
           if (selectedDate != null) {
-            controller.text = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+            controller.text =
+                "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
           }
         },
       ),
@@ -231,7 +234,17 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
       'S2',
       'S3',
     ];
-    final rtRwList = List.generate(20, (i) => (i + 1).toString().padLeft(3, '0'));
+    final rtRwList = [
+      ...List.generate(20, (i) => (i + 1).toString().padLeft(2, '0')),
+    ];
+    if (_rtController.text.isNotEmpty &&
+        !rtRwList.contains(_rtController.text)) {
+      rtRwList.add(_rtController.text);
+    }
+    if (_rwController.text.isNotEmpty &&
+        !rtRwList.contains(_rwController.text)) {
+      rtRwList.add(_rwController.text);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -281,9 +294,13 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      _buildField('Nama Kelompok', _kelompokDawisController, readOnly: !isAdmin),
                       _buildField(
-                        'ID Kader / Username',
+                        'Nama Kelompok',
+                        _kelompokDawisController,
+                        readOnly: !isAdmin,
+                      ),
+                      _buildField(
+                        'ID / Username',
                         _idKaderController,
                         required: true,
                         readOnly: !isAdmin,
@@ -293,7 +310,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // 2. Data Diri
               Card(
                 elevation: 2,
@@ -321,7 +338,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                       _buildDropdownField(
                         'Pendidikan Terakhir',
                         _pendidikanTerakhirController,
-                        pendidikanList
+                        pendidikanList,
                       ),
                     ],
                   ),
@@ -348,9 +365,21 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                       _buildField('Alamat', _alamatController),
                       Row(
                         children: [
-                          Expanded(child: _buildDropdownField('RT', _rtController, rtRwList)),
+                          Expanded(
+                            child: _buildDropdownField(
+                              'RT',
+                              _rtController,
+                              rtRwList,
+                            ),
+                          ),
                           const SizedBox(width: 16),
-                          Expanded(child: _buildDropdownField('RW', _rwController, rtRwList)),
+                          Expanded(
+                            child: _buildDropdownField(
+                              'RW',
+                              _rwController,
+                              rtRwList,
+                            ),
+                          ),
                         ],
                       ),
                       _buildField('Kelurahan', _kelurahanController),

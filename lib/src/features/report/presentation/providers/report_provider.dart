@@ -100,37 +100,46 @@ final reportBulanProvider = NotifierProvider<ReportBulanNotifier, String>(
   ReportBulanNotifier.new,
 );
 
-final kelompokDawisListProvider = FutureProvider<List<Map<String, String>>>((
-  ref,
-) async {
-  final repo = ref.read(reportRepositoryProvider);
-  final allList = await repo.getAllKelompokDawisList();
+final kelompokDawisListProvider =
+    FutureProvider.autoDispose<List<Map<String, String>>>((ref) async {
+      final repo = ref.read(reportRepositoryProvider);
+      final allList = await repo.getAllKelompokDawisList();
 
-  final currentUser = ref.read(loggedInUserProvider);
-  if (currentUser == null || currentUser.role == 'ADMIN') {
-    return allList;
-  }
+      final currentUser = ref.read(loggedInUserProvider);
+      if (currentUser == null || currentUser.role == 'ADMIN') {
+        return allList;
+      }
 
-  if (currentUser.role == 'RW') {
-    return allList.where((map) => map['rw'] == currentUser.rw).toList();
-  }
+      if (currentUser.role == 'RW') {
+        return allList.where((map) => map['rw'] == currentUser.rw).toList();
+      }
 
-  if (currentUser.role == 'RT') {
-    return allList
-        .where(
-          (map) => map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
-        )
-        .toList();
-  }
+      if (currentUser.role == 'RT') {
+        return allList
+            .where(
+              (map) =>
+                  map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
+            )
+            .toList();
+      }
 
-  if (currentUser.role == 'KADER') {
-    return allList
-        .where((map) => map['kelompok_dawis'] == currentUser.kelompokDawis)
-        .toList();
-  }
+      if (currentUser.role == 'KADER') {
+        final kaderName = (currentUser.kelompokDawis ?? '')
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
 
-  return allList;
-});
+        return allList.where((map) {
+          final dbName = (map['kelompok_dawis'] ?? '')
+              .replaceAll('.', '')
+              .replaceAll(' ', '')
+              .toLowerCase();
+          return dbName == kaderName;
+        }).toList();
+      }
+
+      return allList;
+    });
 
 class ReportController extends Notifier<ReportState> {
   @override

@@ -201,22 +201,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Silakan masuk menggunakan ID Kader Anda',
+                    'Silakan masuk menggunakan ID / Username Anda',
                     style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                   ),
                   const SizedBox(height: 32),
 
-                  // ── ID Kader Field ──
-                  TextField(
+                  // ── ID Field ──
+                  TextFormField(
                     controller: _idKaderController,
-                    keyboardType: TextInputType.text,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF1E293B),
                     ),
                     decoration: InputDecoration(
-                      labelText: 'ID Kader',
+                      labelText: 'ID / Username',
                       labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
                       prefixIcon: const Icon(
                         Icons.badge_outlined,

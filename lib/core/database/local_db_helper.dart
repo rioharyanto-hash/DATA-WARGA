@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
@@ -35,7 +34,9 @@ class LocalDbHelper {
         ),
       );
     } else {
-      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      if (defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.linux ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
         sqfliteFfiInit();
         databaseFactory = databaseFactoryFfi;
       }
@@ -46,7 +47,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 26,
+        version: 27,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -284,6 +285,51 @@ class LocalDbHelper {
         await db.execute('ALTER TABLE individu ADD COLUMN nama_ayah TEXT');
         await db.execute('ALTER TABLE individu ADD COLUMN nama_ibu TEXT');
       } catch (_) {}
+    }
+
+    if (oldVersion < 27) {
+      try {
+        final tables = ['app_user', 'bangunan'];
+        final regex = RegExp(
+          r'^(.+?)\s*(\d{1,3})\s*[.,-]\s*(\d{1,3})\s*[.,-]\s*(\d{1,3})\s*$',
+        );
+        for (final table in tables) {
+          final rows = await db.query(table);
+          for (final row in rows) {
+            final kelompokDawis = row['kelompok_dawis']?.toString();
+            if (kelompokDawis != null && kelompokDawis.isNotEmpty) {
+              final match = regex.firstMatch(kelompokDawis);
+              if (match != null) {
+                final name = match.group(1)?.trim() ?? '';
+                final rw = match.group(2)?.padLeft(3, '0') ?? '';
+                final rt = match.group(3)?.padLeft(3, '0') ?? '';
+                final urut = match.group(4)?.padLeft(3, '0') ?? '';
+                final normalized = '$name $rw.$rt.$urut';
+                if (kelompokDawis != normalized) {
+                  await db.update(
+                    table,
+                    {'kelompok_dawis': normalized},
+                    where: 'id = ?',
+                    whereArgs: [row['id']],
+                  );
+                }
+              } else {
+                final trimmed = kelompokDawis.trim();
+                if (trimmed != kelompokDawis) {
+                  await db.update(
+                    table,
+                    {'kelompok_dawis': trimmed},
+                    where: 'id = ?',
+                    whereArgs: [row['id']],
+                  );
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
     }
   }
 

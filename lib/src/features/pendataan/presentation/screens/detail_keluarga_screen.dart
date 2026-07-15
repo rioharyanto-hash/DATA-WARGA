@@ -99,7 +99,8 @@ class DetailKeluargaScreen extends ConsumerWidget {
                           loading: () => const Text('Memuat...'),
                           error: (err, stack) => const Text('Error'),
                           data: (keluarga) {
-                            final noKk = keluarga?.noKk ?? 'Data tidak ditemukan';
+                            final noKk =
+                                keluarga?.noKk ?? 'Data tidak ditemukan';
                             return Text(
                               'NO. KK: $noKk',
                               style: const TextStyle(
@@ -139,7 +140,10 @@ class DetailKeluargaScreen extends ConsumerWidget {
                 const Spacer(),
                 individuList.when(
                   data: (items) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFDBEAFE),
                       borderRadius: BorderRadius.circular(12),
@@ -178,7 +182,10 @@ class DetailKeluargaScreen extends ConsumerWidget {
                 }
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 4.0,
+                  ),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -196,11 +203,18 @@ class DetailKeluargaScreen extends ConsumerWidget {
                       children: [
                         // Table Header
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           decoration: const BoxDecoration(
                             color: Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                            border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(12),
+                            ),
+                            border: Border(
+                              bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
                           ),
                           child: const Row(
                             children: [
@@ -214,7 +228,10 @@ class DetailKeluargaScreen extends ConsumerWidget {
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Text('STATUS KELUARGA', style: _headerStyle),
+                                child: Text(
+                                  'STATUS KELUARGA',
+                                  style: _headerStyle,
+                                ),
                               ),
                               Expanded(
                                 flex: 1,
@@ -226,7 +243,11 @@ class DetailKeluargaScreen extends ConsumerWidget {
                               ),
                               SizedBox(
                                 width: 50,
-                                child: Text('AKSI', style: _headerStyle, textAlign: TextAlign.center),
+                                child: Text(
+                                  'AKSI',
+                                  style: _headerStyle,
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ],
                           ),
@@ -236,8 +257,10 @@ class DetailKeluargaScreen extends ConsumerWidget {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: individuItems.length,
-                          separatorBuilder: (context, index) =>
-                              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                          separatorBuilder: (context, index) => const Divider(
+                            height: 1,
+                            color: Color(0xFFE2E8F0),
+                          ),
                           itemBuilder: (context, index) {
                             final individu = individuItems[index];
 
@@ -245,11 +268,37 @@ class DetailKeluargaScreen extends ConsumerWidget {
                             String ageText = '-';
                             if (individu.tanggalLahir.isNotEmpty) {
                               try {
-                                final tglLahir = DateTime.parse(individu.tanggalLahir);
+                                DateTime tglLahir;
+                                final parts = individu.tanggalLahir.split(
+                                  RegExp(r'[-/]'),
+                                );
+                                if (parts.length == 3) {
+                                  if (parts[0].length == 4) {
+                                    // YYYY-MM-DD
+                                    tglLahir = DateTime(
+                                      int.parse(parts[0]),
+                                      int.parse(parts[1]),
+                                      int.parse(parts[2]),
+                                    );
+                                  } else {
+                                    // DD-MM-YYYY
+                                    tglLahir = DateTime(
+                                      int.parse(parts[2]),
+                                      int.parse(parts[1]),
+                                      int.parse(parts[0]),
+                                    );
+                                  }
+                                } else {
+                                  tglLahir = DateTime.parse(
+                                    individu.tanggalLahir,
+                                  );
+                                }
+
                                 final today = DateTime.now();
                                 int age = today.year - tglLahir.year;
                                 if (today.month < tglLahir.month ||
-                                    (today.month == tglLahir.month && today.day < tglLahir.day)) {
+                                    (today.month == tglLahir.month &&
+                                        today.day < tglLahir.day)) {
                                   age--;
                                 }
                                 ageText = '$age Tahun';
@@ -265,14 +314,17 @@ class DetailKeluargaScreen extends ConsumerWidget {
 
                             Widget trailingIcon;
                             if (mode == 'master') {
-                              trailingIcon = const Icon(Icons.chevron_right, color: Color(0xFF94A3B8));
+                              trailingIcon = const Icon(
+                                Icons.chevron_right,
+                                color: Color(0xFF94A3B8),
+                              );
                             } else {
                               trailingIcon = Icon(
                                 mode == 'catatan'
                                     ? Icons.edit_document
                                     : (mode == 'potensi'
-                                        ? Icons.analytics_rounded
-                                        : Icons.pregnant_woman_rounded),
+                                          ? Icons.analytics_rounded
+                                          : Icons.pregnant_woman_rounded),
                                 color: const Color(0xFF4338CA),
                                 size: 20,
                               );
@@ -283,43 +335,75 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                 if (mode == 'master') {
                                   context.push('/view-individu/${individu.id}');
                                 } else if (mode == 'catatan') {
-                                  context.push('/form-catatan-keluarga/${individu.id}').then((_) {
-                                    ref.invalidate(individuByKeluargaProvider(keluargaId));
-                                  });
+                                  context
+                                      .push(
+                                        '/form-catatan-keluarga/${individu.id}',
+                                      )
+                                      .then((_) {
+                                        ref.invalidate(
+                                          individuByKeluargaProvider(
+                                            keluargaId,
+                                          ),
+                                        );
+                                      });
                                 } else if (mode == 'potensi') {
-                                  context.push('/form-potensi-warga/${individu.id}').then((_) {
-                                    ref.invalidate(individuByKeluargaProvider(keluargaId));
-                                  });
+                                  context
+                                      .push(
+                                        '/form-potensi-warga/${individu.id}',
+                                      )
+                                      .then((_) {
+                                        ref.invalidate(
+                                          individuByKeluargaProvider(
+                                            keluargaId,
+                                          ),
+                                        );
+                                      });
                                 } else if (mode == 'mutasi') {
                                   final idBangunan = await ref.read(
-                                    idBangunanByKeluargaProvider(keluargaId).future,
+                                    idBangunanByKeluargaProvider(
+                                      keluargaId,
+                                    ).future,
                                   );
                                   if (idBangunan != null && context.mounted) {
                                     context
                                         .push(
-                                      Uri(
-                                        path: '/form-mutasi/$idBangunan',
-                                        queryParameters: {
-                                          'idIndividuAsal': individu.id,
-                                          'defaultNama': individu.namaLengkap,
-                                          'defaultNik': individu.nik,
-                                        },
-                                      ).toString(),
-                                    )
+                                          Uri(
+                                            path: '/form-mutasi/$idBangunan',
+                                            queryParameters: {
+                                              'idIndividuAsal': individu.id,
+                                              'defaultNama':
+                                                  individu.namaLengkap,
+                                              'defaultNik': individu.nik,
+                                            },
+                                          ).toString(),
+                                        )
                                         .then((_) {
-                                      ref.invalidate(individuByKeluargaProvider(keluargaId));
-                                    });
+                                          ref.invalidate(
+                                            individuByKeluargaProvider(
+                                              keluargaId,
+                                            ),
+                                          );
+                                        });
                                   } else {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Gagal menemukan data Bangunan.')),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Gagal menemukan data Bangunan.',
+                                          ),
+                                        ),
                                       );
                                     }
                                   }
                                 }
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                  vertical: 12.0,
+                                ),
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -334,7 +418,9 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                               shape: BoxShape.circle,
                                             ),
                                             child: Icon(
-                                              isLaki ? Icons.person : Icons.person_2,
+                                              isLaki
+                                                  ? Icons.person
+                                                  : Icons.person_2,
                                               size: 16,
                                               color: statusColor,
                                             ),
@@ -359,7 +445,10 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                       flex: 2,
                                       child: Text(
                                         individu.nik,
-                                        style: const TextStyle(color: Color(0xFF475569), fontSize: 13),
+                                        style: const TextStyle(
+                                          color: Color(0xFF475569),
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                     Expanded(
@@ -377,14 +466,22 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                       flex: 1,
                                       child: Text(
                                         ageText,
-                                        style: const TextStyle(color: Color(0xFF475569), fontSize: 13),
+                                        style: const TextStyle(
+                                          color: Color(0xFF475569),
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                     Expanded(
                                       flex: 2,
                                       child: Text(
-                                        individu.noTlp?.isNotEmpty == true ? individu.noTlp! : '-',
-                                        style: const TextStyle(color: Color(0xFF475569), fontSize: 13),
+                                        individu.noTlp?.isNotEmpty == true
+                                            ? individu.noTlp!
+                                            : '-',
+                                        style: const TextStyle(
+                                          color: Color(0xFF475569),
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                     SizedBox(

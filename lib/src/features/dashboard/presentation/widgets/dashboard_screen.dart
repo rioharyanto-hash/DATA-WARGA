@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/dashboard_provider.dart';
 import '../../../settings/presentation/providers/app_user_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -22,22 +23,9 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.blue.shade700,
 
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Dashboard',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Sistem Informasi Dasawisma',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
+        title: const SharedAppBarTitle(
+          title: 'Dashboard',
+          subtitle: 'Sistem Informasi Dasawisma',
         ),
         actions: [
           _buildFilterDropdowns(ref),

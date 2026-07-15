@@ -1,7 +1,11 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart';
 import 'package:excel/excel.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dawis/core/database/local_db_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DataTransferService {
   Future<List<int>> generateImportTemplate() async {
@@ -41,9 +45,25 @@ class DataTransferService {
     return excel.encode() ?? [];
   }
 
-  Future<void> importDataWarga(String filePath, String idKeluarga) async {
-    final bytes = await File(filePath).readAsBytes();
-    final excel = Excel.decodeBytes(bytes);
+  Future<void> importDataWarga({
+    String? filePath,
+    Uint8List? bytes,
+    required String idKeluarga,
+  }) async {
+    Uint8List data;
+    if (kIsWeb) {
+      if (bytes == null) throw Exception('File bytes cannot be null on Web');
+      data = bytes;
+    } else {
+      if (bytes != null) {
+        data = bytes;
+      } else if (filePath != null) {
+        data = await File(filePath).readAsBytes();
+      } else {
+        throw Exception('Either filePath or bytes must be provided');
+      }
+    }
+    final excel = Excel.decodeBytes(data);
     final db = await LocalDbHelper.database;
     const uuid = Uuid();
 
@@ -152,10 +172,21 @@ class DataTransferService {
     return excel.encode() ?? [];
   }
 
-  Future<void> importDataKader(String filePath) async {
-    final bytes = await File(filePath).readAsBytes();
-    final excel = Excel.decodeBytes(bytes);
-    final db = await LocalDbHelper.database;
+  Future<void> importDataKader({String? filePath, Uint8List? bytes}) async {
+    Uint8List data;
+    if (kIsWeb) {
+      if (bytes == null) throw Exception('File bytes cannot be null on Web');
+      data = bytes;
+    } else {
+      if (bytes != null) {
+        data = bytes;
+      } else if (filePath != null) {
+        data = await File(filePath).readAsBytes();
+      } else {
+        throw Exception('Either filePath or bytes must be provided');
+      }
+    }
+    final excel = Excel.decodeBytes(data);
     const uuid = Uuid();
 
     for (final table in excel.tables.keys) {
@@ -169,7 +200,7 @@ class DataTransferService {
           continue;
         }
 
-        if (row.isEmpty || row.length <= 1 || row[1] == null) continue;
+        if (row.isEmpty) continue;
 
         String getString(int index) {
           if (index >= row.length) return '';
@@ -206,11 +237,10 @@ class DataTransferService {
         final noRekeningBank = getString(20);
         final npwp = getString(21);
 
-        final existing = await db.query(
-          'app_user',
-          where: 'id_kader = ?',
-          whereArgs: [idKader],
-        );
+        final existing = await Supabase.instance.client
+            .from('app_user')
+            .select()
+            .eq('id_kader', idKader);
 
         final mapData = {
           'nama': nama,
@@ -235,19 +265,140 @@ class DataTransferService {
         };
 
         if (existing.isNotEmpty) {
-          await db.update(
-            'app_user',
-            mapData,
-            where: 'id = ?',
-            whereArgs: [existing.first['id']],
-          );
+          await Supabase.instance.client
+              .from('app_user')
+              .update(mapData)
+              .eq('id', existing.first['id']);
         } else {
           mapData['id'] = uuid.v4();
           mapData['id_kader'] = idKader;
           mapData['password'] =
               '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92'; // SHA256 for '123456'
-          await db.insert('app_user', mapData);
+          await Supabase.instance.client.from('app_user').insert(mapData);
         }
+      }
+    }
+  }
+
+  Future<void> importDataPengurus({String? filePath, Uint8List? bytes}) async {
+    Uint8List data;
+    if (kIsWeb) {
+      if (bytes == null) throw Exception('File bytes cannot be null on Web');
+      data = bytes;
+    } else {
+      if (bytes != null) {
+        data = bytes;
+      } else if (filePath != null) {
+        data = await File(filePath).readAsBytes();
+      } else {
+        throw Exception('Either filePath or bytes must be provided');
+      }
+    }
+    final excel = Excel.decodeBytes(data);
+    const uuid = Uuid();
+    final defaultPasswordHash = sha256
+        .convert(utf8.encode('dawis010'))
+        .toString();
+
+    for (final table in excel.tables.keys) {
+      final sheet = excel.tables[table];
+      if (sheet == null) continue;
+
+      int i = 0;
+      for (final row in sheet.rows) {
+        if (i < 6) {
+          i++;
+          continue;
+        }
+
+        if (row.isEmpty) {
+          i++;
+          continue;
+        }
+
+        String getString(int index) {
+          if (index >= row.length) return '';
+          return row[index]?.value?.toString().trim() ?? '';
+        }
+
+        final noStr = getString(0);
+        if (noStr.isEmpty) {
+          i++;
+          continue; // Skip if no number
+        }
+
+        final rwStr = getString(
+          1,
+        ).replaceAll('RW.', '').replaceAll('RW', '').trim();
+        final rtStr = getString(
+          2,
+        ).replaceAll('RT.', '').replaceAll('RT', '').trim();
+        final nama = getString(3);
+        final nik = getString(4);
+        final tempatLahir = getString(5);
+
+        String tanggalLahir = getString(6);
+        if (tanggalLahir.isNotEmpty && tanggalLahir.contains('T')) {
+          tanggalLahir = tanggalLahir.split('T')[0];
+        } else if (tanggalLahir.isNotEmpty && tanggalLahir.contains(' ')) {
+          tanggalLahir = tanggalLahir.split(' ')[0];
+        }
+
+        final alamat = getString(7);
+        final noHp = getString(8);
+        final email = getString(11);
+        final noRekeningBank = getString(12);
+
+        String role = '';
+        String idKader = '';
+        String? rtParam;
+        String? rwParam = rwStr;
+
+        // RT column might contain RW value if it's the RW leader
+        final rtRaw = getString(2).toUpperCase();
+        if (rtRaw.contains('RW')) {
+          role = 'RW';
+          idKader = 'RW$rwStr';
+        } else {
+          role = 'RT';
+          idKader = 'RT${rtStr}_RW$rwStr';
+          rtParam = rtStr;
+        }
+
+        final existing = await Supabase.instance.client
+            .from('app_user')
+            .select()
+            .eq('id_kader', idKader);
+
+        final mapData = <String, dynamic>{
+          'nama': nama,
+          'kelompok_dawis': null,
+          'role': role,
+          'rt': rtParam,
+          'rw': rwParam,
+          'nik': nik,
+          'tempat_lahir': tempatLahir,
+          'tanggal_lahir': tanggalLahir,
+          'alamat': alamat,
+          'no_hp': noHp,
+          'email': email,
+          'no_rekening_bank': noRekeningBank,
+        };
+
+        if (existing.isNotEmpty) {
+          await Supabase.instance.client
+              .from('app_user')
+              .update(mapData)
+              .eq('id', existing.first['id']);
+        } else {
+          mapData['id'] = uuid.v4();
+          mapData['id_kader'] = idKader;
+          mapData['password'] = defaultPasswordHash;
+          mapData['is_active'] = 1;
+          await Supabase.instance.client.from('app_user').insert(mapData);
+        }
+
+        i++;
       }
     }
   }

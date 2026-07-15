@@ -39,7 +39,9 @@ final mutasiFilteredProvider = FutureProvider.family<List<Mutasi>, String?>((
     return await repo.getMutasiByKelompokDawis(user!.kelompokDawis ?? '');
   }
 
-  if (kelompokDawis == null || kelompokDawis.isEmpty || kelompokDawis == 'Semua') {
+  if (kelompokDawis == null ||
+      kelompokDawis.isEmpty ||
+      kelompokDawis == 'Semua') {
     return await repo.getAllMutasi();
   } else {
     return await repo.getMutasiByKelompokDawis(kelompokDawis);

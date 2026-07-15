@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
 
 class PendataanScreen extends ConsumerWidget {
   const PendataanScreen({super.key});
@@ -19,22 +20,9 @@ class PendataanScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.blue.shade700,
 
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pendataan',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Pilih formulir input yang ingin Anda isi',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
+        title: const SharedAppBarTitle(
+          title: 'Pendataan',
+          subtitle: 'Pilih formulir input yang ingin Anda isi',
         ),
       ),
       body: _buildGrid(context),

@@ -76,13 +76,19 @@ final filteredDaftarBangunanProvider = Provider<AsyncValue<List<Bangunan>>>((
 final uniqueKelompokDawisProvider = Provider<AsyncValue<List<String>>>((ref) {
   final asyncList = ref.watch(daftarBangunanProvider);
   return asyncList.whenData((list) {
-    final set = <String>{};
+    final map = <String, String>{};
     for (var b in list) {
       if (b.kelompokDawis.isNotEmpty) {
-        set.add(b.kelompokDawis);
+        final normalized = b.kelompokDawis
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        if (!map.containsKey(normalized)) {
+          map[normalized] = b.kelompokDawis;
+        }
       }
     }
-    final result = set.toList()..sort();
+    final result = map.values.toList()..sort();
     result.insert(0, 'Semua');
     return result;
   });

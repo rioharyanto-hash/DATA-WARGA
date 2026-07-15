@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/app_user.dart';
 import '../providers/app_user_provider.dart';
 import 'package:path_provider/path_provider.dart';
@@ -22,15 +23,19 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xlsx', 'xls'],
+      withData: true,
     );
 
-    if (result != null && result.files.single.path != null) {
-      final path = result.files.single.path!;
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.single;
       setState(() => _isImporting = true);
 
       try {
         final service = DataTransferService();
-        await service.importDataKader(path);
+        await service.importDataKader(
+          filePath: kIsWeb ? null : file.path,
+          bytes: file.bytes,
+        );
 
         ref.invalidate(allUsersProvider);
         if (mounted) {
@@ -117,14 +122,16 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
         children: [
           usersAsync.when(
             data: (users) {
-              if (users.isEmpty) {
-                return const Center(child: Text('Belum ada pengguna.'));
+              final kaderList = users.where((u) => u.role == 'KADER').toList();
+
+              if (kaderList.isEmpty) {
+                return const Center(child: Text('Belum ada kader.'));
               }
               return ListView.builder(
                 padding: const EdgeInsets.all(12),
-                itemCount: users.length,
+                itemCount: kaderList.length,
                 itemBuilder: (context, index) {
-                  final user = users[index];
+                  final user = kaderList[index];
                   return _buildUserCard(context, user);
                 },
               );

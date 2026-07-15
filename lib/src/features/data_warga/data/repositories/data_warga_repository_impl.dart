@@ -1,45 +1,51 @@
-import 'package:sqflite/sqflite.dart';
-import '../../../../../core/database/local_db_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../settings/domain/entities/app_user.dart';
 import '../../domain/entities/data_warga_bangunan.dart';
 import '../../domain/entities/data_warga_keluarga.dart';
 import '../../domain/repositories/data_warga_repository.dart';
 
 class DataWargaRepositoryImpl implements DataWargaRepository {
+  final SupabaseClient _supabase = Supabase.instance.client;
+
   @override
   Future<List<String>> getRtList(AppUser user) async {
-    final db = await LocalDbHelper.database;
-    String where = '1=1';
-    List<Object?> params = [];
+    final response = await _supabase
+        .from('bangunan')
+        .select('rt, rw, kelompok_dawis');
 
-    if (user.role == 'RW') {
-      where += ' AND rw = ?';
-      params.add(user.rw);
-    } else if (user.role == 'RT') {
-      where += ' AND rw = ? AND rt = ?';
-      params.add(user.rw);
-      params.add(user.rt);
-    }
+    Iterable<dynamic> filteredResults = response.where((e) {
+      final rt = e['rt']?.toString() ?? '';
+      if (rt.isEmpty) return false;
 
-    final query = '''
-      SELECT DISTINCT rt, kelompok_dawis 
-      FROM bangunan 
-      WHERE $where AND rt IS NOT NULL AND rt != ''
-    ''';
-    
-    final results = await db.rawQuery(query, params);
-    
-    // Manual filter for KADER due to naming inconsistencies
-    Iterable<Map<String, Object?>> filteredResults = results;
+      final bRw = int.tryParse(e['rw']?.toString() ?? '0') ?? 0;
+      final bRt = int.tryParse(rt) ?? 0;
+
+      final uRw = int.tryParse(user.rw ?? '0') ?? 0;
+      final uRt = int.tryParse(user.rt ?? '0') ?? 0;
+
+      if (user.role == 'RW') {
+        if (bRw != uRw) return false;
+      } else if (user.role == 'RT') {
+        if (bRw != uRw || bRt != uRt) return false;
+      }
+      return true;
+    });
+
     if (user.role == 'KADER' && user.kelompokDawis != null) {
-      final normalizedName = user.kelompokDawis!.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-      filteredResults = results.where((e) {
+      final normalizedName = user.kelompokDawis!
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+      filteredResults = filteredResults.where((e) {
         final kd = e['kelompok_dawis']?.toString() ?? '';
-        final normalizedKd = kd.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
+        final normalizedKd = kd
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
         return normalizedKd == normalizedName;
       });
     }
-    
+
     final rtSet = filteredResults.map((e) => e['rt'].toString()).toSet();
     final rtList = rtSet.toList()..sort();
     return rtList;
@@ -51,146 +57,238 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
     String? searchQuery,
     String? rtFilter,
   }) async {
-    final db = await LocalDbHelper.database;
+    // 1. Fetch all Bangunan
+    final allBangunan = await _supabase.from('bangunan').select();
 
-    String where = '1=1';
-    List<Object?> params = [];
+    // 2. Filter Bangunan based on Role and RT Filter
+    var filteredBangunan = allBangunan.where((b) {
+      final bRw = int.tryParse(b['rw']?.toString() ?? '0') ?? 0;
+      final bRt = int.tryParse(b['rt']?.toString() ?? '0') ?? 0;
+      final uRw = int.tryParse(user.rw ?? '0') ?? 0;
+      final uRt = int.tryParse(user.rt ?? '0') ?? 0;
 
-    // RBAC Filtering
-    if (user.role == 'RW') {
-      where += ' AND b.rw = ?';
-      params.add(user.rw);
-    } else if (user.role == 'RT') {
-      where += ' AND b.rw = ? AND b.rt = ?';
-      params.add(user.rw);
-      params.add(user.rt);
-    }
+      if (user.role == 'RW') {
+        if (bRw != uRw) return false;
+      } else if (user.role == 'RT') {
+        if (bRw != uRw || bRt != uRt) return false;
+      }
 
-    if (rtFilter != null && rtFilter.isNotEmpty && rtFilter != 'Semua') {
-      where += ' AND b.rt = ?';
-      params.add(rtFilter);
-    }
+      if (rtFilter != null && rtFilter.isNotEmpty && rtFilter != 'Semua') {
+        final rtF = int.tryParse(rtFilter) ?? 0;
+        if (bRt != rtF) return false;
+      }
 
-    if (searchQuery != null && searchQuery.isNotEmpty) {
-      where += ''' AND (b.nama_bangunan LIKE ? 
-                    OR b.alamat_lengkap LIKE ? 
-                    OR EXISTS (
-                      SELECT 1 FROM krt k
-                      LEFT JOIN keluarga kel ON k.id = kel.id_krt
-                      LEFT JOIN individu i ON kel.id = i.id_keluarga
-                      WHERE k.id_bangunan = b.id 
-                      AND (k.nama_krt LIKE ? OR i.nama_lengkap LIKE ?)
-                    ))''';
-      params.add('%$searchQuery%');
-      params.add('%$searchQuery%');
-      params.add('%$searchQuery%');
-      params.add('%$searchQuery%');
-    }
+      if (user.role == 'KADER' && user.kelompokDawis != null) {
+        final normalizedName = user.kelompokDawis!
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        final kd = b['kelompok_dawis']?.toString() ?? '';
+        final normalizedKd = kd
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        if (normalizedKd != normalizedName) return false;
+      }
 
-    final query =
-        '''
-      SELECT 
-        b.id, b.nama_bangunan, b.nomor_urut_bangunan, b.alamat_lengkap as alamat, b.rt, b.rw, '' as kelurahan, b.kategori_bangunan, b.kelompok_dawis,
-        (SELECT COUNT(*) FROM keluarga kel JOIN krt k ON kel.id_krt = k.id WHERE k.id_bangunan = b.id) as total_kk,
-        (SELECT COUNT(*) FROM individu i JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id WHERE k.id_bangunan = b.id) as total_penghuni,
-        (SELECT COUNT(*) FROM individu i JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id WHERE k.id_bangunan = b.id AND i.jenis_kelamin = 'Laki-laki') as laki_laki,
-        (SELECT COUNT(*) FROM individu i JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id WHERE k.id_bangunan = b.id AND i.jenis_kelamin = 'Perempuan') as perempuan
-      FROM bangunan b
-      WHERE $where
-      ORDER BY b.nama_bangunan ASC
-    ''';
-
-    final results = await db.rawQuery(query, params);
-
-    // Manual filter for KADER due to naming inconsistencies
-    Iterable<Map<String, Object?>> filteredResults = results;
-    if (user.role == 'KADER' && user.kelompokDawis != null) {
-      final normalizedName = user.kelompokDawis!.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-      filteredResults = results.where((e) {
-        final kd = e['kelompok_dawis']?.toString() ?? '';
-        final normalizedKd = kd.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normalizedKd == normalizedName;
-      });
-    }
-
-    return filteredResults.map((e) {
-      return DataWargaBangunan(
-        id: e['id']?.toString() ?? '',
-        namaBangunan: e['nama_bangunan']?.toString() ?? '',
-        nomorBangunan: e['nomor_urut_bangunan']?.toString(),
-        alamat: e['alamat']?.toString() ?? '',
-        rt: e['rt']?.toString() ?? '',
-        rw: e['rw']?.toString() ?? '',
-        kelurahan: e['kelurahan']?.toString() ?? '',
-        totalPenghuni:
-            Sqflite.firstIntValue([
-              {'count': e['total_penghuni']},
-            ]) ??
-            0,
-        totalKk:
-            Sqflite.firstIntValue([
-              {'count': e['total_kk']},
-            ]) ??
-            0,
-        lakiLaki:
-            Sqflite.firstIntValue([
-              {'count': e['laki_laki']},
-            ]) ??
-            0,
-        perempuan:
-            Sqflite.firstIntValue([
-              {'count': e['perempuan']},
-            ]) ??
-            0,
-        kategoriBangunan: e['kategori_bangunan'] != null
-            ? int.tryParse(e['kategori_bangunan'].toString())
-            : null,
-      );
+      return true;
     }).toList();
+
+    if (filteredBangunan.isEmpty) return [];
+
+    // 3. Fetch related data
+    final krtList = await _supabase
+        .from('krt')
+        .select('id, id_bangunan, nama_krt');
+    final keluargaList = await _supabase.from('keluarga').select('id, id_krt');
+    final individuList = await _supabase
+        .from('individu')
+        .select('id, id_keluarga, jenis_kelamin, nama_lengkap');
+
+    // Map relationships
+    Map<String, List<Map<String, dynamic>>> bToKrt = {};
+    Map<String, List<Map<String, dynamic>>> krtToKel = {};
+    Map<String, List<Map<String, dynamic>>> kelToInd = {};
+
+    for (var krt in krtList) {
+      final bId = krt['id_bangunan'] as String?;
+      if (bId != null) {
+        bToKrt.putIfAbsent(bId, () => []).add(krt);
+      }
+    }
+    for (var kel in keluargaList) {
+      final krtId = kel['id_krt'] as String?;
+      if (krtId != null) {
+        krtToKel.putIfAbsent(krtId, () => []).add(kel);
+      }
+    }
+    for (var ind in individuList) {
+      final kelId = ind['id_keluarga'] as String?;
+      if (kelId != null) {
+        kelToInd.putIfAbsent(kelId, () => []).add(ind);
+      }
+    }
+
+    // 4. Aggregate & Apply Search Query
+    List<DataWargaBangunan> result = [];
+    final sq = searchQuery?.toLowerCase() ?? '';
+
+    for (var b in filteredBangunan) {
+      final bId = b['id'] as String;
+      final krts = bToKrt[bId] ?? [];
+
+      int totalKk = 0;
+      int lakiLaki = 0;
+      int perempuan = 0;
+      int totalPenghuni = 0;
+
+      bool searchMatch = false;
+
+      if (sq.isNotEmpty) {
+        if ((b['nama_bangunan']?.toString().toLowerCase().contains(sq) ??
+                false) ||
+            (b['alamat_lengkap']?.toString().toLowerCase().contains(sq) ??
+                false)) {
+          searchMatch = true;
+        }
+      } else {
+        searchMatch = true; // no search query
+      }
+
+      for (var krt in krts) {
+        if (!searchMatch && sq.isNotEmpty) {
+          if (krt['nama_krt']?.toString().toLowerCase().contains(sq) ?? false) {
+            searchMatch = true;
+          }
+        }
+
+        final krtId = krt['id'] as String;
+        final kels = krtToKel[krtId] ?? [];
+        totalKk += kels.length;
+
+        for (var kel in kels) {
+          final kelId = kel['id'] as String;
+          final inds = kelToInd[kelId] ?? [];
+          totalPenghuni += inds.length;
+
+          for (var ind in inds) {
+            if (!searchMatch && sq.isNotEmpty) {
+              if (ind['nama_lengkap']?.toString().toLowerCase().contains(sq) ??
+                  false) {
+                searchMatch = true;
+              }
+            }
+
+            if (ind['jenis_kelamin'] == 'Laki-laki') lakiLaki++;
+            if (ind['jenis_kelamin'] == 'Perempuan') perempuan++;
+          }
+        }
+      }
+
+      if (searchMatch) {
+        result.add(
+          DataWargaBangunan(
+            id: bId,
+            namaBangunan: b['nama_bangunan']?.toString() ?? '',
+            nomorBangunan: b['nomor_urut_bangunan']?.toString(),
+            alamat: b['alamat_lengkap']?.toString() ?? '',
+            rt: b['rt']?.toString() ?? '',
+            rw: b['rw']?.toString() ?? '',
+            kelurahan: '', // unused in legacy
+            totalPenghuni: totalPenghuni,
+            totalKk: totalKk,
+            lakiLaki: lakiLaki,
+            perempuan: perempuan,
+            kategoriBangunan: int.tryParse(
+              b['kategori_bangunan']?.toString() ?? '',
+            ),
+          ),
+        );
+      }
+    }
+
+    result.sort((a, b) => a.namaBangunan.compareTo(b.namaBangunan));
+    return result;
   }
 
   @override
   Future<List<DataWargaKeluarga>> getKeluargaList(String bangunanId) async {
-    final db = await LocalDbHelper.database;
+    // 1. Fetch KRT for the Bangunan
+    final krtList = await _supabase
+        .from('krt')
+        .select('id, id_bangunan, nama_krt')
+        .eq('id_bangunan', bangunanId);
+    if (krtList.isEmpty) return [];
 
-    // We get keluarga inside the given bangunan.
-    // The query finds all keluarga that belong to any KRT that belongs to the bangunan.
-    final query = '''
-      SELECT 
-        kel.id, 
-        k.id as id_krt,
-        COALESCE(
-          (SELECT nama_lengkap FROM individu i 
-           WHERE i.id_keluarga = kel.id 
-           AND UPPER(i.hubungan_keluarga) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA') 
-           LIMIT 1),
-          k.nama_krt,
-          'Tanpa Nama'
-        ) as nama_kepala_keluarga, 
-        kel.no_kk,
-        (SELECT COUNT(*) FROM individu i WHERE i.id_keluarga = kel.id) as jumlah_anggota,
-        (SELECT b.status_hunian FROM bangunan b WHERE b.id = k.id_bangunan LIMIT 1) as status_hunian
-      FROM keluarga kel
-      JOIN krt k ON kel.id_krt = k.id
-      WHERE k.id_bangunan = ?
-      ORDER BY nama_kepala_keluarga ASC
-    ''';
+    final krtIds = krtList.map((k) => k['id'] as String).toSet();
 
-    final results = await db.rawQuery(query, [bangunanId]);
+    // 2. Fetch Keluarga for these KRTs
+    final keluargaList = await _supabase
+        .from('keluarga')
+        .select('id, id_krt, no_kk');
+    final kels = keluargaList
+        .where((k) => krtIds.contains(k['id_krt']))
+        .toList();
+    if (kels.isEmpty) return [];
 
-    return results.map((e) {
-      return DataWargaKeluarga(
-        id: e['id']?.toString() ?? '',
-        idKrt: e['id_krt']?.toString() ?? '',
-        namaKepalaKeluarga: e['nama_kepala_keluarga']?.toString() ?? '',
-        noKk: e['no_kk']?.toString() ?? '-',
-        jumlahAnggota:
-            Sqflite.firstIntValue([
-              {'count': e['jumlah_anggota']},
-            ]) ??
-            0,
-        statusHunian: e['status_hunian']?.toString() ?? 'Tidak Diketahui',
+    final kelIds = kels.map((k) => k['id'] as String).toSet();
+
+    // 3. Fetch Individu
+    final individuList = await _supabase
+        .from('individu')
+        .select('id, id_keluarga, nama_lengkap, hubungan_keluarga');
+    final inds = individuList
+        .where((i) => kelIds.contains(i['id_keluarga']))
+        .toList();
+
+    // 4. Fetch Bangunan status_hunian
+    final bangunan = await _supabase
+        .from('bangunan')
+        .select('status_hunian')
+        .eq('id', bangunanId)
+        .maybeSingle();
+    final statusHunian =
+        bangunan?['status_hunian']?.toString() ?? 'Tidak Diketahui';
+
+    // Build Maps
+    Map<String, Map<String, dynamic>> krtMap = {
+      for (var k in krtList) k['id']: k,
+    };
+    Map<String, List<Map<String, dynamic>>> kelToInd = {};
+    for (var ind in inds) {
+      kelToInd.putIfAbsent(ind['id_keluarga'], () => []).add(ind);
+    }
+
+    // Map to Entities
+    List<DataWargaKeluarga> result = [];
+    for (var kel in kels) {
+      final krt = krtMap[kel['id_krt']];
+      final kelInds = kelToInd[kel['id']] ?? [];
+
+      String namaKepala = krt?['nama_krt']?.toString() ?? 'Tanpa Nama';
+      for (var ind in kelInds) {
+        final hub = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+        if (hub == 'KK' ||
+            hub == 'KEPALA KELUARGA' ||
+            hub == 'KEPALA RUMAH TANGGA') {
+          namaKepala = ind['nama_lengkap']?.toString() ?? namaKepala;
+          break;
+        }
+      }
+
+      result.add(
+        DataWargaKeluarga(
+          id: kel['id']?.toString() ?? '',
+          idKrt: kel['id_krt']?.toString() ?? '',
+          namaKepalaKeluarga: namaKepala,
+          noKk: kel['no_kk']?.toString() ?? '-',
+          jumlahAnggota: kelInds.length,
+          statusHunian: statusHunian,
+        ),
       );
-    }).toList();
+    }
+
+    result.sort((a, b) => a.namaKepalaKeluarga.compareTo(b.namaKepalaKeluarga));
+    return result;
   }
 }

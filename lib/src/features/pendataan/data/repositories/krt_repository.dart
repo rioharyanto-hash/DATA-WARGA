@@ -1,68 +1,50 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:dawis/core/database/local_db_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/krt_model.dart';
 import '../../domain/entities/krt.dart';
 
 class KrtRepository {
+  final SupabaseClient _supabase = Supabase.instance.client;
+
   Future<void> insertKrt(Krt krt) async {
-    final db = await LocalDbHelper.database;
     final model = KrtModel.fromEntity(krt);
-    await db.insert(
-      'krt',
-      model.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _supabase.from('krt').upsert(model.toJson());
   }
 
   Future<List<Krt>> getKrtByBangunanId(String bangunanId) async {
-    final db = await LocalDbHelper.database;
-    final maps = await db.query(
-      'krt',
-      where: 'id_bangunan = ?',
-      whereArgs: [bangunanId],
-    );
-    return maps.map((json) => KrtModel.fromJson(json)).toList();
+    final response = await _supabase
+        .from('krt')
+        .select()
+        .eq('id_bangunan', bangunanId);
+    return response.map((json) => KrtModel.fromJson(json)).toList();
   }
 
   Future<Krt?> getKrtById(String id) async {
-    final db = await LocalDbHelper.database;
-    final maps = await db.query(
-      'krt',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-    if (maps.isEmpty) return null;
-    return KrtModel.fromJson(maps.first);
+    final response = await _supabase
+        .from('krt')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    if (response == null) return null;
+    return KrtModel.fromJson(response);
   }
 
   Future<void> updateKrt(Krt krt) async {
-    final db = await LocalDbHelper.database;
     final model = KrtModel.fromEntity(krt);
-    await db.update(
-      'krt',
-      model.toJson(),
-      where: 'id = ?',
-      whereArgs: [krt.id],
-    );
+    await _supabase.from('krt').update(model.toJson()).eq('id', krt.id);
   }
 
-  Future<void> updateKrtNameAndNik(String krtId, String newName, String newNik) async {
-    final db = await LocalDbHelper.database;
-    await db.update(
-      'krt',
-      {
-        'nama_krt': newName,
-        'nik_krt': newNik,
-        'is_synced': 0,
-      },
-      where: 'id = ?',
-      whereArgs: [krtId],
-    );
+  Future<void> updateKrtNameAndNik(
+    String krtId,
+    String newName,
+    String newNik,
+  ) async {
+    await _supabase
+        .from('krt')
+        .update({'nama_krt': newName, 'nik_krt': newNik, 'is_synced': 0})
+        .eq('id', krtId);
   }
 
   Future<void> deleteKrt(String id) async {
-    final db = await LocalDbHelper.database;
-    await db.delete('krt', where: 'id = ?', whereArgs: [id]);
+    await _supabase.from('krt').delete().eq('id', id);
   }
 }

@@ -7,5 +7,5 @@ abstract class DashboardRepository {
     String? kelompokDawis,
   });
 
-  Future<Map<String, List<String>>> getFilterOptions();
+  Future<Map<String, List<String>>> getFilterOptions({String? rw, String? rt});
 }

@@ -1,27 +1,60 @@
-import 'package:sqflite/sqflite.dart';
-import '../../../../../core/database/local_db_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
-  @override
-  Future<Map<String, List<String>>> getFilterOptions() async {
-    final db = await LocalDbHelper.database;
-    final rwList = await db.rawQuery(
-      "SELECT DISTINCT rw FROM bangunan WHERE rw IS NOT NULL AND rw != '' ORDER BY rw",
-    );
-    final rtList = await db.rawQuery(
-      "SELECT DISTINCT rt FROM bangunan WHERE rt IS NOT NULL AND rt != '' ORDER BY rt",
-    );
-    final kaderList = await db.rawQuery(
-      "SELECT DISTINCT kelompok_dawis FROM bangunan WHERE kelompok_dawis IS NOT NULL AND kelompok_dawis != '' ORDER BY kelompok_dawis",
-    );
+  final SupabaseClient _supabase = Supabase.instance.client;
 
-    return {
-      'rw': rwList.map((e) => e['rw'].toString()).toList(),
-      'rt': rtList.map((e) => e['rt'].toString()).toList(),
-      'kader': kaderList.map((e) => e['kelompok_dawis'].toString()).toList(),
-    };
+  @override
+  Future<Map<String, List<String>>> getFilterOptions({
+    String? rw,
+    String? rt,
+  }) async {
+    final response = await _supabase
+        .from('bangunan')
+        .select('rw, rt, kelompok_dawis');
+
+    final rwSet = <String>{};
+    final rtSet = <String>{};
+    final kaderSet = <String>{};
+
+    for (var b in response) {
+      final bRw = b['rw']?.toString() ?? '';
+      final bRt = b['rt']?.toString() ?? '';
+      final bKd = b['kelompok_dawis']?.toString() ?? '';
+
+      if (bRw.isNotEmpty) rwSet.add(bRw);
+
+      bool matchRw = rw == null || rw.isEmpty || bRw == rw;
+      if (matchRw && bRt.isNotEmpty) rtSet.add(bRt);
+
+      bool matchRt = rt == null || rt.isEmpty || bRt == rt;
+      if (matchRw && matchRt && bKd.isNotEmpty) kaderSet.add(bKd);
+    }
+
+    final rwList = rwSet.toList()..sort();
+    final rtList = rtSet.toList()..sort();
+    final kaderList = kaderSet.toList()..sort();
+
+    return {'rw': rwList, 'rt': rtList, 'kader': kaderList};
+  }
+
+  int _calculateAge(String? tglLahir) {
+    if (tglLahir == null || tglLahir.isEmpty) return -1;
+    try {
+      final birthDate = DateTime.parse(tglLahir);
+      final today = DateTime.now();
+      int age = today.year - birthDate.year;
+      if (today.month < birthDate.month ||
+          (today.month == birthDate.month && today.day < birthDate.day)) {
+        age--;
+      }
+      return age;
+    } catch (e) {
+      // If the date format is different (e.g. DD/MM/YYYY), handle it
+      // Standard SQLite is YYYY-MM-DD
+      return -1;
+    }
   }
 
   @override
@@ -30,281 +63,152 @@ class DashboardRepositoryImpl implements DashboardRepository {
     String? rt,
     String? kelompokDawis,
   }) async {
-    final db = await LocalDbHelper.database;
-
-    String bWhere = '1=1';
-    List<Object?> bParams = [];
-
-    if (kelompokDawis == null || kelompokDawis.isEmpty) {
-      if (rw != null && rw.isNotEmpty) {
-        bWhere += ' AND b.rw = ?';
-        bParams.add(rw);
-      }
-      if (rt != null && rt.isNotEmpty) {
-        bWhere += ' AND b.rt = ?';
-        bParams.add(rt);
-      }
-    }
-
-    if (kelompokDawis != null && kelompokDawis.isNotEmpty) {
-      // Manual filter in Dart due to naming inconsistencies
-      final normalizedName = kelompokDawis.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-      
-      final bQuery = bWhere.replaceAll('b.', '');
-      final bangunanData = await db.rawQuery(
-        'SELECT id, kelompok_dawis FROM bangunan WHERE $bQuery',
-        bParams,
-      );
-      
-      final filteredBangunan = bangunanData.where((e) {
-        final kd = e['kelompok_dawis']?.toString() ?? '';
-        final normalizedKd = kd.replaceAll('.', '').replaceAll(' ', '').toLowerCase();
-        return normalizedKd == normalizedName;
-      }).toList();
-      
-      if (filteredBangunan.isEmpty) {
-        return DashboardSummary(
-          jumlahBangunan: 0,
-          jumlahKk: 0,
-          jumlahMutasi: 0,
-          jumlahBalita: 0,
-          jumlahLansia: 0,
-          jumlahWus: 0,
-          jumlahPus: 0,
-          jumlahLakiLaki: 0,
-          jumlahPerempuan: 0,
-          pendidikanGrouping: {},
-          pekerjaanGrouping: {},
-          umurGrouping: {},
-          jumlahDisabilitas: 0,
-          jumlahLahir: 0,
-          jumlahMeninggal: 0,
-          jumlahPindah: 0,
-          jumlahDatang: 0,
-        );
-      }
-      
-      final ids = filteredBangunan.map((e) => "'${e['id']}'").join(',');
-      bWhere += ' AND b.id IN ($ids)';
-    }
-
-    String bangunanWhere = bWhere.replaceAll('b.', '');
-
-    String keluargaJoin =
-        'JOIN krt k ON kel.id_krt = k.id JOIN bangunan b ON k.id_bangunan = b.id';
-    String individuJoin =
-        'JOIN keluarga kel ON i.id_keluarga = kel.id JOIN krt k ON kel.id_krt = k.id JOIN bangunan b ON k.id_bangunan = b.id';
-
-    // Jumlah Bangunan & KK
-    final bangunanCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM bangunan b WHERE $bangunanWhere',
-            bParams,
-          ),
-        ) ??
-        0;
-    final kkCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM keluarga kel $keluargaJoin WHERE $bWhere',
-            bParams,
-          ),
-        ) ??
-        0;
-
-    // Balita (0 - 5 tahun)
-    final balitaCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) BETWEEN 0 AND 5
-      AND $bWhere
-    ''', bParams),
-        ) ??
-        0;
-
-    // Lansia (>= 60 tahun)
-    final lansiaCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 60
-      AND $bWhere
-    ''', bParams),
-        ) ??
-        0;
-
-    // WUS (Wanita Usia Subur: Perempuan, 15 - 49 tahun)
-    final wusCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE i.jenis_kelamin = 'Perempuan' 
-      AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) BETWEEN 15 AND 49
-      AND $bWhere
-    ''', bParams),
-        ) ??
-        0;
-
-    // PUS (Pasangan Usia Subur: Perempuan, status Kawin, 15 - 49 tahun)
-    final pusCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE UPPER(i.hubungan_keluarga) = 'ISTRI'
-      AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) BETWEEN 15 AND 49
-      AND $bWhere
-    ''', bParams),
-        ) ??
-        0;
-
-    // Pendidikan Grouping
-    final pendidikanRaw = await db.rawQuery(
-      'SELECT i.pendidikan_terakhir, COUNT(*) as count FROM individu i $individuJoin WHERE $bWhere GROUP BY i.pendidikan_terakhir',
-      bParams,
+    final emptySummary = DashboardSummary(
+      jumlahBangunan: 0,
+      jumlahKk: 0,
+      jumlahMutasi: 0,
+      jumlahBalita: 0,
+      jumlahLansia: 0,
+      jumlahWus: 0,
+      jumlahPus: 0,
+      jumlahLakiLaki: 0,
+      jumlahPerempuan: 0,
+      pendidikanGrouping: {},
+      pekerjaanGrouping: {},
+      umurGrouping: {},
+      jumlahDisabilitas: 0,
+      jumlahLahir: 0,
+      jumlahMeninggal: 0,
+      jumlahPindah: 0,
+      jumlahDatang: 0,
     );
-    final Map<String, int> pendidikanGrouping = {};
-    for (var row in pendidikanRaw) {
-      final key = row['pendidikan_terakhir'] as String? ?? 'Tidak Diketahui';
-      final count = row['count'] as int? ?? 0;
-      pendidikanGrouping[key] = count;
+
+    if (kelompokDawis == 'Semua') kelompokDawis = null;
+
+    final allBangunan = await _supabase
+        .from('bangunan')
+        .select('id, rw, rt, kelompok_dawis');
+
+    final filteredBangunan = allBangunan.where((b) {
+      if (rw != null &&
+          rw.isNotEmpty &&
+          rw != 'Semua' &&
+          b['rw']?.toString() != rw) {
+        return false;
+      }
+      if (rt != null &&
+          rt.isNotEmpty &&
+          rt != 'Semua' &&
+          b['rt']?.toString() != rt) {
+        return false;
+      }
+      if (kelompokDawis != null && kelompokDawis.isNotEmpty) {
+        final kd =
+            b['kelompok_dawis']
+                ?.toString()
+                .replaceAll('.', '')
+                .replaceAll(' ', '')
+                .toLowerCase() ??
+            '';
+        final nkd = kelompokDawis
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        if (kd != nkd) return false;
+      }
+      return true;
+    }).toList();
+
+    if (filteredBangunan.isEmpty) {
+      return emptySummary;
     }
 
-    // Pekerjaan Grouping
-    final pekerjaanRaw = await db.rawQuery(
-      'SELECT i.pekerjaan, COUNT(*) as count FROM individu i $individuJoin WHERE $bWhere GROUP BY i.pekerjaan',
-      bParams,
-    );
-    final Map<String, int> pekerjaanGrouping = {};
-    for (var row in pekerjaanRaw) {
-      final key = row['pekerjaan'] as String? ?? 'Tidak Diketahui';
-      final count = row['count'] as int? ?? 0;
-      pekerjaanGrouping[key] = count;
+    final bIds = filteredBangunan.map((e) => e['id'] as String).toSet();
+
+    final allKrt = await _supabase.from('krt').select('id, id_bangunan');
+    final krtIds = allKrt
+        .where((k) => bIds.contains(k['id_bangunan']))
+        .map((k) => k['id'] as String)
+        .toSet();
+
+    final allKeluarga = await _supabase.from('keluarga').select('id, id_krt');
+    final kelIds = allKeluarga
+        .where((k) => krtIds.contains(k['id_krt']))
+        .map((k) => k['id'] as String)
+        .toSet();
+
+    final allIndividu = await _supabase.from('individu').select();
+    final filteredIndividu = allIndividu
+        .where((i) => kelIds.contains(i['id_keluarga']))
+        .toList();
+
+    final allMutasi = await _supabase
+        .from('mutasi')
+        .select('id_bangunan, jenis_mutasi');
+    final filteredMutasi = allMutasi
+        .where((m) => bIds.contains(m['id_bangunan']))
+        .toList();
+
+    // Counts
+    int balitaCount = 0;
+    int lansiaCount = 0;
+    int wusCount = 0;
+    int pusCount = 0;
+    int lakiLakiCount = 0;
+    int perempuanCount = 0;
+    int anakCount = 0;
+    int remajaCount = 0;
+    int dewasaCount = 0;
+    int disabilitasCount = 0;
+
+    Map<String, int> pendidikanGrouping = {};
+    Map<String, int> pekerjaanGrouping = {};
+
+    for (var ind in filteredIndividu) {
+      final jk = ind['jenis_kelamin']?.toString();
+      final tglLahir = ind['tanggal_lahir']?.toString();
+      final hub = ind['hubungan_keluarga']?.toString().toUpperCase();
+      final pdd = ind['pendidikan_terakhir']?.toString() ?? 'Tidak Diketahui';
+      final pkj = ind['pekerjaan']?.toString() ?? 'Tidak Diketahui';
+      final disabilitas = ind['kriteria_berkebutuhan_khusus']?.toString();
+
+      int age = _calculateAge(tglLahir);
+
+      if (jk == 'Laki-laki') lakiLakiCount++;
+      if (jk == 'Perempuan') perempuanCount++;
+
+      if (age >= 0 && age <= 4) balitaCount++;
+      if (age >= 5 && age <= 9) anakCount++;
+      if (age >= 10 && age <= 24) remajaCount++;
+      if (age >= 25 && age <= 59) dewasaCount++;
+      if (age >= 60) lansiaCount++;
+
+      if (jk == 'Perempuan' && age >= 15 && age <= 49) wusCount++;
+      if (hub == 'ISTRI' && age >= 15 && age <= 49) pusCount++;
+
+      if (disabilitas != null && disabilitas.isNotEmpty) disabilitasCount++;
+
+      pendidikanGrouping[pdd] = (pendidikanGrouping[pdd] ?? 0) + 1;
+      pekerjaanGrouping[pkj] = (pekerjaanGrouping[pkj] ?? 0) + 1;
     }
 
-    // Jenis Kelamin
-    final lakiLakiCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM individu i $individuJoin WHERE i.jenis_kelamin = 'Laki-laki' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-    final perempuanCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM individu i $individuJoin WHERE i.jenis_kelamin = 'Perempuan' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
+    int lahirCount = 0;
+    int matiCount = 0;
+    int pindahCount = 0;
+    int datangCount = 0;
 
-    // Umur Grouping
-    final anakCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 5 
-      AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) < 10
-      AND $bWhere
-    ''', bParams),
-        ) ??
-        0;
-
-    final remajaCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 10 
-      AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) < 25
-      AND $bWhere
-    ''', bParams),
-        ) ??
-        0;
-
-    final dewasaCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery('''
-      SELECT COUNT(*) FROM individu i $individuJoin
-      WHERE CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) >= 25 
-      AND CAST((julianday('now') - julianday(i.tanggal_lahir)) / 365.25 AS INTEGER) < 60
-      AND $bWhere
-    ''', bParams),
-        ) ??
-        0;
-
-    final Map<String, int> umurGrouping = {
-      'Balita (0-4)': balitaCount,
-      'Anak (5-9)': anakCount,
-      'Remaja (10-24)': remajaCount,
-      'Dewasa (25-59)': dewasaCount,
-      'Lansia (>=60)': lansiaCount,
-    };
-
-    // Mutasi - LAMPID
-    String mutasiJoin = 'JOIN bangunan b ON m.id_bangunan = b.id';
-
-    final mutasiCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE $bWhere',
-            bParams,
-          ),
-        ) ??
-        0;
-
-    final lahirCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'LAHIR' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
-    final matiCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'MENINGGAL' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
-    final pindahCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'PINDAH' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
-    final datangCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM mutasi m $mutasiJoin WHERE UPPER(m.jenis_mutasi) = 'DATANG' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
-
-    // Disabilitas
-    final disabilitasCount =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            "SELECT COUNT(*) FROM individu i $individuJoin WHERE i.kriteria_berkebutuhan_khusus IS NOT NULL AND i.kriteria_berkebutuhan_khusus != '' AND $bWhere",
-            bParams,
-          ),
-        ) ??
-        0;
+    for (var m in filteredMutasi) {
+      final type = m['jenis_mutasi']?.toString().toUpperCase() ?? '';
+      if (type == 'LAHIR') lahirCount++;
+      if (type == 'MENINGGAL') matiCount++;
+      if (type == 'PINDAH') pindahCount++;
+      if (type == 'DATANG') datangCount++;
+    }
 
     return DashboardSummary(
-      jumlahBangunan: bangunanCount,
-      jumlahKk: kkCount,
-      jumlahMutasi: mutasiCount,
+      jumlahBangunan: bIds.length,
+      jumlahKk: kelIds.length,
+      jumlahMutasi: filteredMutasi.length,
       jumlahBalita: balitaCount,
       jumlahLansia: lansiaCount,
       jumlahWus: wusCount,
@@ -313,7 +217,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
       jumlahPerempuan: perempuanCount,
       pendidikanGrouping: pendidikanGrouping,
       pekerjaanGrouping: pekerjaanGrouping,
-      umurGrouping: umurGrouping,
+      umurGrouping: {
+        'Balita (0-4)': balitaCount,
+        'Anak (5-9)': anakCount,
+        'Remaja (10-24)': remajaCount,
+        'Dewasa (25-59)': dewasaCount,
+        'Lansia (>=60)': lansiaCount,
+      },
       jumlahDisabilitas: disabilitasCount,
       jumlahLahir: lahirCount,
       jumlahMeninggal: matiCount,

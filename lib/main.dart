@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/database/local_db_helper.dart';
 import 'core/router/app_router.dart';
 import 'src/features/settings/presentation/providers/app_user_provider.dart';
+import 'core/services/sync_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,14 +15,22 @@ void main() async {
   // --- Inisialisasi dengan error handling agar tidak layar putih ---
   try {
     await dotenv.load(fileName: ".env");
+    final supabaseUrl = dotenv.env['SUPABASE_URL'];
+    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+    if (supabaseUrl != null && supabaseAnonKey != null) {
+      await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseAnonKey);
+    }
   } catch (e) {
-    debugPrint('[INIT] Gagal memuat .env: $e');
+    debugPrint('[INIT] Gagal memuat .env atau inisialisasi Supabase: $e');
   }
 
   try {
     await LocalDbHelper.database;
+    // Jalankan sinkronisasi secara asynchronous (background) agar tidak memblokir UI
+    SyncService.syncSupabaseToLocal();
   } catch (e) {
-    debugPrint('[INIT] Gagal inisialisasi Local DB: $e');
+    debugPrint('[INIT] Gagal inisialisasi Local DB atau Sync: $e');
   }
 
   runApp(const ProviderScope(child: MyApp()));

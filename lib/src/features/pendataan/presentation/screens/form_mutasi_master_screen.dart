@@ -87,15 +87,20 @@ class _FormMutasiMasterScreenState
           : _tanggalMutasiController.text;
 
       final db = await LocalDbHelper.database;
-      final res = await db.rawQuery('''
+      final res = await db.rawQuery(
+        '''
         SELECT krt.id_bangunan 
         FROM individu 
         JOIN keluarga ON individu.id_keluarga = keluarga.id 
         JOIN krt ON keluarga.id_krt = krt.id 
         WHERE individu.id = ?
-      ''', [_selectedIndividu!.id]);
-      
-      final resolvedIdBangunan = res.isNotEmpty ? res.first['id_bangunan'] as String : '';
+      ''',
+        [_selectedIndividu!.id],
+      );
+
+      final resolvedIdBangunan = res.isNotEmpty
+          ? res.first['id_bangunan'] as String
+          : '';
 
       final mutasi = Mutasi(
         id: id,
@@ -107,12 +112,14 @@ class _FormMutasiMasterScreenState
         tujuan: _tujuanController.text,
         keterangan: _keteranganController.text,
         sebabKematian: _sebabKematianController.text,
-        statusIbu: _jenisMutasi == 'Status Ibu (Hamil/Nifas)' ? _statusIbu : null,
+        statusIbu: _jenisMutasi == 'Status Ibu (Hamil/Nifas)'
+            ? _statusIbu
+            : null,
         idBangunan: resolvedIdBangunan,
       );
 
       await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
-      
+
       ref.invalidate(allMutasiProvider);
       ref.invalidate(mutasiFilteredProvider);
 

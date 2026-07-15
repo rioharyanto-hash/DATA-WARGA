@@ -63,12 +63,19 @@ class PdfFormBuilder {
       children: [
         pw.Container(
           width: 120,
-          child: pw.Text(label,
-              style: pw.TextStyle(font: boldFont, fontSize: fontSize)),
+          child: pw.Text(
+            label,
+            style: pw.TextStyle(font: boldFont, fontSize: fontSize),
+          ),
         ),
-        pw.Text(' : ', style: pw.TextStyle(font: boldFont, fontSize: fontSize)),
-        pw.Text(value,
-            style: pw.TextStyle(font: regularFont, fontSize: fontSize)),
+        pw.Text(
+          ' : ',
+          style: pw.TextStyle(font: boldFont, fontSize: fontSize),
+        ),
+        pw.Text(
+          value,
+          style: pw.TextStyle(font: regularFont, fontSize: fontSize),
+        ),
       ],
     );
   }
@@ -102,8 +109,8 @@ class PdfFormBuilder {
         textAlign: alignment == pw.Alignment.center
             ? pw.TextAlign.center
             : (alignment == pw.Alignment.centerLeft
-                ? pw.TextAlign.left
-                : pw.TextAlign.right),
+                  ? pw.TextAlign.left
+                  : pw.TextAlign.right),
       ),
     );
   }
@@ -121,12 +128,12 @@ class PdfFormBuilder {
         final alignment = (alignments != null && alignments.length > index)
             ? alignments[index]
             : pw.Alignment.center;
-        
+
         final textAlign = alignment == pw.Alignment.centerLeft
             ? pw.TextAlign.left
             : (alignment == pw.Alignment.centerRight
-                ? pw.TextAlign.right
-                : pw.TextAlign.center);
+                  ? pw.TextAlign.right
+                  : pw.TextAlign.center);
 
         return pw.Container(
           padding: const pw.EdgeInsets.all(2),

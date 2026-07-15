@@ -1,4 +1,13 @@
 ## [2026-07-14]
+### [PATCH] - Versi 1.9.17+40
+- Memperbaiki *crash* `Unsupported operation: _Namespace` pada peramban Web saat mengimpor atau mengekspor data Excel/CSV yang disebabkan oleh pemeriksaan platform internal dan getter dari package *file_picker*.
+- Mengimplementasikan kalender interaktif (*Date Picker*) pada Formulir Tambah Kader dan Tambah Pengurus untuk mempermudah dan menstandarkan pengisian form Tanggal Lahir.
+
+### [PATCH] - Versi 1.9.15+38
+- Memperbaiki isu di mana halaman Data Warga pada mode Desktop/Layar Terbelah *(Split View)* selalu menampilkan kondisi kosong (Belum Ada Data) untuk RT yang tercatat sebagai angka di *database* (misalnya RT 1).
+- Menambah penanganan khusus terkait inkonsistensi penulisan angka dan teks untuk kode RT/RW (terutama pada angka tanpa nol di depan seperti 1 vs 001) pada sistem penyimpanan *database lokal* SQLite. Semua pembacaan kini distandarkan menjadi teks.
+- Memberikan proteksi dan menjamin fungsi yang sama *(dynamic type safety)* saat mengekspor laporan Data Dasawisma *(Excel & PDF)*.
+
 ### [PATCH] - Versi 1.9.14+37
 - Menyempurnakan desain antarmuka (UI) form edit Profil Kader Dawis agar terstruktur rapi ke dalam beberapa kelompok (*Informasi Akun*, *Data Diri*, *Alamat & Kontak*) layaknya form admin.
 - Menyeragamkan opsi menu *dropdown* Pendidikan Terakhir di Profil Kader dengan yang ada di menu Form Data Individu.

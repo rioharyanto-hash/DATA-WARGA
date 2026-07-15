@@ -43,7 +43,8 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
       if (krt != null) {
         try {
           final db = await LocalDbHelper.database;
-          final result = await db.rawQuery('''
+          final result = await db.rawQuery(
+            '''
             SELECT i.id, i.nama_lengkap, i.nik
             FROM individu i
             JOIN keluarga k ON i.id_keluarga = k.id
@@ -53,8 +54,10 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                  WHERE id_individu_asal IS NOT NULL 
                  AND jenis_mutasi IN ('Meninggal', 'Pindah')
             )
-          ''', [widget.krtId]);
-          
+          ''',
+            [widget.krtId],
+          );
+
           if (mounted) {
             setState(() {
               _existingBangunanId = krt.idBangunan;
@@ -62,7 +65,7 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
               _nikController.text = krt.nikKrt;
               _noKkController.text = krt.noKkKrt;
               _krtCandidates = result;
-              
+
               for (var c in _krtCandidates) {
                 if (c['nama_lengkap'] == krt.namaKrt) {
                   _selectedCandidateId = c['id'] as String;
@@ -287,15 +290,22 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFE2E8F0),
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFE2E8F0),
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF6366F1),
+                                  width: 2,
+                                ),
                               ),
                             ),
                             items: [
@@ -308,15 +318,19 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                                   value: c['id'] as String,
                                   child: Text(c['nama_lengkap'] as String),
                                 );
-                              })
+                              }),
                             ],
                             onChanged: (val) {
                               setState(() {
                                 _selectedCandidateId = val;
                                 if (val != null) {
-                                  final selected = _krtCandidates.firstWhere((e) => e['id'] == val);
-                                  _namaController.text = selected['nama_lengkap'] as String;
-                                  _nikController.text = selected['nik'] as String;
+                                  final selected = _krtCandidates.firstWhere(
+                                    (e) => e['id'] == val,
+                                  );
+                                  _namaController.text =
+                                      selected['nama_lengkap'] as String;
+                                  _nikController.text =
+                                      selected['nik'] as String;
                                 }
                               });
                             },

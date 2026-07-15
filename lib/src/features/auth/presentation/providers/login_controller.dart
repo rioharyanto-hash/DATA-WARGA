@@ -10,7 +10,7 @@ class LoginController extends AsyncNotifier<void> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       if (idKader.trim().isEmpty || password.isEmpty) {
-        throw Exception('ID Kader dan password tidak boleh kosong');
+        throw Exception('ID / Username dan password tidak boleh kosong');
       }
       final repo = ref.read(appUserRepositoryProvider);
       final user = await repo.authenticate(idKader.trim(), password);
@@ -18,7 +18,9 @@ class LoginController extends AsyncNotifier<void> {
       if (user != null) {
         ref.read(loggedInUserProvider.notifier).setUser(user);
       } else {
-        throw Exception('Login Gagal. Pastikan ID Kader dan Password benar.');
+        throw Exception(
+          'Login Gagal. Pastikan ID / Username dan Password benar.',
+        );
       }
     });
   }

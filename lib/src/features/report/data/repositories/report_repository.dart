@@ -1060,7 +1060,8 @@ class ReportRepository implements IReportRepository {
             }
 
             // PUS
-            final hubKelPUS = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+            final hubKelPUS =
+                ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
             if (hubKelPUS == 'ISTRI' && age >= 15 && age < 50) {
               countPUS++;
             }
@@ -1583,19 +1584,23 @@ class ReportRepository implements IReportRepository {
       where: 'role = ?',
       whereArgs: ['KADER'],
     );
-    
+
     final bangunanGroups = await db.query(
       'bangunan',
       columns: ['kelompok_dawis', 'rt', 'rw'],
       distinct: true,
     );
-    
+
     final Map<String, Map<String, String>> combined = {};
-    
+
     for (var row in result) {
       final k = row['kelompok_dawis']?.toString() ?? '';
       if (k.isNotEmpty) {
-        combined[k] = {
+        final normalized = k
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        combined[normalized] = {
           'kelompok_dawis': k,
           'rt': row['rt']?.toString() ?? '',
           'rw': row['rw']?.toString() ?? '',
@@ -1604,20 +1609,26 @@ class ReportRepository implements IReportRepository {
         };
       }
     }
-    
+
     for (var row in bangunanGroups) {
       final k = row['kelompok_dawis']?.toString() ?? '';
-      if (k.isNotEmpty && !combined.containsKey(k)) {
-        combined[k] = {
-          'kelompok_dawis': k,
-          'rt': row['rt']?.toString() ?? '',
-          'rw': row['rw']?.toString() ?? '',
-          'id_kader': '',
-          'nama': '',
-        };
+      if (k.isNotEmpty) {
+        final normalized = k
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        if (!combined.containsKey(normalized)) {
+          combined[normalized] = {
+            'kelompok_dawis': k,
+            'rt': row['rt']?.toString() ?? '',
+            'rw': row['rw']?.toString() ?? '',
+            'id_kader': '',
+            'nama': '',
+          };
+        }
       }
     }
-    
+
     final list = combined.values.toList();
     list.sort((a, b) => a['kelompok_dawis']!.compareTo(b['kelompok_dawis']!));
     return list;

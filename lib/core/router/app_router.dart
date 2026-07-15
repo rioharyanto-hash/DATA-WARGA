@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../src/features/settings/presentation/providers/app_user_provider.dart';
+
 import '../../src/features/auth/presentation/widgets/login_screen.dart';
 import '../../src/features/dashboard/presentation/widgets/dashboard_screen.dart';
 import '../../src/features/pendataan/presentation/widgets/pendataan_screen.dart';
@@ -27,6 +29,8 @@ import '../../src/features/settings/presentation/screens/settings_screen.dart';
 import '../../src/features/settings/presentation/screens/user_list_screen.dart';
 import '../../src/features/settings/presentation/screens/form_user_screen.dart';
 import '../../src/features/settings/presentation/screens/profil_screen.dart';
+import '../../src/features/settings/presentation/screens/pengurus_list_screen.dart';
+import '../../src/features/settings/presentation/screens/form_pengurus_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>();
@@ -39,9 +43,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/login',
+    redirect: (context, state) {
+      final user = ref.read(loggedInUserProvider);
+      final isLoggingIn = state.uri.path == '/login';
+
+      if (user == null && !isLoggingIn) {
+        return '/login';
+      }
+
+      if (user != null && isLoggingIn) {
+        return '/dashboard';
+      }
+
+      return null;
+    },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       StatefulShellRoute.indexedStack(
+        redirect: (context, state) {
+          final user = ref.read(loggedInUserProvider);
+          if (user == null) return '/login';
+          return null;
+        },
         builder: (context, state, navigationShell) {
           return MainLayoutScreen(navigationShell: navigationShell);
         },
@@ -146,8 +169,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: '/view-individu/:individuId',
                 builder: (context, state) {
                   final individuId = state.pathParameters['individuId']!;
-                  final isReadOnly = state.uri.queryParameters['isReadOnly'] == 'true';
-                  return ViewIndividuScreen(individuId: individuId, isReadOnly: isReadOnly);
+                  final isReadOnly =
+                      state.uri.queryParameters['isReadOnly'] == 'true';
+                  return ViewIndividuScreen(
+                    individuId: individuId,
+                    isReadOnly: isReadOnly,
+                  );
                 },
               ),
               GoRoute(
@@ -277,6 +304,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) {
                   final userId = state.pathParameters['userId']!;
                   return FormUserScreen(userId: userId);
+                },
+              ),
+              GoRoute(
+                path: '/pengurus-list',
+                builder: (context, state) => const PengurusListScreen(),
+              ),
+              GoRoute(
+                path: '/form-pengurus',
+                builder: (context, state) => const FormPengurusScreen(),
+              ),
+              GoRoute(
+                path: '/form-pengurus/:userId',
+                builder: (context, state) {
+                  final userId = state.pathParameters['userId']!;
+                  return FormPengurusScreen(userId: userId);
                 },
               ),
             ],

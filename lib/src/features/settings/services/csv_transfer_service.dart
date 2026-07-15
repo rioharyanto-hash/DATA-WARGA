@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:csv/csv.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dawis/core/database/local_db_helper.dart';
@@ -19,6 +20,21 @@ class ImportSummary {
 }
 
 class CsvTransferService {
+  String _normalizeKelompokDawis(String input) {
+    final regex = RegExp(
+      r'^(.+?)\s*(\d{1,3})\s*[.,-]\s*(\d{1,3})\s*[.,-]\s*(\d{1,3})\s*$',
+    );
+    final match = regex.firstMatch(input);
+    if (match != null) {
+      final name = match.group(1)?.trim() ?? '';
+      final rw = match.group(2)?.padLeft(3, '0') ?? '';
+      final rt = match.group(3)?.padLeft(3, '0') ?? '';
+      final urut = match.group(4)?.padLeft(3, '0') ?? '';
+      return '$name $rw.$rt.$urut';
+    }
+    return input.trim();
+  }
+
   final _uuid = const Uuid();
 
   /// Mendownload template CSV kosong untuk diisi
@@ -208,14 +224,37 @@ class CsvTransferService {
   }
 
   /// Impor data CSV mentah ke dalam SQLite (hierarkis)
-  Future<ImportSummary> importBulkCsv(String filePath) async {
-    final file = File(filePath);
+  Future<ImportSummary> importBulkCsv({
+    String? filePath,
+    Uint8List? bytes,
+  }) async {
     String csvString;
-    try {
-      csvString = await file.readAsString();
-    } catch (e) {
-      final bytes = await file.readAsBytes();
-      csvString = latin1.decode(bytes, allowInvalid: true);
+
+    if (kIsWeb) {
+      if (bytes == null) throw Exception('File bytes cannot be null on Web');
+      try {
+        csvString = utf8.decode(bytes);
+      } catch (e) {
+        csvString = latin1.decode(bytes, allowInvalid: true);
+      }
+    } else {
+      if (bytes != null) {
+        try {
+          csvString = utf8.decode(bytes);
+        } catch (e) {
+          csvString = latin1.decode(bytes, allowInvalid: true);
+        }
+      } else if (filePath != null) {
+        final file = File(filePath);
+        try {
+          csvString = await file.readAsString();
+        } catch (e) {
+          final b = await file.readAsBytes();
+          csvString = latin1.decode(b, allowInvalid: true);
+        }
+      } else {
+        throw Exception('Either filePath or bytes must be provided');
+      }
     }
     final List<List<dynamic>> rows = Csv().decode(csvString);
 
@@ -290,7 +329,7 @@ class CsvTransferService {
         continue;
       }
 
-      String kelompokDawis = row[0]?.toString().trim() ?? '';
+      String kelompokDawis = _normalizeKelompokDawis(row[0]?.toString() ?? '');
       String rt = row[1]?.toString().trim() ?? '';
       String rw = row[2]?.toString().trim() ?? '';
       String nomorUrutBangunan = row[3]?.toString().trim() ?? '';
@@ -562,14 +601,37 @@ class CsvTransferService {
   }
 
   /// Impor data CSV khusus Bangunan
-  Future<ImportSummary> importBangunanCsv(String filePath) async {
-    final file = File(filePath);
+  Future<ImportSummary> importBangunanCsv({
+    String? filePath,
+    Uint8List? bytes,
+  }) async {
     String csvString;
-    try {
-      csvString = await file.readAsString();
-    } catch (e) {
-      final bytes = await file.readAsBytes();
-      csvString = latin1.decode(bytes, allowInvalid: true);
+
+    if (kIsWeb) {
+      if (bytes == null) throw Exception('File bytes cannot be null on Web');
+      try {
+        csvString = utf8.decode(bytes);
+      } catch (e) {
+        csvString = latin1.decode(bytes, allowInvalid: true);
+      }
+    } else {
+      if (bytes != null) {
+        try {
+          csvString = utf8.decode(bytes);
+        } catch (e) {
+          csvString = latin1.decode(bytes, allowInvalid: true);
+        }
+      } else if (filePath != null) {
+        final file = File(filePath);
+        try {
+          csvString = await file.readAsString();
+        } catch (e) {
+          final b = await file.readAsBytes();
+          csvString = latin1.decode(b, allowInvalid: true);
+        }
+      } else {
+        throw Exception('Either filePath or bytes must be provided');
+      }
     }
     final List<List<dynamic>> rows = Csv().decode(csvString);
 
@@ -613,7 +675,9 @@ class CsvTransferService {
 
       int offset = colIdIndex != -1 ? 1 : 0;
 
-      String kelompokDawis = row[0 + offset]?.toString().trim() ?? '';
+      String kelompokDawis = _normalizeKelompokDawis(
+        row[0 + offset]?.toString() ?? '',
+      );
       String rt = row[1 + offset]?.toString().trim() ?? '';
       String rw = row[2 + offset]?.toString().trim() ?? '';
       String nomorUrutBangunan = row[3 + offset]?.toString().trim() ?? '';

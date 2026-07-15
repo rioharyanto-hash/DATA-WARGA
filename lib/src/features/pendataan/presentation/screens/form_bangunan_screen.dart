@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
@@ -118,8 +119,8 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
           _nomorUrutController.text = bangunan.nomorUrutBangunan ?? '';
           _namaBangunanController.text = bangunan.namaBangunan;
           _alamatController.text = bangunan.alamatLengkap;
-          _rtController.text = bangunan.rt;
-          _rwController.text = bangunan.rw;
+          _rtController.text = bangunan.rt.padLeft(2, '0');
+          _rwController.text = bangunan.rw.padLeft(2, '0');
           _nopPbbController.text = bangunan.nopPbb ?? '';
           _luasBangunanController.text =
               bangunan.luasBangunan?.toString() ?? '';
@@ -445,10 +446,25 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildOutlinedInput(
+              _buildOutlinedDropdown(
                 'Nomor Urut Bangunan',
-                _nomorUrutController,
-                isNumber: true,
+                _nomorUrutController.text.isEmpty
+                    ? null
+                    : _nomorUrutController.text,
+                [
+                  ...List.generate(25, (i) => (i + 1).toString()),
+                  if (_nomorUrutController.text.isNotEmpty &&
+                      !List.generate(
+                        25,
+                        (i) => (i + 1).toString(),
+                      ).contains(_nomorUrutController.text))
+                    _nomorUrutController.text,
+                ],
+                (val) {
+                  if (val != null) {
+                    setState(() => _nomorUrutController.text = val);
+                  }
+                },
               ),
               const SizedBox(height: 16),
               _buildOutlinedInput(
@@ -466,20 +482,50 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildOutlinedInput(
+                    child: _buildOutlinedDropdown(
                       'RT',
-                      _rtController,
-                      isNumber: true,
-                      isRequired: true,
+                      _rtController.text.isEmpty
+                          ? null
+                          : _rtController.text.padLeft(2, '0'),
+                      [
+                        ...List.generate(
+                          20,
+                          (i) => (i + 1).toString().padLeft(2, '0'),
+                        ),
+                        if (_rtController.text.isNotEmpty &&
+                            !List.generate(
+                              20,
+                              (i) => (i + 1).toString().padLeft(2, '0'),
+                            ).contains(_rtController.text.padLeft(2, '0')))
+                          _rtController.text.padLeft(2, '0'),
+                      ],
+                      (val) {
+                        if (val != null) _rtController.text = val;
+                      },
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildOutlinedInput(
+                    child: _buildOutlinedDropdown(
                       'RW',
-                      _rwController,
-                      isNumber: true,
-                      isRequired: true,
+                      _rwController.text.isEmpty
+                          ? null
+                          : _rwController.text.padLeft(2, '0'),
+                      [
+                        ...List.generate(
+                          20,
+                          (i) => (i + 1).toString().padLeft(2, '0'),
+                        ),
+                        if (_rwController.text.isNotEmpty &&
+                            !List.generate(
+                              20,
+                              (i) => (i + 1).toString().padLeft(2, '0'),
+                            ).contains(_rwController.text.padLeft(2, '0')))
+                          _rwController.text.padLeft(2, '0'),
+                      ],
+                      (val) {
+                        if (val != null) _rwController.text = val;
+                      },
                     ),
                   ),
                 ],
@@ -901,7 +947,12 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
-          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          keyboardType: isNumber
+              ? const TextInputType.numberWithOptions(decimal: true)
+              : TextInputType.text,
+          inputFormatters: isNumber
+              ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+              : null,
           decoration: _outlinedDecoration(),
           validator: isRequired
               ? (val) => val == null || val.isEmpty ? 'Wajib diisi' : null
@@ -971,7 +1022,12 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          keyboardType: isNumber
+              ? const TextInputType.numberWithOptions(decimal: true)
+              : TextInputType.text,
+          inputFormatters: isNumber
+              ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
+              : null,
           decoration: const InputDecoration(
             isDense: true,
             contentPadding: EdgeInsets.symmetric(vertical: 8),

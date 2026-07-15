@@ -44,21 +44,36 @@ class DataWargaBangunan {
 
   String get jenisBangunan {
     switch (kategoriBangunan) {
-      case 1: return 'Rumah Tinggal';
-      case 2: return 'Kontrakan';
-      case 3: return 'Kos-kosan';
-      case 4: return 'Asrama/Mess';
-      case 5: return 'Rusun';
-      case 6: return 'Rumah Dinas';
-      case 7: return 'Apartemen';
-      case 8: return 'Rukan/Ruko';
-      case 9: return 'Kios/Toko/Warung';
-      case 10: return 'Tempat Usaha Lainnya';
-      case 11: return 'Sekolah';
-      case 12: return 'Tempat Ibadah';
-      case 13: return 'Panti';
-      case 14: return 'Jenis Bangunan Lainnya';
-      default: return 'Lainnya';
+      case 1:
+        return 'Rumah Tinggal';
+      case 2:
+        return 'Kontrakan';
+      case 3:
+        return 'Kos-kosan';
+      case 4:
+        return 'Asrama/Mess';
+      case 5:
+        return 'Rusun';
+      case 6:
+        return 'Rumah Dinas';
+      case 7:
+        return 'Apartemen';
+      case 8:
+        return 'Rukan/Ruko';
+      case 9:
+        return 'Kios/Toko/Warung';
+      case 10:
+        return 'Tempat Usaha Lainnya';
+      case 11:
+        return 'Sekolah';
+      case 12:
+        return 'Tempat Ibadah';
+      case 13:
+        return 'Panti';
+      case 14:
+        return 'Jenis Bangunan Lainnya';
+      default:
+        return 'Lainnya';
     }
   }
 }

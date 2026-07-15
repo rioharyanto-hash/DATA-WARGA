@@ -19,10 +19,10 @@ class PdfReportService {
       LEFT JOIN krt k ON k.id_bangunan = b.id
       LEFT JOIN keluarga kel ON kel.id_krt = k.id
       LEFT JOIN individu i ON i.id_keluarga = kel.id
-      WHERE b.rt = ? AND b.rw = ?
+      WHERE CAST(b.rt AS INTEGER) = ? AND CAST(b.rw AS INTEGER) = ?
       GROUP BY b.kelompok_dawis
     ''',
-      [rt, rw],
+      [int.tryParse(rt) ?? 0, int.tryParse(rw) ?? 0],
     );
 
     // Fetch data for Form II
@@ -38,10 +38,10 @@ class PdfReportService {
       LEFT JOIN krt k ON k.id_bangunan = b.id
       LEFT JOIN keluarga kel ON kel.id_krt = k.id
       LEFT JOIN individu i ON i.id_keluarga = kel.id
-      WHERE b.rt = ? AND b.rw = ?
+      WHERE CAST(b.rt AS INTEGER) = ? AND CAST(b.rw AS INTEGER) = ?
       GROUP BY b.id, b.alamat_lengkap, b.kelompok_dawis
     ''',
-      [rt, rw],
+      [int.tryParse(rt) ?? 0, int.tryParse(rw) ?? 0],
     );
 
     final pdf = pw.Document();

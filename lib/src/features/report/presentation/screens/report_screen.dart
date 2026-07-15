@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/report_provider.dart';
 import 'report_preview_screen.dart';
+import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({super.key});
@@ -196,27 +197,31 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         const SizedBox(height: 8),
         kelompokDawisAsync.when(
           data: (list) {
-            final uniqueRts = list
-                .map((e) => e['rt'] ?? '')
-                .where((e) => e.isNotEmpty)
-                .toSet()
-                .toList()
-              ..sort();
-            
+            final uniqueRts =
+                list
+                    .map((e) => e['rt'] ?? '')
+                    .where((e) => e.isNotEmpty)
+                    .toSet()
+                    .toList()
+                  ..sort();
+
             if (uniqueRts.isEmpty) {
               return TextField(
                 controller: _rtController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 enabled: false,
               );
             }
 
-            final validRt = uniqueRts.contains(_rtController.text) 
-                ? _rtController.text 
+            final validRt = uniqueRts.contains(_rtController.text)
+                ? _rtController.text
                 : uniqueRts.first;
 
             if (_rtController.text != validRt) {
@@ -229,7 +234,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               initialValue: validRt,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               items: uniqueRts
                   .map((rt) => DropdownMenuItem(value: rt, child: Text(rt)))
@@ -256,19 +264,23 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         const SizedBox(height: 8),
         kelompokDawisAsync.when(
           data: (list) {
-            final uniqueRws = list
-                .map((e) => e['rw'] ?? '')
-                .where((e) => e.isNotEmpty)
-                .toSet()
-                .toList()
-              ..sort();
+            final uniqueRws =
+                list
+                    .map((e) => e['rw'] ?? '')
+                    .where((e) => e.isNotEmpty)
+                    .toSet()
+                    .toList()
+                  ..sort();
 
             if (uniqueRws.isEmpty) {
               return TextField(
                 controller: _rwController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 enabled: false,
@@ -289,7 +301,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               initialValue: validRw,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               items: uniqueRws
                   .map((rw) => DropdownMenuItem(value: rw, child: Text(rw)))
@@ -354,24 +369,12 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: _isRingkasan ? Colors.amber.shade700 : Colors.blue.shade700,
-
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Laporan & Cetak PDF',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Pratinjau dan cetak laporan Dasawisma',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
+        backgroundColor: _isRingkasan
+            ? Colors.amber.shade700
+            : Colors.blue.shade700,
+        title: const SharedAppBarTitle(
+          title: 'Laporan & Cetak PDF',
+          subtitle: 'Pratinjau dan cetak laporan Dasawisma',
         ),
         actions: [
           if (context.canPop())
@@ -471,7 +474,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Form I & II'),
                           generatePdf: () {
                             final name = _isRingkasan
@@ -495,7 +498,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Kuantitas'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -520,7 +523,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Rekapitulasi'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -545,7 +548,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Profil Kependudukan'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -570,7 +573,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Potensi Warga'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -595,7 +598,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Form Ibu Hamil'),
                           generatePdf: () => _isRingkasan
                               ? ref
@@ -620,7 +623,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Manual'),
                           generatePdf: () => ref
                               .read(reportControllerProvider.notifier)
@@ -641,7 +644,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ReportPreviewScreen(
-                            isRingkasan: _isRingkasan,
+                          isRingkasan: _isRingkasan,
                           title: getFormattedTitle('Data Yatim Piatu'),
                           generatePdf: () => ref
                               .read(reportControllerProvider.notifier)

@@ -274,7 +274,10 @@ class PdfPerincianService {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: const PdfPageFormat(13 * PdfPageFormat.inch, 8.5 * PdfPageFormat.inch), // F4 / Folio
+        pageFormat: const PdfPageFormat(
+          13 * PdfPageFormat.inch,
+          8.5 * PdfPageFormat.inch,
+        ), // F4 / Folio
         margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Column(
@@ -983,23 +986,27 @@ class PdfPerincianService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('TOTAL',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 5),
+                  buildCell(
+                    'TOTAL',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 5,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
                         buildCell('L', flex: 1, isHeader: true, fontSize: 5),
-                        buildCell('P',
-                            flex: 1,
-                            isHeader: true,
-                            noRightBorder: true,
-                            fontSize: 5),
+                        buildCell(
+                          'P',
+                          flex: 1,
+                          isHeader: true,
+                          noRightBorder: true,
+                          fontSize: 5,
+                        ),
                       ],
                     ),
                   ),
@@ -1017,12 +1024,14 @@ class PdfPerincianService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('BALITA',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 5),
+                  buildCell(
+                    'BALITA',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 5,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
@@ -1035,27 +1044,33 @@ class PdfPerincianService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                             children: [
-                              buildCell('AKTIF\nPOSYANDU',
-                                  flex: 2,
-                                  isHeader: true,
-                                  noRightBorder: true,
-                                  bottomBorder: true,
-                                  fontSize: 4),
+                              buildCell(
+                                'AKTIF\nPOSYANDU',
+                                flex: 2,
+                                isHeader: true,
+                                noRightBorder: true,
+                                bottomBorder: true,
+                                fontSize: 4,
+                              ),
                               pw.Expanded(
                                 flex: 1,
                                 child: pw.Row(
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.stretch,
                                   children: [
-                                    buildCell('L',
-                                        flex: 1,
-                                        isHeader: true,
-                                        fontSize: 5),
-                                    buildCell('P',
-                                        flex: 1,
-                                        isHeader: true,
-                                        noRightBorder: true,
-                                        fontSize: 5),
+                                    buildCell(
+                                      'L',
+                                      flex: 1,
+                                      isHeader: true,
+                                      fontSize: 5,
+                                    ),
+                                    buildCell(
+                                      'P',
+                                      flex: 1,
+                                      isHeader: true,
+                                      noRightBorder: true,
+                                      fontSize: 5,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1081,36 +1096,58 @@ class PdfPerincianService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('PENGGUNAAN ALAT KB',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 5),
+                  buildCell(
+                    'PENGGUNAAN ALAT KB',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 5,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
-                        buildCell('TIDAK\nKB',
-                            flex: 1, isHeader: true, fontSize: 5),
-                        buildCell('PIL',
-                            flex: 1, isHeader: true, fontSize: 5),
-                        buildCell('IUD',
-                            flex: 1, isHeader: true, fontSize: 5),
-                        buildCell('IMPLAN',
-                            flex: 1, isHeader: true, fontSize: 4),
-                        buildCell('SUNTIK',
-                            flex: 1, isHeader: true, fontSize: 4),
-                        buildCell('KONDOM',
-                            flex: 1, isHeader: true, fontSize: 4),
-                        buildCell('STERIL',
-                            flex: 1, isHeader: true, fontSize: 4),
-                        buildCell('LAINN\nYA',
-                            flex: 1,
-                            isHeader: true,
-                            noRightBorder: true,
-                            fontSize: 5),
+                        buildCell(
+                          'TIDAK\nKB',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 5,
+                        ),
+                        buildCell('PIL', flex: 1, isHeader: true, fontSize: 5),
+                        buildCell('IUD', flex: 1, isHeader: true, fontSize: 5),
+                        buildCell(
+                          'IMPLAN',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 4,
+                        ),
+                        buildCell(
+                          'SUNTIK',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 4,
+                        ),
+                        buildCell(
+                          'KONDOM',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 4,
+                        ),
+                        buildCell(
+                          'STERIL',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 4,
+                        ),
+                        buildCell(
+                          'LAINN\nYA',
+                          flex: 1,
+                          isHeader: true,
+                          noRightBorder: true,
+                          fontSize: 5,
+                        ),
                       ],
                     ),
                   ),
@@ -1128,12 +1165,14 @@ class PdfPerincianService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('REMAJA (10-18) TH',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 5),
+                  buildCell(
+                    'REMAJA (10-18) TH',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 5,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
@@ -1146,27 +1185,33 @@ class PdfPerincianService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                             children: [
-                              buildCell('AKTIF\nPOSREM',
-                                  flex: 2,
-                                  isHeader: true,
-                                  noRightBorder: true,
-                                  bottomBorder: true,
-                                  fontSize: 4),
+                              buildCell(
+                                'AKTIF\nPOSREM',
+                                flex: 2,
+                                isHeader: true,
+                                noRightBorder: true,
+                                bottomBorder: true,
+                                fontSize: 4,
+                              ),
                               pw.Expanded(
                                 flex: 1,
                                 child: pw.Row(
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.stretch,
                                   children: [
-                                    buildCell('L',
-                                        flex: 1,
-                                        isHeader: true,
-                                        fontSize: 5),
-                                    buildCell('P',
-                                        flex: 1,
-                                        isHeader: true,
-                                        noRightBorder: true,
-                                        fontSize: 5),
+                                    buildCell(
+                                      'L',
+                                      flex: 1,
+                                      isHeader: true,
+                                      fontSize: 5,
+                                    ),
+                                    buildCell(
+                                      'P',
+                                      flex: 1,
+                                      isHeader: true,
+                                      noRightBorder: true,
+                                      fontSize: 5,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1190,12 +1235,14 @@ class PdfPerincianService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('LANSIA',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 5),
+                  buildCell(
+                    'LANSIA',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 5,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
@@ -1208,27 +1255,33 @@ class PdfPerincianService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                             children: [
-                              buildCell('AKTIF POSLAN',
-                                  flex: 2,
-                                  isHeader: true,
-                                  noRightBorder: true,
-                                  bottomBorder: true,
-                                  fontSize: 4),
+                              buildCell(
+                                'AKTIF POSLAN',
+                                flex: 2,
+                                isHeader: true,
+                                noRightBorder: true,
+                                bottomBorder: true,
+                                fontSize: 4,
+                              ),
                               pw.Expanded(
                                 flex: 1,
                                 child: pw.Row(
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.stretch,
                                   children: [
-                                    buildCell('L',
-                                        flex: 1,
-                                        isHeader: true,
-                                        fontSize: 5),
-                                    buildCell('P',
-                                        flex: 1,
-                                        isHeader: true,
-                                        noRightBorder: true,
-                                        fontSize: 5),
+                                    buildCell(
+                                      'L',
+                                      flex: 1,
+                                      isHeader: true,
+                                      fontSize: 5,
+                                    ),
+                                    buildCell(
+                                      'P',
+                                      flex: 1,
+                                      isHeader: true,
+                                      noRightBorder: true,
+                                      fontSize: 5,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1252,23 +1305,27 @@ class PdfPerincianService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('BERKEBUTUHAN\nKHUSUS',
-                      flex: 2,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 5),
+                  buildCell(
+                    'BERKEBUTUHAN\nKHUSUS',
+                    flex: 2,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 5,
+                  ),
                   pw.Expanded(
                     flex: 1,
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
                         buildCell('L', flex: 1, isHeader: true, fontSize: 5),
-                        buildCell('P',
-                            flex: 1,
-                            isHeader: true,
-                            noRightBorder: true,
-                            fontSize: 5),
+                        buildCell(
+                          'P',
+                          flex: 1,
+                          isHeader: true,
+                          noRightBorder: true,
+                          fontSize: 5,
+                        ),
                       ],
                     ),
                   ),
@@ -1277,8 +1334,13 @@ class PdfPerincianService {
             ),
           ),
           // KET
-          buildCell('KET',
-              flex: 1, isHeader: true, noRightBorder: true, fontSize: 5),
+          buildCell(
+            'KET',
+            flex: 1,
+            isHeader: true,
+            noRightBorder: true,
+            fontSize: 5,
+          ),
         ],
       ),
     );
@@ -1318,17 +1380,34 @@ class PdfPerincianService {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       _potensiInfoRow(
-                          'NAMA KELOMPOK', kelompok, boldFont, regularFont),
+                        'NAMA KELOMPOK',
+                        kelompok,
+                        boldFont,
+                        regularFont,
+                      ),
                       pw.SizedBox(height: 2),
                       _potensiInfoRow(
-                          'RUKUN WARGA (RW)', rw, boldFont, regularFont),
+                        'RUKUN WARGA (RW)',
+                        rw,
+                        boldFont,
+                        regularFont,
+                      ),
                       pw.SizedBox(height: 2),
                       _potensiInfoRow(
-                          'DESA / KELURAHAN', kelurahan, boldFont, regularFont),
+                        'DESA / KELURAHAN',
+                        kelurahan,
+                        boldFont,
+                        regularFont,
+                      ),
                       pw.SizedBox(height: 2),
                       _potensiInfoRow('TAHUN', tahun, boldFont, regularFont),
                       pw.SizedBox(height: 2),
-                      _potensiInfoRow('PERIODE', periode, boldFont, regularFont),
+                      _potensiInfoRow(
+                        'PERIODE',
+                        periode,
+                        boldFont,
+                        regularFont,
+                      ),
                     ],
                   ),
                 ],
@@ -1337,9 +1416,7 @@ class PdfPerincianService {
               pw.Container(height: 48, child: tableHeaderWidget),
               pw.Container(
                 height: 12,
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(width: 0.5),
-                ),
+                decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
                 child: pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
@@ -1357,10 +1434,7 @@ class PdfPerincianService {
                           alignment: pw.Alignment.center,
                           child: pw.Text(
                             '$j',
-                            style: pw.TextStyle(
-                              font: regularFont,
-                              fontSize: 5,
-                            ),
+                            style: pw.TextStyle(font: regularFont, fontSize: 5),
                           ),
                         ),
                       ),
@@ -1382,14 +1456,8 @@ class PdfPerincianService {
               tKondom = 0,
               tSteril = 0,
               tKbLainnya = 0;
-          int tRemajaL = 0,
-              tRemajaP = 0,
-              tRemajaAktifL = 0,
-              tRemajaAktifP = 0;
-          int tLansiaL = 0,
-              tLansiaP = 0,
-              tLansiaAktifL = 0,
-              tLansiaAktifP = 0;
+          int tRemajaL = 0, tRemajaP = 0, tRemajaAktifL = 0, tRemajaAktifP = 0;
+          int tLansiaL = 0, tLansiaP = 0, tLansiaAktifL = 0, tLansiaAktifP = 0;
           int tBerkebutuhanL = 0, tBerkebutuhanP = 0;
 
           List<pw.TableRow> tableRows = [];
@@ -1496,10 +1564,7 @@ class PdfPerincianService {
                           : pw.Alignment.center,
                       child: pw.Text(
                         values[j],
-                        style: pw.TextStyle(
-                          font: regularFont,
-                          fontSize: 5,
-                        ),
+                        style: pw.TextStyle(font: regularFont, fontSize: 5),
                       ),
                     ),
                 ],
@@ -1544,9 +1609,7 @@ class PdfPerincianService {
           tableRows.add(
             pw.TableRow(
               decoration: const pw.BoxDecoration(
-                border: pw.Border(
-                  top: pw.BorderSide(width: 1.0),
-                ),
+                border: pw.Border(top: pw.BorderSide(width: 1.0)),
               ),
               children: [
                 for (int j = 0; j < 30; j++)
@@ -1555,7 +1618,10 @@ class PdfPerincianService {
                     alignment: pw.Alignment.center,
                     child: pw.Text(
                       totalValues[j],
-                      style: pw.TextStyle(font: boldFont, fontSize: j == 1 ? 6 : 5),
+                      style: pw.TextStyle(
+                        font: boldFont,
+                        fontSize: j == 1 ? 6 : 5,
+                      ),
                     ),
                   ),
               ],
@@ -1573,10 +1639,12 @@ class PdfPerincianService {
               ),
               columnWidths: {
                 for (int j = 0; j < 30; j++)
-                  j: j == 1 ? const pw.FlexColumnWidth(4) : const pw.FlexColumnWidth(1),
+                  j: j == 1
+                      ? const pw.FlexColumnWidth(4)
+                      : const pw.FlexColumnWidth(1),
               },
               children: tableRows,
-            )
+            ),
           ];
         },
       ),
@@ -1601,10 +1669,7 @@ class PdfPerincianService {
             style: pw.TextStyle(font: boldFont, fontSize: 8),
           ),
         ),
-        pw.Text(
-          ': ',
-          style: pw.TextStyle(font: boldFont, fontSize: 8),
-        ),
+        pw.Text(': ', style: pw.TextStyle(font: boldFont, fontSize: 8)),
         pw.SizedBox(
           width: 150,
           child: pw.Text(
@@ -2711,7 +2776,10 @@ class PdfPerincianService {
 
     pdf.addPage(
       pw.MultiPage(
-        pageFormat: const PdfPageFormat(13 * PdfPageFormat.inch, 8.5 * PdfPageFormat.inch), // Ukuran F4 / Folio
+        pageFormat: const PdfPageFormat(
+          13 * PdfPageFormat.inch,
+          8.5 * PdfPageFormat.inch,
+        ), // Ukuran F4 / Folio
         margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Column(
@@ -3821,8 +3889,10 @@ class PdfPerincianService {
     final filteredMutasiList = mutasiList.where((row) {
       final jenisMutasi = row['jenis_mutasi']?.toString().toUpperCase() ?? '';
       if (jenisMutasi == 'LAHIR') return true;
-      if (jenisMutasi.contains('IBU') || jenisMutasi.contains('HAMIL')) return true;
-      
+      if (jenisMutasi.contains('IBU') || jenisMutasi.contains('HAMIL')) {
+        return true;
+      }
+
       if (jenisMutasi == 'MENINGGAL') {
         bool isBayiOrBalita = false;
         final tglLahirStr = row['tanggal_lahir']?.toString();
@@ -3830,8 +3900,8 @@ class PdfPerincianService {
           try {
             final tglLahir = DateTime.parse(tglLahirStr);
             final tglMutasiStr = row['tanggal_mutasi']?.toString();
-            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty 
-                ? DateTime.parse(tglMutasiStr) 
+            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty
+                ? DateTime.parse(tglMutasiStr)
                 : DateTime.now();
             final ageInDays = tglMutasi.difference(tglLahir).inDays;
             if (ageInDays <= (5 * 365 + 2)) {
@@ -3839,18 +3909,22 @@ class PdfPerincianService {
             }
           } catch (_) {}
         }
-        
+
         final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
         final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
         final statusIbu = row['status_ibu']?.toString().toUpperCase() ?? '';
-        final isIstri = hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU';
-        
+        final isIstri =
+            hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU';
+
         if (isBayiOrBalita || isIstri) {
           return true;
         }
 
         final keterangan = row['keterangan']?.toString().toUpperCase() ?? '';
-        if (keterangan.contains('HAMIL') || keterangan.contains('MELAHIRKAN') || keterangan.contains('NIFAS') || keterangan.contains('IBU')) {
+        if (keterangan.contains('HAMIL') ||
+            keterangan.contains('MELAHIRKAN') ||
+            keterangan.contains('NIFAS') ||
+            keterangan.contains('IBU')) {
           return true;
         }
       }
@@ -4500,8 +4574,172 @@ class PdfPerincianService {
                     ),
 
                     // Data Rows
-                    ...List.generate(filteredMutasiList.length < 12 ? 12 : filteredMutasiList.length, (index) {
-                      if (index >= filteredMutasiList.length) {
+                    ...List.generate(
+                      filteredMutasiList.length < 12
+                          ? 12
+                          : filteredMutasiList.length,
+                      (index) {
+                        if (index >= filteredMutasiList.length) {
+                          return pw.Container(
+                            height: 18,
+                            decoration: const pw.BoxDecoration(
+                              border: pw.Border(top: pw.BorderSide(width: 0.5)),
+                            ),
+                            child: pw.Row(
+                              crossAxisAlignment: pw.CrossAxisAlignment.center,
+                              children: [
+                                buildCell('', flex: 1, fontSize: 7),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 4),
+                                buildCell('', flex: 4),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 2),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 2),
+                                buildCell('', flex: 2),
+                                buildCell('', flex: 3, noRightBorder: true),
+                              ],
+                            ),
+                          );
+                        }
+                        final int i = index + 1;
+                        final row = filteredMutasiList[index];
+
+                        String jkVal = '';
+                        final nik = row['nik']?.toString() ?? '';
+                        if (nik.length == 16) {
+                          try {
+                            final dd = int.parse(nik.substring(6, 8));
+                            jkVal = dd > 40 ? 'P' : 'L';
+                          } catch (_) {}
+                        }
+                        if (jkVal.isEmpty) {
+                          jkVal = row['jenis_kelamin']?.toString() ?? '';
+                        }
+
+                        final jenisMutasi =
+                            row['jenis_mutasi']?.toString() ?? '';
+                        final isKelahiran =
+                            jenisMutasi.toUpperCase() == 'LAHIR';
+                        final isKematian =
+                            jenisMutasi.toUpperCase() == 'MENINGGAL';
+                        final isIbu =
+                            jenisMutasi.toUpperCase().contains('IBU') ||
+                            jenisMutasi.toUpperCase().contains('HAMIL');
+
+                        final namaIbu = row['nama_ibu']?.toString() ?? '';
+                        final namaSuami = row['nama_suami']?.toString() ?? '';
+                        final statusIbu = isIbu
+                            ? (row['status_ibu']?.toString() ?? jenisMutasi)
+                            : '';
+
+                        final namaAnak = isKelahiran
+                            ? (row['nama_orang']?.toString() ?? '')
+                            : '';
+                        final jkLahirL =
+                            isKelahiran && jkVal.toUpperCase().startsWith('L')
+                            ? 'V'
+                            : '';
+                        final jkLahirP =
+                            isKelahiran && jkVal.toUpperCase().startsWith('P')
+                            ? 'V'
+                            : '';
+                        final tglLahir = isKelahiran
+                            ? (row['tanggal_mutasi']?.toString() ?? '')
+                            : '';
+                        final akteAda = ''; // Placeholder
+                        final akteTidak = ''; // Placeholder
+
+                        final namaMeninggal = isKematian
+                            ? (row['nama_orang']?.toString() ?? '')
+                            : '';
+
+                        String statusMeninggal = '';
+                        if (isKematian) {
+                          final tglLahirStr = row['tanggal_lahir']?.toString();
+                          if (tglLahirStr != null && tglLahirStr.isNotEmpty) {
+                            try {
+                              final tglLahir = DateTime.parse(tglLahirStr);
+                              final tglMutasiStr = row['tanggal_mutasi']
+                                  ?.toString();
+                              final tglMutasi =
+                                  tglMutasiStr != null &&
+                                      tglMutasiStr.isNotEmpty
+                                  ? DateTime.parse(tglMutasiStr)
+                                  : DateTime.now();
+                              final ageInDays = tglMutasi
+                                  .difference(tglLahir)
+                                  .inDays;
+                              if (ageInDays < 365) {
+                                statusMeninggal = 'Bayi';
+                              } else if (ageInDays < (5 * 365 + 2)) {
+                                statusMeninggal = 'Balita';
+                              }
+                            } catch (_) {}
+                          }
+
+                          if (statusMeninggal.isEmpty) {
+                            final hub =
+                                row['hubungan_keluarga']
+                                    ?.toString()
+                                    .toUpperCase() ??
+                                '';
+                            final statusKrt =
+                                row['status_dgn_krt']
+                                    ?.toString()
+                                    .toUpperCase() ??
+                                '';
+                            final statusIbu =
+                                row['status_ibu']?.toString().toUpperCase() ??
+                                '';
+                            if (hub == 'ISTRI' ||
+                                statusKrt == 'ISTRI' ||
+                                statusIbu == 'IBU') {
+                              statusMeninggal = 'Ibu';
+                            } else {
+                              final keterangan =
+                                  row['keterangan']?.toString().toUpperCase() ??
+                                  '';
+                              if (keterangan.contains('HAMIL') ||
+                                  keterangan.contains('MELAHIRKAN') ||
+                                  keterangan.contains('NIFAS') ||
+                                  keterangan.contains('IBU')) {
+                                statusMeninggal = 'Ibu';
+                              }
+                            }
+                          }
+                        }
+
+                        String jk = jkVal;
+                        if (jk.isEmpty &&
+                            isKematian &&
+                            statusMeninggal.toLowerCase() == 'ibu') {
+                          jk = 'P';
+                        }
+                        final jkMatiL =
+                            isKematian && jk.toUpperCase().startsWith('L')
+                            ? 'V'
+                            : '';
+                        final jkMatiP =
+                            isKematian && jk.toUpperCase().startsWith('P')
+                            ? 'V'
+                            : '';
+                        final tglMeninggal = isKematian
+                            ? (row['tanggal_mutasi']?.toString() ?? '')
+                            : '';
+                        final sebabMeninggal = isKematian
+                            ? (row['sebab_kematian']?.toString() ?? '')
+                            : '';
+
+                        final ket = row['keterangan']?.toString() ?? '';
+
                         return pw.Container(
                           height: 18,
                           decoration: const pw.BoxDecoration(
@@ -4510,157 +4748,38 @@ class PdfPerincianService {
                           child: pw.Row(
                             crossAxisAlignment: pw.CrossAxisAlignment.center,
                             children: [
-                              buildCell('', flex: 1, fontSize: 7),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 4),
-                              buildCell('', flex: 4),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 2),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 2),
-                              buildCell('', flex: 2),
-                              buildCell('', flex: 3, noRightBorder: true),
+                              buildCell('$i', flex: 1, fontSize: 7),
+                              buildCell(
+                                namaIbu,
+                                flex: 3,
+                                alignment: pw.Alignment.centerLeft,
+                                textAlign: pw.TextAlign.left,
+                              ),
+                              buildCell(namaSuami, flex: 3),
+                              buildCell(statusIbu, flex: 4),
+                              buildCell(namaAnak, flex: 4),
+                              buildCell(jkLahirL, flex: 1),
+                              buildCell(jkLahirP, flex: 1),
+                              buildCell(tglLahir, flex: 2),
+                              buildCell(akteAda, flex: 1),
+                              buildCell(akteTidak, flex: 1),
+                              buildCell(
+                                namaMeninggal,
+                                flex: 3,
+                                alignment: pw.Alignment.centerLeft,
+                                textAlign: pw.TextAlign.left,
+                              ),
+                              buildCell(statusMeninggal, flex: 3),
+                              buildCell(jkMatiL, flex: 1),
+                              buildCell(jkMatiP, flex: 1),
+                              buildCell(tglMeninggal, flex: 2),
+                              buildCell(sebabMeninggal, flex: 2),
+                              buildCell(ket, flex: 3, noRightBorder: true),
                             ],
                           ),
                         );
-                      }
-                      final int i = index + 1;
-                      final row = filteredMutasiList[index];
-
-                      String jkVal = '';
-                      final nik = row['nik']?.toString() ?? '';
-                      if (nik.length == 16) {
-                        try {
-                          final dd = int.parse(nik.substring(6, 8));
-                          jkVal = dd > 40 ? 'P' : 'L';
-                        } catch (_) {}
-                      }
-                      if (jkVal.isEmpty) {
-                        jkVal = row['jenis_kelamin']?.toString() ?? '';
-                      }
-
-                      final jenisMutasi = row['jenis_mutasi']?.toString() ?? '';
-                      final isKelahiran = jenisMutasi.toUpperCase() == 'LAHIR';
-                      final isKematian =
-                          jenisMutasi.toUpperCase() == 'MENINGGAL';
-                      final isIbu =
-                          jenisMutasi.toUpperCase().contains('IBU') ||
-                          jenisMutasi.toUpperCase().contains('HAMIL');
-
-                      final namaIbu = row['nama_ibu']?.toString() ?? '';
-                      final namaSuami = row['nama_suami']?.toString() ?? '';
-                      final statusIbu = isIbu
-                          ? (row['status_ibu']?.toString() ?? jenisMutasi)
-                          : '';
-
-                      final namaAnak = isKelahiran
-                          ? (row['nama_orang']?.toString() ?? '')
-                          : '';
-                      final jkLahirL =
-                          isKelahiran && jkVal.toUpperCase().startsWith('L') ? 'V' : '';
-                      final jkLahirP =
-                          isKelahiran && jkVal.toUpperCase().startsWith('P') ? 'V' : '';
-                      final tglLahir = isKelahiran
-                          ? (row['tanggal_mutasi']?.toString() ?? '')
-                          : '';
-                      final akteAda = ''; // Placeholder
-                      final akteTidak = ''; // Placeholder
-
-                      final namaMeninggal = isKematian
-                          ? (row['nama_orang']?.toString() ?? '')
-                          : '';
-                      
-                      String statusMeninggal = '';
-                      if (isKematian) {
-                        final tglLahirStr = row['tanggal_lahir']?.toString();
-                        if (tglLahirStr != null && tglLahirStr.isNotEmpty) {
-                          try {
-                            final tglLahir = DateTime.parse(tglLahirStr);
-                            final tglMutasiStr = row['tanggal_mutasi']?.toString();
-                            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty 
-                                ? DateTime.parse(tglMutasiStr) 
-                                : DateTime.now();
-                            final ageInDays = tglMutasi.difference(tglLahir).inDays;
-                            if (ageInDays < 365) {
-                              statusMeninggal = 'Bayi';
-                            } else if (ageInDays < (5 * 365 + 2)) {
-                              statusMeninggal = 'Balita';
-                            }
-                          } catch (_) {}
-                        }
-                        
-                        if (statusMeninggal.isEmpty) {
-                          final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
-                          final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
-                          final statusIbu = row['status_ibu']?.toString().toUpperCase() ?? '';
-                          if (hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU') {
-                            statusMeninggal = 'Ibu';
-                          } else {
-                            final keterangan = row['keterangan']?.toString().toUpperCase() ?? '';
-                            if (keterangan.contains('HAMIL') || keterangan.contains('MELAHIRKAN') || keterangan.contains('NIFAS') || keterangan.contains('IBU')) {
-                              statusMeninggal = 'Ibu';
-                            }
-                          }
-                        }
-                      }
-                      
-                      String jk = jkVal;
-                      if (jk.isEmpty && isKematian && statusMeninggal.toLowerCase() == 'ibu') {
-                        jk = 'P';
-                      }
-                      final jkMatiL = isKematian && jk.toUpperCase().startsWith('L')
-                          ? 'V'
-                          : '';
-                      final jkMatiP = isKematian && jk.toUpperCase().startsWith('P')
-                          ? 'V'
-                          : '';
-                      final tglMeninggal = isKematian
-                          ? (row['tanggal_mutasi']?.toString() ?? '')
-                          : '';
-                      final sebabMeninggal = isKematian
-                          ? (row['sebab_kematian']?.toString() ?? '')
-                          : '';
-
-                      final ket = row['keterangan']?.toString() ?? '';
-
-                      return pw.Container(
-                        height: 18,
-                        decoration: const pw.BoxDecoration(
-                          border: pw.Border(top: pw.BorderSide(width: 0.5)),
-                        ),
-                        child: pw.Row(
-                          crossAxisAlignment: pw.CrossAxisAlignment.center,
-                          children: [
-                            buildCell('$i', flex: 1, fontSize: 7),
-                            buildCell(namaIbu, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
-                            buildCell(namaSuami, flex: 3),
-                            buildCell(statusIbu, flex: 4),
-                            buildCell(namaAnak, flex: 4),
-                            buildCell(jkLahirL, flex: 1),
-                            buildCell(jkLahirP, flex: 1),
-                            buildCell(tglLahir, flex: 2),
-                            buildCell(akteAda, flex: 1),
-                            buildCell(akteTidak, flex: 1),
-                            buildCell(namaMeninggal, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
-                            buildCell(statusMeninggal, flex: 3),
-                            buildCell(jkMatiL, flex: 1),
-                            buildCell(jkMatiP, flex: 1),
-                            buildCell(tglMeninggal, flex: 2),
-                            buildCell(sebabMeninggal, flex: 2),
-                            buildCell(ket, flex: 3, noRightBorder: true),
-                          ],
-                        ),
-                      );
-                    }),
-
-                    
+                      },
+                    ),
 
                     // JUMLAH Row
                     pw.Container(
@@ -5778,7 +5897,7 @@ class PdfPerincianService {
     totalBangunan = bangunanSet.length;
     totalKrt = krtSet.length;
     totalKk = kkSet.length;
-pdf.addPage(
+    pdf.addPage(
       pw.MultiPage(
         pageFormat: formatF4Landscape,
         margin: const pw.EdgeInsets.all(32),
@@ -5790,19 +5909,28 @@ pdf.addPage(
 
           String getValGrouped(int idx, String key, String level) {
             if (idx == 0) return val(data['rows'][idx], key);
-            
+
             final currentRow = data['rows'][idx];
             final prevRow = data['rows'][idx - 1];
-            
-            bool isSameBangunan = val(currentRow, 'noUrutBangunan') == val(prevRow, 'noUrutBangunan') && 
-                                  val(currentRow, 'namaBangunan') == val(prevRow, 'namaBangunan');
-            bool isSameKrt = isSameBangunan && val(currentRow, 'namaKrt') == val(prevRow, 'namaKrt') && val(currentRow, 'nikKrt') == val(prevRow, 'nikKrt');
-            bool isSameKk = isSameKrt && val(currentRow, 'namaKepalaKeluarga') == val(prevRow, 'namaKepalaKeluarga') && val(currentRow, 'noKk') == val(prevRow, 'noKk');
-            
+
+            bool isSameBangunan =
+                val(currentRow, 'noUrutBangunan') ==
+                    val(prevRow, 'noUrutBangunan') &&
+                val(currentRow, 'namaBangunan') == val(prevRow, 'namaBangunan');
+            bool isSameKrt =
+                isSameBangunan &&
+                val(currentRow, 'namaKrt') == val(prevRow, 'namaKrt') &&
+                val(currentRow, 'nikKrt') == val(prevRow, 'nikKrt');
+            bool isSameKk =
+                isSameKrt &&
+                val(currentRow, 'namaKepalaKeluarga') ==
+                    val(prevRow, 'namaKepalaKeluarga') &&
+                val(currentRow, 'noKk') == val(prevRow, 'noKk');
+
             if (level == 'bangunan' && isSameBangunan) return '';
             if (level == 'krt' && isSameKrt) return '';
             if (level == 'kk' && isSameKk) return '';
-            
+
             return val(currentRow, key);
           }
 
@@ -5939,28 +6067,48 @@ pdf.addPage(
 
                 // Data Rows
                 ...(() {
-                  pw.Widget buildCellCustom(String text, pw.Font font, bool isCentered, {double fontSize = 6, bool topBorder = false}) {
+                  pw.Widget buildCellCustom(
+                    String text,
+                    pw.Font font,
+                    bool isCentered, {
+                    double fontSize = 6,
+                    bool topBorder = false,
+                  }) {
                     return pw.Container(
-                      alignment: isCentered ? pw.Alignment.center : pw.Alignment.centerLeft,
+                      alignment: isCentered
+                          ? pw.Alignment.center
+                          : pw.Alignment.centerLeft,
                       padding: const pw.EdgeInsets.all(4),
                       decoration: pw.BoxDecoration(
-                        border: topBorder ? const pw.Border(top: pw.BorderSide(width: 0.5)) : null,
+                        border: topBorder
+                            ? const pw.Border(top: pw.BorderSide(width: 0.5))
+                            : null,
                       ),
-                      child: pw.Text(text, style: pw.TextStyle(font: font, fontSize: fontSize), textAlign: isCentered ? pw.TextAlign.center : pw.TextAlign.left),
+                      child: pw.Text(
+                        text,
+                        style: pw.TextStyle(font: font, fontSize: fontSize),
+                        textAlign: isCentered
+                            ? pw.TextAlign.center
+                            : pw.TextAlign.left,
+                      ),
                     );
                   }
 
                   final list = <pw.TableRow>[];
                   final rowsList = data['rows'] as List;
-                  
+
                   int bangunanCounter = 0;
-                  
+
                   int getMidBangunanIdx(int idx) {
                     int startIdx = idx;
                     while (startIdx > 0) {
                       final curr = rowsList[startIdx];
                       final prev = rowsList[startIdx - 1];
-                      bool isSame = val(curr, 'noUrutBangunan') == val(prev, 'noUrutBangunan') && val(curr, 'namaBangunan') == val(prev, 'namaBangunan');
+                      bool isSame =
+                          val(curr, 'noUrutBangunan') ==
+                              val(prev, 'noUrutBangunan') &&
+                          val(curr, 'namaBangunan') ==
+                              val(prev, 'namaBangunan');
                       if (!isSame) break;
                       startIdx--;
                     }
@@ -5968,7 +6116,11 @@ pdf.addPage(
                     while (endIdx < rowsList.length - 1) {
                       final curr = rowsList[endIdx];
                       final next = rowsList[endIdx + 1];
-                      bool isSame = val(curr, 'noUrutBangunan') == val(next, 'noUrutBangunan') && val(curr, 'namaBangunan') == val(next, 'namaBangunan');
+                      bool isSame =
+                          val(curr, 'noUrutBangunan') ==
+                              val(next, 'noUrutBangunan') &&
+                          val(curr, 'namaBangunan') ==
+                              val(next, 'namaBangunan');
                       if (!isSame) break;
                       endIdx++;
                     }
@@ -5979,26 +6131,42 @@ pdf.addPage(
                     final currentRow = rowsList[i];
                     final prevRow = i > 0 ? rowsList[i - 1] : null;
 
-                    bool isNewBangunan = i == 0 || val(currentRow, 'noUrutBangunan') != val(prevRow!, 'noUrutBangunan') || val(currentRow, 'namaBangunan') != val(prevRow, 'namaBangunan');
-                    bool isNewKrt = isNewBangunan || val(currentRow, 'namaKrt') != val(prevRow!, 'namaKrt') || val(currentRow, 'nikKrt') != val(prevRow, 'nikKrt');
-                    bool isNewKk = isNewKrt || val(currentRow, 'namaKepalaKeluarga') != val(prevRow!, 'namaKepalaKeluarga') || val(currentRow, 'noKk') != val(prevRow, 'noKk');
-                    
+                    bool isNewBangunan =
+                        i == 0 ||
+                        val(currentRow, 'noUrutBangunan') !=
+                            val(prevRow!, 'noUrutBangunan') ||
+                        val(currentRow, 'namaBangunan') !=
+                            val(prevRow, 'namaBangunan');
+                    bool isNewKrt =
+                        isNewBangunan ||
+                        val(currentRow, 'namaKrt') !=
+                            val(prevRow!, 'namaKrt') ||
+                        val(currentRow, 'nikKrt') != val(prevRow, 'nikKrt');
+                    bool isNewKk =
+                        isNewKrt ||
+                        val(currentRow, 'namaKepalaKeluarga') !=
+                            val(prevRow!, 'namaKepalaKeluarga') ||
+                        val(currentRow, 'noKk') != val(prevRow, 'noKk');
+
                     if (isNewBangunan) bangunanCounter++;
 
                     if (i > 0 && isNewBangunan) {
                       list.add(
                         pw.TableRow(
-                          children: List.generate(18, (_) => pw.Container(
-                            height: 6,
-                            decoration: const pw.BoxDecoration(
-                              color: PdfColors.grey400,
-                              border: pw.Border(
-                                top: pw.BorderSide(width: 0.5),
-                                bottom: pw.BorderSide(width: 0.5),
+                          children: List.generate(
+                            18,
+                            (_) => pw.Container(
+                              height: 6,
+                              decoration: const pw.BoxDecoration(
+                                color: PdfColors.grey400,
+                                border: pw.Border(
+                                  top: pw.BorderSide(width: 0.5),
+                                  bottom: pw.BorderSide(width: 0.5),
+                                ),
                               ),
                             ),
-                          )),
-                        )
+                          ),
+                        ),
                       );
                     }
 
@@ -6006,31 +6174,127 @@ pdf.addPage(
                     bool tbKrt = tbBangunan || isNewKrt;
                     bool tbKk = tbKrt || isNewKk;
                     bool tbIndividu = true;
-                    
+
                     bool isMidBangunan = i == getMidBangunanIdx(i);
 
-                    list.add(pw.TableRow(
-                      children: [
-                        buildCellCustom(isMidBangunan ? '$bangunanCounter' : '', ttfBold, true, topBorder: tbBangunan),
-                        buildCellCustom(isMidBangunan ? val(currentRow, 'noUrutBangunan') : '', ttfBold, true, topBorder: tbBangunan),
-                        buildCellCustom(isMidBangunan ? val(currentRow, 'namaBangunan') : '', ttfBold, true, topBorder: tbBangunan),
-                        buildCellCustom(getValGrouped(i, 'namaKrt', 'krt'), ttf, false, topBorder: tbKrt),
-                        buildCellCustom(getValGrouped(i, 'nikKrt', 'krt'), ttf, true, topBorder: tbKrt),
-                        buildCellCustom(getValGrouped(i, 'noTlp', 'krt'), ttf, true, topBorder: tbKrt),
-                        buildCellCustom(getValGrouped(i, 'namaKepalaKeluarga', 'kk'), ttf, false, topBorder: tbKk),
-                        buildCellCustom(getValGrouped(i, 'noKk', 'kk'), ttf, true, topBorder: tbKk),
-                        buildCellCustom(val(rowsList[i], 'individu'), ttf, false, topBorder: tbIndividu),
-                        buildCellCustom(val(rowsList[i], 'lp'), ttf, true, topBorder: tbIndividu),
-                        buildCellCustom(val(rowsList[i], 'nikIndividu'), ttf, true, topBorder: tbIndividu),
-                        buildCellCustom(val(rowsList[i], 'tglLahir'), ttf, true, topBorder: tbIndividu),
-                        buildCellCustom(val(rowsList[i], 'umur'), ttf, true, topBorder: tbIndividu),
-                        buildCellCustom(val(rowsList[i], 'sttsKrt'), ttf, true, topBorder: tbIndividu),
-                        buildCellCustom(val(rowsList[i], 'sttsKk'), ttf, true, topBorder: tbIndividu),
-                        buildCellCustom(isMidBangunan ? val(currentRow, 'nop') : '', ttfBold, true, topBorder: tbBangunan),
-                        buildCellCustom(isMidBangunan ? val(currentRow, 'lb') : '', ttfBold, true, topBorder: tbBangunan),
-                        buildCellCustom(isMidBangunan ? val(currentRow, 'll') : '', ttfBold, true, topBorder: tbBangunan),
-                      ],
-                    ));
+                    list.add(
+                      pw.TableRow(
+                        children: [
+                          buildCellCustom(
+                            isMidBangunan ? '$bangunanCounter' : '',
+                            ttfBold,
+                            true,
+                            topBorder: tbBangunan,
+                          ),
+                          buildCellCustom(
+                            isMidBangunan
+                                ? val(currentRow, 'noUrutBangunan')
+                                : '',
+                            ttfBold,
+                            true,
+                            topBorder: tbBangunan,
+                          ),
+                          buildCellCustom(
+                            isMidBangunan
+                                ? val(currentRow, 'namaBangunan')
+                                : '',
+                            ttfBold,
+                            true,
+                            topBorder: tbBangunan,
+                          ),
+                          buildCellCustom(
+                            getValGrouped(i, 'namaKrt', 'krt'),
+                            ttf,
+                            false,
+                            topBorder: tbKrt,
+                          ),
+                          buildCellCustom(
+                            getValGrouped(i, 'nikKrt', 'krt'),
+                            ttf,
+                            true,
+                            topBorder: tbKrt,
+                          ),
+                          buildCellCustom(
+                            getValGrouped(i, 'noTlp', 'krt'),
+                            ttf,
+                            true,
+                            topBorder: tbKrt,
+                          ),
+                          buildCellCustom(
+                            getValGrouped(i, 'namaKepalaKeluarga', 'kk'),
+                            ttf,
+                            false,
+                            topBorder: tbKk,
+                          ),
+                          buildCellCustom(
+                            getValGrouped(i, 'noKk', 'kk'),
+                            ttf,
+                            true,
+                            topBorder: tbKk,
+                          ),
+                          buildCellCustom(
+                            val(rowsList[i], 'individu'),
+                            ttf,
+                            false,
+                            topBorder: tbIndividu,
+                          ),
+                          buildCellCustom(
+                            val(rowsList[i], 'lp'),
+                            ttf,
+                            true,
+                            topBorder: tbIndividu,
+                          ),
+                          buildCellCustom(
+                            val(rowsList[i], 'nikIndividu'),
+                            ttf,
+                            true,
+                            topBorder: tbIndividu,
+                          ),
+                          buildCellCustom(
+                            val(rowsList[i], 'tglLahir'),
+                            ttf,
+                            true,
+                            topBorder: tbIndividu,
+                          ),
+                          buildCellCustom(
+                            val(rowsList[i], 'umur'),
+                            ttf,
+                            true,
+                            topBorder: tbIndividu,
+                          ),
+                          buildCellCustom(
+                            val(rowsList[i], 'sttsKrt'),
+                            ttf,
+                            true,
+                            topBorder: tbIndividu,
+                          ),
+                          buildCellCustom(
+                            val(rowsList[i], 'sttsKk'),
+                            ttf,
+                            true,
+                            topBorder: tbIndividu,
+                          ),
+                          buildCellCustom(
+                            isMidBangunan ? val(currentRow, 'nop') : '',
+                            ttfBold,
+                            true,
+                            topBorder: tbBangunan,
+                          ),
+                          buildCellCustom(
+                            isMidBangunan ? val(currentRow, 'lb') : '',
+                            ttfBold,
+                            true,
+                            topBorder: tbBangunan,
+                          ),
+                          buildCellCustom(
+                            isMidBangunan ? val(currentRow, 'll') : '',
+                            ttfBold,
+                            true,
+                            topBorder: tbBangunan,
+                          ),
+                        ],
+                      ),
+                    );
                   }
                   return list;
                 })(),

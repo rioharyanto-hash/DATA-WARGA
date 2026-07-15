@@ -134,14 +134,14 @@ class PdfRingkasanService {
         flex: flexVal,
         child: pw.Container(
           decoration: pw.BoxDecoration(
-              border: customBorder ??
-                  const pw.Border(
-                    right: pw.BorderSide(width: 0.5),
-                    top: pw.BorderSide(width: 0.5),
-                  )),
-          child: pw.Center(
-            child: pw.Text(text, style: style),
+            border:
+                customBorder ??
+                const pw.Border(
+                  right: pw.BorderSide(width: 0.5),
+                  top: pw.BorderSide(width: 0.5),
+                ),
           ),
+          child: pw.Center(child: pw.Text(text, style: style)),
         ),
       );
     }
@@ -157,106 +157,113 @@ class PdfRingkasanService {
             child: pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.stretch,
               children: [
-          headerCell('NO', 1),
-          headerCell('JUMLAH KRT', 3),
-          headerCell('JUMLAH KEPALA KELUARGA', 4),
-          pw.Expanded(
-            flex: 80,
-            child: pw.Container(
-              decoration: pw.BoxDecoration(border: borderRight),
-              child: pw.Column(
-                children: [
-                  pw.Container(
-                    height: 12,
-                    decoration: pw.BoxDecoration(border: borderBottom),
-                    child: pw.Center(
-                      child: pw.Text(
-                        'Jumlah dan Komposisi Penduduk',
-                        style: style,
-                      ),
-                    ),
-                  ),
-                  pw.Expanded(
-                    child: pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                headerCell('NO', 1),
+                headerCell('JUMLAH KRT', 3),
+                headerCell('JUMLAH KEPALA KELUARGA', 4),
+                pw.Expanded(
+                  flex: 80,
+                  child: pw.Container(
+                    decoration: pw.BoxDecoration(border: borderRight),
+                    child: pw.Column(
                       children: [
-                        headerCell('LAKI-LAKI', 1),
-                        headerCell('PEREMPUAN', 1),
-                        headerCell('Jumlah', 1),
-                        headerCell('Balita\n(0-5 Thn)', 1),
-                        headerCell('Anak\n(6-9 Thn)', 1),
-                        headerCell('Remaja\n(10-24 Thn)', 1),
-                        headerCell('Dewasa\n(25-59 Thn)', 1),
-                        headerCell('Lansia\n(60+ Thn)', 1, pw.Border()),
+                        pw.Container(
+                          height: 12,
+                          decoration: pw.BoxDecoration(border: borderBottom),
+                          child: pw.Center(
+                            child: pw.Text(
+                              'Jumlah dan Komposisi Penduduk',
+                              style: style,
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          child: pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                            children: [
+                              headerCell('LAKI-LAKI', 1),
+                              headerCell('PEREMPUAN', 1),
+                              headerCell('Jumlah', 1),
+                              headerCell('Balita\n(0-5 Thn)', 1),
+                              headerCell('Anak\n(6-9 Thn)', 1),
+                              headerCell('Remaja\n(10-24 Thn)', 1),
+                              headerCell('Dewasa\n(25-59 Thn)', 1),
+                              headerCell('Lansia\n(60+ Thn)', 1, pw.Border()),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          headerCell('Jumlah\nKeluarga', 1),
-          headerCell('Jumlah\nPasangan\nUsia Subur\n(PUS)', 1),
-          pw.Expanded(
-            flex: 80,
-            child: pw.Container(
-              decoration: pw.BoxDecoration(border: borderRight),
-              child: pw.Column(
-                children: [
-                  pw.Container(
-                    height: 12,
-                    decoration: pw.BoxDecoration(border: borderBottom),
-                    child: pw.Center(
-                      child: pw.Text('Jumlah Kesertaan Ber-KB', style: style),
-                    ),
-                  ),
-                  pw.Expanded(
-                    child: pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                ),
+                headerCell('Jumlah\nKeluarga', 1),
+                headerCell('Jumlah\nPasangan\nUsia Subur\n(PUS)', 1),
+                pw.Expanded(
+                  flex: 80,
+                  child: pw.Container(
+                    decoration: pw.BoxDecoration(border: borderRight),
+                    child: pw.Column(
                       children: [
-                        headerCell('MOW/Steril\nWanita', 1),
-                        headerCell('MOP/Steril\nPria', 1),
-                        headerCell('IUD/Spiral\nAKDR', 1),
-                        headerCell('Implant/\nSusuk', 1),
-                        headerCell('Suntik', 1),
-                        headerCell('Pil', 1),
-                        headerCell('Kondom', 1),
-                        headerCell('Jumlah\nPeserta KB', 1, pw.Border()),
+                        pw.Container(
+                          height: 12,
+                          decoration: pw.BoxDecoration(border: borderBottom),
+                          child: pw.Center(
+                            child: pw.Text(
+                              'Jumlah Kesertaan Ber-KB',
+                              style: style,
+                            ),
+                          ),
+                        ),
+                        pw.Expanded(
+                          child: pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                            children: [
+                              headerCell('MOW/Steril\nWanita', 1),
+                              headerCell('MOP/Steril\nPria', 1),
+                              headerCell('IUD/Spiral\nAKDR', 1),
+                              headerCell('Implant/\nSusuk', 1),
+                              headerCell('Suntik', 1),
+                              headerCell('Pil', 1),
+                              headerCell('Kondom', 1),
+                              headerCell('Jumlah\nPeserta KB', 1, pw.Border()),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          pw.Expanded(
-            flex: 50,
-            child: pw.Container(
-              child: pw.Column(
-                children: [
-                  pw.Container(
-                    height: 12,
-                    decoration: pw.BoxDecoration(border: borderBottom),
-                    child: pw.Center(
-                      child: pw.Text('Bukan Peserta KB', style: style),
-                    ),
-                  ),
-                  pw.Expanded(
-                    child: pw.Row(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                ),
+                pw.Expanded(
+                  flex: 50,
+                  child: pw.Container(
+                    child: pw.Column(
                       children: [
-                        headerCell('TIAL', 1),
-                        headerCell('IAT', 1),
-                        headerCell('IAS', 1),
-                        headerCell('Hamil', 1),
-                        headerCell('Jumlah Bukan\nPeserta KB', 1, pw.Border()),
+                        pw.Container(
+                          height: 12,
+                          decoration: pw.BoxDecoration(border: borderBottom),
+                          child: pw.Center(
+                            child: pw.Text('Bukan Peserta KB', style: style),
+                          ),
+                        ),
+                        pw.Expanded(
+                          child: pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                            children: [
+                              headerCell('TIAL', 1),
+                              headerCell('IAT', 1),
+                              headerCell('IAS', 1),
+                              headerCell('Hamil', 1),
+                              headerCell(
+                                'Jumlah Bukan\nPeserta KB',
+                                1,
+                                pw.Border(),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
               ],
             ),
           ),
@@ -272,7 +279,11 @@ class PdfRingkasanService {
                 numberCell('5', 10),
                 numberCell('6', 10),
                 numberCell('7', 80),
-                numberCell('8', 50, const pw.Border(top: pw.BorderSide(width: 0.5))),
+                numberCell(
+                  '8',
+                  50,
+                  const pw.Border(top: pw.BorderSide(width: 0.5)),
+                ),
               ],
             ),
           ),
@@ -1067,12 +1078,17 @@ class PdfRingkasanService {
                               children: [
                                 pw.Container(
                                   height: 12,
-                                  decoration: pw.BoxDecoration(border: borderBottom),
-                                  child: pw.Center(child: pw.Text('TOTAL', style: style)),
+                                  decoration: pw.BoxDecoration(
+                                    border: borderBottom,
+                                  ),
+                                  child: pw.Center(
+                                    child: pw.Text('TOTAL', style: style),
+                                  ),
                                 ),
                                 pw.Expanded(
                                   child: pw.Row(
-                                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        pw.CrossAxisAlignment.stretch,
                                     children: [
                                       headerCell('L', 2),
                                       headerCell('P', 2, pw.Border()),
@@ -1091,12 +1107,17 @@ class PdfRingkasanService {
                               children: [
                                 pw.Container(
                                   height: 12,
-                                  decoration: pw.BoxDecoration(border: borderBottom),
-                                  child: pw.Center(child: pw.Text('BALITA', style: style)),
+                                  decoration: pw.BoxDecoration(
+                                    border: borderBottom,
+                                  ),
+                                  child: pw.Center(
+                                    child: pw.Text('BALITA', style: style),
+                                  ),
                                 ),
                                 pw.Expanded(
                                   child: pw.Row(
-                                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        pw.CrossAxisAlignment.stretch,
                                     children: [
                                       headerCell('L', 2),
                                       headerCell('P', 2, pw.Border()),
@@ -1320,15 +1341,24 @@ class PdfRingkasanService {
                           children: [
                             pw.Text(
                               'RW',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               ':',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               rw,
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                           ],
                         ),
@@ -1336,15 +1366,24 @@ class PdfRingkasanService {
                           children: [
                             pw.Text(
                               'DUSUN/LINGKUNGAN',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               ':',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               '', // No data for dusun/lingkungan currently
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                           ],
                         ),
@@ -1352,15 +1391,24 @@ class PdfRingkasanService {
                           children: [
                             pw.Text(
                               'DESA / KELURAHAN',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               ':',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               desa,
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                           ],
                         ),
@@ -1368,15 +1416,24 @@ class PdfRingkasanService {
                           children: [
                             pw.Text(
                               'TAHUN',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               ':',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                             pw.Text(
                               '${data['tahun']}',
-                              style: pw.TextStyle(font: regularFont, fontSize: 10),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 10,
+                              ),
                             ),
                           ],
                         ),
@@ -1521,9 +1578,7 @@ class PdfRingkasanService {
           // Add 15 empty rows
           for (int i = 0; i < 15; i++) {
             tableRows.add(
-              pw.TableRow(
-                children: List.generate(34, (index) => dataCell('')),
-              ),
+              pw.TableRow(children: List.generate(34, (index) => dataCell(''))),
             );
           }
 
@@ -1651,23 +1706,27 @@ class PdfRingkasanService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('TOTAL',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 6),
+                  buildCell(
+                    'TOTAL',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 6,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
                         buildCell('L', flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('P',
-                            flex: 1,
-                            isHeader: true,
-                            noRightBorder: true,
-                            fontSize: 6),
+                        buildCell(
+                          'P',
+                          flex: 1,
+                          isHeader: true,
+                          noRightBorder: true,
+                          fontSize: 6,
+                        ),
                       ],
                     ),
                   ),
@@ -1685,12 +1744,14 @@ class PdfRingkasanService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('BALITA',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 6),
+                  buildCell(
+                    'BALITA',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 6,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
@@ -1703,27 +1764,33 @@ class PdfRingkasanService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                             children: [
-                              buildCell('AKTIF\nPOSYANDU',
-                                  flex: 2,
-                                  isHeader: true,
-                                  noRightBorder: true,
-                                  bottomBorder: true,
-                                  fontSize: 6),
+                              buildCell(
+                                'AKTIF\nPOSYANDU',
+                                flex: 2,
+                                isHeader: true,
+                                noRightBorder: true,
+                                bottomBorder: true,
+                                fontSize: 6,
+                              ),
                               pw.Expanded(
                                 flex: 1,
                                 child: pw.Row(
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.stretch,
                                   children: [
-                                    buildCell('L',
-                                        flex: 1,
-                                        isHeader: true,
-                                        fontSize: 6),
-                                    buildCell('P',
-                                        flex: 1,
-                                        isHeader: true,
-                                        noRightBorder: true,
-                                        fontSize: 6),
+                                    buildCell(
+                                      'L',
+                                      flex: 1,
+                                      isHeader: true,
+                                      fontSize: 6,
+                                    ),
+                                    buildCell(
+                                      'P',
+                                      flex: 1,
+                                      isHeader: true,
+                                      noRightBorder: true,
+                                      fontSize: 6,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1749,36 +1816,58 @@ class PdfRingkasanService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('PENGGUNAAN ALAT KB',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 6),
+                  buildCell(
+                    'PENGGUNAAN ALAT KB',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 6,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
-                        buildCell('TIDAK\nKB',
-                            flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('PIL',
-                            flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('IUD',
-                            flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('IMPLAN',
-                            flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('SUNTIK',
-                            flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('KONDOM',
-                            flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('STERIL',
-                            flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('LAINN\nYA',
-                            flex: 1,
-                            isHeader: true,
-                            noRightBorder: true,
-                            fontSize: 6),
+                        buildCell(
+                          'TIDAK\nKB',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 6,
+                        ),
+                        buildCell('PIL', flex: 1, isHeader: true, fontSize: 6),
+                        buildCell('IUD', flex: 1, isHeader: true, fontSize: 6),
+                        buildCell(
+                          'IMPLAN',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 6,
+                        ),
+                        buildCell(
+                          'SUNTIK',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 6,
+                        ),
+                        buildCell(
+                          'KONDOM',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 6,
+                        ),
+                        buildCell(
+                          'STERIL',
+                          flex: 1,
+                          isHeader: true,
+                          fontSize: 6,
+                        ),
+                        buildCell(
+                          'LAINN\nYA',
+                          flex: 1,
+                          isHeader: true,
+                          noRightBorder: true,
+                          fontSize: 6,
+                        ),
                       ],
                     ),
                   ),
@@ -1796,12 +1885,14 @@ class PdfRingkasanService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('REMAJA (10-18) TH',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 6),
+                  buildCell(
+                    'REMAJA (10-18) TH',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 6,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
@@ -1814,27 +1905,33 @@ class PdfRingkasanService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                             children: [
-                              buildCell('AKTIF\nPOSREM',
-                                  flex: 2,
-                                  isHeader: true,
-                                  noRightBorder: true,
-                                  bottomBorder: true,
-                                  fontSize: 6),
+                              buildCell(
+                                'AKTIF\nPOSREM',
+                                flex: 2,
+                                isHeader: true,
+                                noRightBorder: true,
+                                bottomBorder: true,
+                                fontSize: 6,
+                              ),
                               pw.Expanded(
                                 flex: 1,
                                 child: pw.Row(
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.stretch,
                                   children: [
-                                    buildCell('L',
-                                        flex: 1,
-                                        isHeader: true,
-                                        fontSize: 6),
-                                    buildCell('P',
-                                        flex: 1,
-                                        isHeader: true,
-                                        noRightBorder: true,
-                                        fontSize: 6),
+                                    buildCell(
+                                      'L',
+                                      flex: 1,
+                                      isHeader: true,
+                                      fontSize: 6,
+                                    ),
+                                    buildCell(
+                                      'P',
+                                      flex: 1,
+                                      isHeader: true,
+                                      noRightBorder: true,
+                                      fontSize: 6,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1858,12 +1955,14 @@ class PdfRingkasanService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('LANSIA',
-                      flex: 1,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 6),
+                  buildCell(
+                    'LANSIA',
+                    flex: 1,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 6,
+                  ),
                   pw.Expanded(
                     flex: 3,
                     child: pw.Row(
@@ -1876,27 +1975,33 @@ class PdfRingkasanService {
                           child: pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                             children: [
-                              buildCell('AKTIF POSLAN',
-                                  flex: 2,
-                                  isHeader: true,
-                                  noRightBorder: true,
-                                  bottomBorder: true,
-                                  fontSize: 6),
+                              buildCell(
+                                'AKTIF POSLAN',
+                                flex: 2,
+                                isHeader: true,
+                                noRightBorder: true,
+                                bottomBorder: true,
+                                fontSize: 6,
+                              ),
                               pw.Expanded(
                                 flex: 1,
                                 child: pw.Row(
                                   crossAxisAlignment:
                                       pw.CrossAxisAlignment.stretch,
                                   children: [
-                                    buildCell('L',
-                                        flex: 1,
-                                        isHeader: true,
-                                        fontSize: 6),
-                                    buildCell('P',
-                                        flex: 1,
-                                        isHeader: true,
-                                        noRightBorder: true,
-                                        fontSize: 6),
+                                    buildCell(
+                                      'L',
+                                      flex: 1,
+                                      isHeader: true,
+                                      fontSize: 6,
+                                    ),
+                                    buildCell(
+                                      'P',
+                                      flex: 1,
+                                      isHeader: true,
+                                      noRightBorder: true,
+                                      fontSize: 6,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1920,23 +2025,27 @@ class PdfRingkasanService {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                 children: [
-                  buildCell('BERKEBUTUHAN\nKHUSUS',
-                      flex: 2,
-                      isHeader: true,
-                      noRightBorder: true,
-                      bottomBorder: true,
-                      fontSize: 6),
+                  buildCell(
+                    'BERKEBUTUHAN\nKHUSUS',
+                    flex: 2,
+                    isHeader: true,
+                    noRightBorder: true,
+                    bottomBorder: true,
+                    fontSize: 6,
+                  ),
                   pw.Expanded(
                     flex: 1,
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
                         buildCell('L', flex: 1, isHeader: true, fontSize: 6),
-                        buildCell('P',
-                            flex: 1,
-                            isHeader: true,
-                            noRightBorder: true,
-                            fontSize: 6),
+                        buildCell(
+                          'P',
+                          flex: 1,
+                          isHeader: true,
+                          noRightBorder: true,
+                          fontSize: 6,
+                        ),
                       ],
                     ),
                   ),
@@ -1945,8 +2054,13 @@ class PdfRingkasanService {
             ),
           ),
           // KET
-          buildCell('KET',
-              flex: 1, isHeader: true, noRightBorder: true, fontSize: 6),
+          buildCell(
+            'KET',
+            flex: 1,
+            isHeader: true,
+            noRightBorder: true,
+            fontSize: 6,
+          ),
         ],
       ),
     );
@@ -1986,17 +2100,34 @@ class PdfRingkasanService {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       _potensiInfoRow(
-                          'NAMA KELOMPOK', kelompok, boldFont, regularFont),
+                        'NAMA KELOMPOK',
+                        kelompok,
+                        boldFont,
+                        regularFont,
+                      ),
                       pw.SizedBox(height: 2),
                       _potensiInfoRow(
-                          'RUKUN WARGA (RW)', rw, boldFont, regularFont),
+                        'RUKUN WARGA (RW)',
+                        rw,
+                        boldFont,
+                        regularFont,
+                      ),
                       pw.SizedBox(height: 2),
                       _potensiInfoRow(
-                          'DESA / KELURAHAN', kelurahan, boldFont, regularFont),
+                        'DESA / KELURAHAN',
+                        kelurahan,
+                        boldFont,
+                        regularFont,
+                      ),
                       pw.SizedBox(height: 2),
                       _potensiInfoRow('TAHUN', tahun, boldFont, regularFont),
                       pw.SizedBox(height: 2),
-                      _potensiInfoRow('PERIODE', periode, boldFont, regularFont),
+                      _potensiInfoRow(
+                        'PERIODE',
+                        periode,
+                        boldFont,
+                        regularFont,
+                      ),
                     ],
                   ),
                 ],
@@ -2005,9 +2136,7 @@ class PdfRingkasanService {
               pw.Container(height: 48, child: tableHeaderWidget),
               pw.Container(
                 height: 12,
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(width: 0.5),
-                ),
+                decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
                 child: pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
@@ -2025,10 +2154,7 @@ class PdfRingkasanService {
                           alignment: pw.Alignment.center,
                           child: pw.Text(
                             '$j',
-                            style: pw.TextStyle(
-                              font: regularFont,
-                              fontSize: 8,
-                            ),
+                            style: pw.TextStyle(font: regularFont, fontSize: 8),
                           ),
                         ),
                       ),
@@ -2050,14 +2176,8 @@ class PdfRingkasanService {
               tKondom = 0,
               tSteril = 0,
               tKbLainnya = 0;
-          int tRemajaL = 0,
-              tRemajaP = 0,
-              tRemajaAktifL = 0,
-              tRemajaAktifP = 0;
-          int tLansiaL = 0,
-              tLansiaP = 0,
-              tLansiaAktifL = 0,
-              tLansiaAktifP = 0;
+          int tRemajaL = 0, tRemajaP = 0, tRemajaAktifL = 0, tRemajaAktifP = 0;
+          int tLansiaL = 0, tLansiaP = 0, tLansiaAktifL = 0, tLansiaAktifP = 0;
           int tBerkebutuhanL = 0, tBerkebutuhanP = 0;
           int tDasawisma = 0, tBangunan = 0, tKelompok = 0;
 
@@ -2091,8 +2211,11 @@ class PdfRingkasanService {
             final lansiaAktifP = r['lansiaAktifP'] as int? ?? 0;
             final berkebutuhanL = r['berkebutuhanL'] as int? ?? 0;
             final berkebutuhanP = r['berkebutuhanP'] as int? ?? 0;
-            
-            final isRowEmpty = r.isEmpty || r['namaWarga'] == null || r['namaWarga'].toString().isEmpty;
+
+            final isRowEmpty =
+                r.isEmpty ||
+                r['namaWarga'] == null ||
+                r['namaWarga'].toString().isEmpty;
             final dasawismaStr = r['jumlah_dasawisma']?.toString() ?? '1';
             final bangunan = r['jumlah_bangunan'] as int? ?? 0;
             final kelompokVal = r['jumlah_kelompok'] as int? ?? 1;
@@ -2131,47 +2254,78 @@ class PdfRingkasanService {
             tBerkebutuhanL += berkebutuhanL;
             tBerkebutuhanP += berkebutuhanP;
 
-            final values = isRowEmpty ? [
-              r['no']?.toString() ?? '',
-              '', '', '', '', '', '', '', '', '', '',
-              '', '', '', '', '', '', '', '', '', '',
-              '', '', '', '', '', '', '', '', '', '',
-              '', '', ''
-            ] : [
-              '${r['no']}',
-              '${r['nomor_rt'] ?? ''}',
-              dasawismaStr,
-              '$bangunan',
-              '$kelompokVal',
-              '$krt',
-              '$kk',
-              '$l',
-              '$p',
-              '$balitaL',
-              '$balitaP',
-              '$balitaAktifL',
-              '$balitaAktifP',
-              '$pus',
-              '$tidakKb',
-              '$kbPil',
-              '$kbIud',
-              '$kbImplan',
-              '$kbSuntik',
-              '$kbKondom',
-              '$kbSteril',
-              '$kbLainnya',
-              '$remajaL',
-              '$remajaP',
-              '$remajaAktifL',
-              '$remajaAktifP',
-              '$lansiaL',
-              '$lansiaP',
-              '$lansiaAktifL',
-              '$lansiaAktifP',
-              '$berkebutuhanL',
-              '$berkebutuhanP',
-              '',
-            ];
+            final values = isRowEmpty
+                ? [
+                    r['no']?.toString() ?? '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                  ]
+                : [
+                    '${r['no']}',
+                    '${r['nomor_rt'] ?? ''}',
+                    dasawismaStr,
+                    '$bangunan',
+                    '$kelompokVal',
+                    '$krt',
+                    '$kk',
+                    '$l',
+                    '$p',
+                    '$balitaL',
+                    '$balitaP',
+                    '$balitaAktifL',
+                    '$balitaAktifP',
+                    '$pus',
+                    '$tidakKb',
+                    '$kbPil',
+                    '$kbIud',
+                    '$kbImplan',
+                    '$kbSuntik',
+                    '$kbKondom',
+                    '$kbSteril',
+                    '$kbLainnya',
+                    '$remajaL',
+                    '$remajaP',
+                    '$remajaAktifL',
+                    '$remajaAktifP',
+                    '$lansiaL',
+                    '$lansiaP',
+                    '$lansiaAktifL',
+                    '$lansiaAktifP',
+                    '$berkebutuhanL',
+                    '$berkebutuhanP',
+                    '',
+                  ];
 
             tableRows.add(
               pw.TableRow(
@@ -2183,10 +2337,7 @@ class PdfRingkasanService {
                       alignment: pw.Alignment.center,
                       child: pw.Text(
                         values[j],
-                        style: pw.TextStyle(
-                          font: regularFont,
-                          fontSize: 8,
-                        ),
+                        style: pw.TextStyle(font: regularFont, fontSize: 8),
                       ),
                     ),
                 ],
@@ -2234,9 +2385,7 @@ class PdfRingkasanService {
           tableRows.add(
             pw.TableRow(
               decoration: const pw.BoxDecoration(
-                border: pw.Border(
-                  top: pw.BorderSide(width: 1.0),
-                ),
+                border: pw.Border(top: pw.BorderSide(width: 1.0)),
               ),
               children: [
                 for (int j = 0; j < 33; j++)
@@ -2263,10 +2412,12 @@ class PdfRingkasanService {
               ),
               columnWidths: {
                 for (int j = 0; j < 33; j++)
-                  j: (j >= 1 && j <= 4) ? const pw.FlexColumnWidth(2) : const pw.FlexColumnWidth(1),
+                  j: (j >= 1 && j <= 4)
+                      ? const pw.FlexColumnWidth(2)
+                      : const pw.FlexColumnWidth(1),
               },
               children: tableRows,
-            )
+            ),
           ];
         },
       ),
@@ -2291,10 +2442,7 @@ class PdfRingkasanService {
             style: pw.TextStyle(font: boldFont, fontSize: 8),
           ),
         ),
-        pw.Text(
-          ': ',
-          style: pw.TextStyle(font: boldFont, fontSize: 8),
-        ),
+        pw.Text(': ', style: pw.TextStyle(font: boldFont, fontSize: 8)),
         pw.SizedBox(
           width: 150,
           child: pw.Text(
@@ -2412,18 +2560,24 @@ class PdfRingkasanService {
     pw.Widget buildBreakdown(List<Map<String, int>> dataList, String key) {
       if (dataList.length <= 1) {
         final val = dataList.isNotEmpty ? (dataList.first[key] ?? 0) : 0;
-        return pw.Text(val.toString(), style: pw.TextStyle(font: regularFont, fontSize: 10));
+        return pw.Text(
+          val.toString(),
+          style: pw.TextStyle(font: regularFont, fontSize: 10),
+        );
       }
       final values = dataList.map((d) => d[key] ?? 0).toList();
       final total = values.fold(0, (sum, v) => sum + v);
-      
+
       List<pw.Widget> children = [];
       for (int i = 0; i < values.length; i++) {
         children.add(
           pw.Container(
             width: 14,
             alignment: pw.Alignment.centerRight,
-            child: pw.Text(values[i].toString(), style: pw.TextStyle(font: regularFont, fontSize: 10)),
+            child: pw.Text(
+              values[i].toString(),
+              style: pw.TextStyle(font: regularFont, fontSize: 10),
+            ),
           ),
         );
         if (i < values.length - 1) {
@@ -2431,7 +2585,10 @@ class PdfRingkasanService {
             pw.Container(
               width: 12,
               alignment: pw.Alignment.center,
-              child: pw.Text('+', style: pw.TextStyle(font: regularFont, fontSize: 10)),
+              child: pw.Text(
+                '+',
+                style: pw.TextStyle(font: regularFont, fontSize: 10),
+              ),
             ),
           );
         }
@@ -2440,17 +2597,23 @@ class PdfRingkasanService {
         pw.Container(
           width: 12,
           alignment: pw.Alignment.center,
-          child: pw.Text('=', style: pw.TextStyle(font: regularFont, fontSize: 10)),
+          child: pw.Text(
+            '=',
+            style: pw.TextStyle(font: regularFont, fontSize: 10),
+          ),
         ),
       );
       children.add(
         pw.Container(
           width: 20,
           alignment: pw.Alignment.centerRight,
-          child: pw.Text(total.toString(), style: pw.TextStyle(font: regularFont, fontSize: 10)),
+          child: pw.Text(
+            total.toString(),
+            style: pw.TextStyle(font: regularFont, fontSize: 10),
+          ),
         ),
       );
-      
+
       return pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.center,
         children: children,
@@ -2691,7 +2854,12 @@ class PdfRingkasanService {
                       crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
                         buildCell(ageGroups[i], flex: 2, bottomBorder: true),
-                        buildCell(pBreakdown, flex: 2, bottomBorder: true, alignment: pw.Alignment.center),
+                        buildCell(
+                          pBreakdown,
+                          flex: 2,
+                          bottomBorder: true,
+                          alignment: pw.Alignment.center,
+                        ),
                         buildCell(
                           wBreakdown,
                           flex: 2,
@@ -2750,8 +2918,10 @@ class PdfRingkasanService {
     final filteredMutasiList = mutasiList.where((row) {
       final jenisMutasi = row['jenis_mutasi']?.toString().toUpperCase() ?? '';
       if (jenisMutasi == 'LAHIR') return true;
-      if (jenisMutasi.contains('IBU') || jenisMutasi.contains('HAMIL')) return true;
-      
+      if (jenisMutasi.contains('IBU') || jenisMutasi.contains('HAMIL')) {
+        return true;
+      }
+
       if (jenisMutasi == 'MENINGGAL') {
         bool isBayiOrBalita = false;
         final tglLahirStr = row['tanggal_lahir']?.toString();
@@ -2759,8 +2929,8 @@ class PdfRingkasanService {
           try {
             final tglLahir = DateTime.parse(tglLahirStr);
             final tglMutasiStr = row['tanggal_mutasi']?.toString();
-            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty 
-                ? DateTime.parse(tglMutasiStr) 
+            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty
+                ? DateTime.parse(tglMutasiStr)
                 : DateTime.now();
             final ageInDays = tglMutasi.difference(tglLahir).inDays;
             if (ageInDays <= (5 * 365 + 2)) {
@@ -2768,18 +2938,22 @@ class PdfRingkasanService {
             }
           } catch (_) {}
         }
-        
+
         final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
         final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
         final statusIbu = row['status_ibu']?.toString().toUpperCase() ?? '';
-        final isIstri = hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU';
-        
+        final isIstri =
+            hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU';
+
         if (isBayiOrBalita || isIstri) {
           return true;
         }
 
         final keterangan = row['keterangan']?.toString().toUpperCase() ?? '';
-        if (keterangan.contains('HAMIL') || keterangan.contains('MELAHIRKAN') || keterangan.contains('NIFAS') || keterangan.contains('IBU')) {
+        if (keterangan.contains('HAMIL') ||
+            keterangan.contains('MELAHIRKAN') ||
+            keterangan.contains('NIFAS') ||
+            keterangan.contains('IBU')) {
           return true;
         }
       }
@@ -3427,8 +3601,171 @@ class PdfRingkasanService {
                     ),
 
                     // Data Rows
-                    ...List.generate(filteredMutasiList.length < 12 ? 12 : filteredMutasiList.length, (index) {
-                      if (index >= filteredMutasiList.length) {
+                    ...List.generate(
+                      filteredMutasiList.length < 12
+                          ? 12
+                          : filteredMutasiList.length,
+                      (index) {
+                        if (index >= filteredMutasiList.length) {
+                          return pw.Container(
+                            height: 18,
+                            decoration: const pw.BoxDecoration(
+                              border: pw.Border(top: pw.BorderSide(width: 0.5)),
+                            ),
+                            child: pw.Row(
+                              crossAxisAlignment: pw.CrossAxisAlignment.center,
+                              children: [
+                                buildCell('', flex: 1, fontSize: 7),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 4),
+                                buildCell('', flex: 4),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 2),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 3),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 1),
+                                buildCell('', flex: 2),
+                                buildCell('', flex: 2),
+                                buildCell('', flex: 3, noRightBorder: true),
+                              ],
+                            ),
+                          );
+                        }
+                        final int i = index + 1;
+                        final row = filteredMutasiList[index];
+
+                        String jkVal = '';
+                        final nik = row['nik']?.toString() ?? '';
+                        if (nik.length == 16) {
+                          try {
+                            final dd = int.parse(nik.substring(6, 8));
+                            jkVal = dd > 40 ? 'P' : 'L';
+                          } catch (_) {}
+                        }
+                        if (jkVal.isEmpty) {
+                          jkVal = row['jenis_kelamin']?.toString() ?? '';
+                        }
+
+                        final jenisMutasi =
+                            row['jenis_mutasi']?.toString() ?? '';
+                        final isKelahiran =
+                            jenisMutasi.toUpperCase() == 'LAHIR';
+                        final isKematian =
+                            jenisMutasi.toUpperCase() == 'MENINGGAL';
+                        final isIbu =
+                            jenisMutasi.toUpperCase().contains('IBU') ||
+                            jenisMutasi.toUpperCase().contains('HAMIL');
+
+                        final namaIbu = row['nama_ibu']?.toString() ?? '';
+                        final namaSuami = row['nama_suami']?.toString() ?? '';
+                        final statusIbu = isIbu
+                            ? (row['status_ibu']?.toString() ?? jenisMutasi)
+                            : '';
+
+                        final namaAnak = isKelahiran
+                            ? (row['nama_orang']?.toString() ?? '')
+                            : '';
+                        final jkLahirL =
+                            isKelahiran && jkVal.toUpperCase().startsWith('L')
+                            ? 'V'
+                            : '';
+                        final jkLahirP =
+                            isKelahiran && jkVal.toUpperCase().startsWith('P')
+                            ? 'V'
+                            : '';
+                        final tglLahir = isKelahiran
+                            ? (row['tanggal_mutasi']?.toString() ?? '')
+                            : '';
+                        final akteAda = ''; // Placeholder
+                        final akteTidak = ''; // Placeholder
+
+                        final namaMeninggal = isKematian
+                            ? (row['nama_orang']?.toString() ?? '')
+                            : '';
+
+                        String statusMeninggal = '';
+                        if (isKematian) {
+                          final tglLahirStr = row['tanggal_lahir']?.toString();
+                          if (tglLahirStr != null && tglLahirStr.isNotEmpty) {
+                            try {
+                              final tglLahir = DateTime.parse(tglLahirStr);
+                              final tglMutasiStr = row['tanggal_mutasi']
+                                  ?.toString();
+                              final tglMutasi =
+                                  tglMutasiStr != null &&
+                                      tglMutasiStr.isNotEmpty
+                                  ? DateTime.parse(tglMutasiStr)
+                                  : DateTime.now();
+                              final ageInDays = tglMutasi
+                                  .difference(tglLahir)
+                                  .inDays;
+                              if (ageInDays < 365) {
+                                statusMeninggal = 'Bayi';
+                              } else if (ageInDays < (5 * 365 + 2)) {
+                                statusMeninggal = 'Balita';
+                              }
+                            } catch (_) {}
+                          }
+
+                          if (statusMeninggal.isEmpty) {
+                            final hub =
+                                row['hubungan_keluarga']
+                                    ?.toString()
+                                    .toUpperCase() ??
+                                '';
+                            final statusKrt =
+                                row['status_dgn_krt']
+                                    ?.toString()
+                                    .toUpperCase() ??
+                                '';
+                            final statusIbu =
+                                row['status_ibu']?.toString().toUpperCase() ??
+                                '';
+                            if (hub == 'ISTRI' ||
+                                statusKrt == 'ISTRI' ||
+                                statusIbu == 'IBU') {
+                              statusMeninggal = 'Ibu';
+                            } else {
+                              final keterangan =
+                                  row['keterangan']?.toString().toUpperCase() ??
+                                  '';
+                              if (keterangan.contains('HAMIL') ||
+                                  keterangan.contains('MELAHIRKAN') ||
+                                  keterangan.contains('NIFAS') ||
+                                  keterangan.contains('IBU')) {
+                                statusMeninggal = 'Ibu';
+                              }
+                            }
+                          }
+                        }
+                        String jk = jkVal;
+                        if (jk.isEmpty &&
+                            isKematian &&
+                            statusMeninggal.toLowerCase() == 'ibu') {
+                          jk = 'P';
+                        }
+                        final jkMatiL =
+                            isKematian && jk.toUpperCase().startsWith('L')
+                            ? 'V'
+                            : '';
+                        final jkMatiP =
+                            isKematian && jk.toUpperCase().startsWith('P')
+                            ? 'V'
+                            : '';
+                        final tglMeninggal = isKematian
+                            ? (row['tanggal_mutasi']?.toString() ?? '')
+                            : '';
+                        final sebabMeninggal = isKematian
+                            ? (row['sebab_kematian']?.toString() ?? '')
+                            : '';
+
+                        final ket = row['keterangan']?.toString() ?? '';
+
                         return pw.Container(
                           height: 18,
                           decoration: const pw.BoxDecoration(
@@ -3437,156 +3774,38 @@ class PdfRingkasanService {
                           child: pw.Row(
                             crossAxisAlignment: pw.CrossAxisAlignment.center,
                             children: [
-                              buildCell('', flex: 1, fontSize: 7),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 4),
-                              buildCell('', flex: 4),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 2),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 3),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 1),
-                              buildCell('', flex: 2),
-                              buildCell('', flex: 2),
-                              buildCell('', flex: 3, noRightBorder: true),
+                              buildCell('$i', flex: 1, fontSize: 7),
+                              buildCell(
+                                namaIbu,
+                                flex: 3,
+                                alignment: pw.Alignment.centerLeft,
+                                textAlign: pw.TextAlign.left,
+                              ),
+                              buildCell(namaSuami, flex: 3),
+                              buildCell(statusIbu, flex: 4),
+                              buildCell(namaAnak, flex: 4),
+                              buildCell(jkLahirL, flex: 1),
+                              buildCell(jkLahirP, flex: 1),
+                              buildCell(tglLahir, flex: 2),
+                              buildCell(akteAda, flex: 1),
+                              buildCell(akteTidak, flex: 1),
+                              buildCell(
+                                namaMeninggal,
+                                flex: 3,
+                                alignment: pw.Alignment.centerLeft,
+                                textAlign: pw.TextAlign.left,
+                              ),
+                              buildCell(statusMeninggal, flex: 3),
+                              buildCell(jkMatiL, flex: 1),
+                              buildCell(jkMatiP, flex: 1),
+                              buildCell(tglMeninggal, flex: 2),
+                              buildCell(sebabMeninggal, flex: 2),
+                              buildCell(ket, flex: 3, noRightBorder: true),
                             ],
                           ),
                         );
-                      }
-                      final int i = index + 1;
-                      final row = filteredMutasiList[index];
-
-                      String jkVal = '';
-                      final nik = row['nik']?.toString() ?? '';
-                      if (nik.length == 16) {
-                        try {
-                          final dd = int.parse(nik.substring(6, 8));
-                          jkVal = dd > 40 ? 'P' : 'L';
-                        } catch (_) {}
-                      }
-                      if (jkVal.isEmpty) {
-                        jkVal = row['jenis_kelamin']?.toString() ?? '';
-                      }
-
-                      final jenisMutasi = row['jenis_mutasi']?.toString() ?? '';
-                      final isKelahiran = jenisMutasi.toUpperCase() == 'LAHIR';
-                      final isKematian =
-                          jenisMutasi.toUpperCase() == 'MENINGGAL';
-                      final isIbu =
-                          jenisMutasi.toUpperCase().contains('IBU') ||
-                          jenisMutasi.toUpperCase().contains('HAMIL');
-
-                      final namaIbu = row['nama_ibu']?.toString() ?? '';
-                      final namaSuami = row['nama_suami']?.toString() ?? '';
-                      final statusIbu = isIbu
-                          ? (row['status_ibu']?.toString() ?? jenisMutasi)
-                          : '';
-
-                      final namaAnak = isKelahiran
-                          ? (row['nama_orang']?.toString() ?? '')
-                          : '';
-                      final jkLahirL =
-                          isKelahiran && jkVal.toUpperCase().startsWith('L') ? 'V' : '';
-                      final jkLahirP =
-                          isKelahiran && jkVal.toUpperCase().startsWith('P') ? 'V' : '';
-                      final tglLahir = isKelahiran
-                          ? (row['tanggal_mutasi']?.toString() ?? '')
-                          : '';
-                      final akteAda = ''; // Placeholder
-                      final akteTidak = ''; // Placeholder
-
-                      final namaMeninggal = isKematian
-                          ? (row['nama_orang']?.toString() ?? '')
-                          : '';
-                      
-                      String statusMeninggal = '';
-                      if (isKematian) {
-                        final tglLahirStr = row['tanggal_lahir']?.toString();
-                        if (tglLahirStr != null && tglLahirStr.isNotEmpty) {
-                          try {
-                            final tglLahir = DateTime.parse(tglLahirStr);
-                            final tglMutasiStr = row['tanggal_mutasi']?.toString();
-                            final tglMutasi = tglMutasiStr != null && tglMutasiStr.isNotEmpty 
-                                ? DateTime.parse(tglMutasiStr) 
-                                : DateTime.now();
-                            final ageInDays = tglMutasi.difference(tglLahir).inDays;
-                            if (ageInDays < 365) {
-                              statusMeninggal = 'Bayi';
-                            } else if (ageInDays < (5 * 365 + 2)) {
-                              statusMeninggal = 'Balita';
-                            }
-                          } catch (_) {}
-                        }
-                        
-                        if (statusMeninggal.isEmpty) {
-                          final hub = row['hubungan_keluarga']?.toString().toUpperCase() ?? '';
-                          final statusKrt = row['status_dgn_krt']?.toString().toUpperCase() ?? '';
-                          final statusIbu = row['status_ibu']?.toString().toUpperCase() ?? '';
-                          if (hub == 'ISTRI' || statusKrt == 'ISTRI' || statusIbu == 'IBU') {
-                            statusMeninggal = 'Ibu';
-                          } else {
-                            final keterangan = row['keterangan']?.toString().toUpperCase() ?? '';
-                            if (keterangan.contains('HAMIL') || keterangan.contains('MELAHIRKAN') || keterangan.contains('NIFAS') || keterangan.contains('IBU')) {
-                              statusMeninggal = 'Ibu';
-                            }
-                          }
-                        }
-                      }
-                      String jk = jkVal;
-                      if (jk.isEmpty && isKematian && statusMeninggal.toLowerCase() == 'ibu') {
-                        jk = 'P';
-                      }
-                      final jkMatiL = isKematian && jk.toUpperCase().startsWith('L')
-                          ? 'V'
-                          : '';
-                      final jkMatiP = isKematian && jk.toUpperCase().startsWith('P')
-                          ? 'V'
-                          : '';
-                      final tglMeninggal = isKematian
-                          ? (row['tanggal_mutasi']?.toString() ?? '')
-                          : '';
-                      final sebabMeninggal = isKematian
-                          ? (row['sebab_kematian']?.toString() ?? '')
-                          : '';
-
-                      final ket = row['keterangan']?.toString() ?? '';
-
-                      return pw.Container(
-                        height: 18,
-                        decoration: const pw.BoxDecoration(
-                          border: pw.Border(top: pw.BorderSide(width: 0.5)),
-                        ),
-                        child: pw.Row(
-                          crossAxisAlignment: pw.CrossAxisAlignment.center,
-                          children: [
-                            buildCell('$i', flex: 1, fontSize: 7),
-                            buildCell(namaIbu, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
-                            buildCell(namaSuami, flex: 3),
-                            buildCell(statusIbu, flex: 4),
-                            buildCell(namaAnak, flex: 4),
-                            buildCell(jkLahirL, flex: 1),
-                            buildCell(jkLahirP, flex: 1),
-                            buildCell(tglLahir, flex: 2),
-                            buildCell(akteAda, flex: 1),
-                            buildCell(akteTidak, flex: 1),
-                            buildCell(namaMeninggal, flex: 3, alignment: pw.Alignment.centerLeft, textAlign: pw.TextAlign.left),
-                            buildCell(statusMeninggal, flex: 3),
-                            buildCell(jkMatiL, flex: 1),
-                            buildCell(jkMatiP, flex: 1),
-                            buildCell(tglMeninggal, flex: 2),
-                            buildCell(sebabMeninggal, flex: 2),
-                            buildCell(ket, flex: 3, noRightBorder: true),
-                          ],
-                        ),
-                      );
-                    }),
-
-
+                      },
+                    ),
 
                     // JUMLAH Row
                     pw.Container(
