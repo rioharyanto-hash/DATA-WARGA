@@ -87,3 +87,34 @@ final dashboardSummaryProvider = FutureProvider<DashboardSummary>((ref) async {
     kelompokDawis: kader,
   );
 });
+
+final dashboardDemografiDetailProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((
+      ref,
+      category,
+    ) async {
+      final repository = ref.watch(dashboardRepositoryProvider);
+      final user = ref.watch(loggedInUserProvider);
+
+      String? rw = ref.watch(dashboardRwFilterProvider);
+      String? rt = ref.watch(dashboardRtFilterProvider);
+      String? kader = ref.watch(dashboardKaderFilterProvider);
+
+      if (user?.role == 'RW') {
+        rw = user?.rw;
+      } else if (user?.role == 'RT') {
+        rw = user?.rw;
+        rt = user?.rt;
+      } else if (user?.role == 'KADER') {
+        rw = user?.rw;
+        rt = user?.rt;
+        kader = user?.kelompokDawis;
+      }
+
+      return await repository.getDemografiDetail(
+        rw: rw,
+        rt: rt,
+        kelompokDawis: kader,
+        category: category,
+      );
+    });

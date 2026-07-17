@@ -119,7 +119,7 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
                 itemCount: pengurusList.length,
                 itemBuilder: (context, index) {
                   final user = pengurusList[index];
-                  return _buildUserCard(context, user);
+                  return _buildUserCard(context, user, index + 1);
                 },
               );
             },
@@ -157,7 +157,7 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
     );
   }
 
-  Widget _buildUserCard(BuildContext context, AppUser user) {
+  Widget _buildUserCard(BuildContext context, AppUser user, int index) {
     Color chipColor;
     switch (user.role) {
       case 'ADMIN':
@@ -186,6 +186,16 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: CircleAvatar(
+          backgroundColor: Colors.lightBlue.shade100,
+          child: Text(
+            '$index',
+            style: const TextStyle(
+              color: Colors.lightBlue,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
         title: Text(
           user.nama,
           style: const TextStyle(fontWeight: FontWeight.bold),

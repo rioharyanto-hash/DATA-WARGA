@@ -84,9 +84,50 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
     }
   }
 
+  Future<void> _confirmDelete(AppUser user) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Kader'),
+        content: Text('Apakah Anda yakin ingin menghapus ${user.nama}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    try {
+      final repository = ref.read(appUserRepositoryProvider);
+      await repository.deleteUser(user.id);
+      ref.invalidate(allUsersProvider);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Kader berhasil dihapus')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal menghapus kader: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(allUsersProvider);
+    final currentUser = ref.watch(loggedInUserProvider);
+    final isAdmin = currentUser?.role == 'ADMIN';
 
     return Scaffold(
       appBar: AppBar(
@@ -132,7 +173,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
                 itemCount: kaderList.length,
                 itemBuilder: (context, index) {
                   final user = kaderList[index];
-                  return _buildUserCard(context, user);
+                  return _buildUserCard(context, user, index + 1, isAdmin);
                 },
               );
             },
@@ -170,7 +211,12 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
     );
   }
 
-  Widget _buildUserCard(BuildContext context, AppUser user) {
+  Widget _buildUserCard(
+    BuildContext context,
+    AppUser user,
+    int index,
+    bool isAdmin,
+  ) {
     Color chipColor;
     switch (user.role) {
       case 'ADMIN':
@@ -205,6 +251,16 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: CircleAvatar(
+          backgroundColor: Colors.lightBlue.shade100,
+          child: Text(
+            '$index',
+            style: const TextStyle(
+              color: Colors.lightBlue,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
         title: Text(
           user.nama,
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -220,13 +276,23 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
             ],
           ],
         ),
-        trailing: Chip(
-          label: Text(
-            user.role,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-          ),
-          backgroundColor: chipColor,
-          padding: EdgeInsets.zero,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Chip(
+              label: Text(
+                user.role,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              backgroundColor: chipColor,
+              padding: EdgeInsets.zero,
+            ),
+            if (isAdmin)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _confirmDelete(user),
+              ),
+          ],
         ),
         onTap: () {
           context.push('/form-user/${user.id}');

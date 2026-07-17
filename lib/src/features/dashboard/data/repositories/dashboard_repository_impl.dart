@@ -186,7 +186,12 @@ class DashboardRepositoryImpl implements DashboardRepository {
       if (jk == 'Perempuan' && age >= 15 && age <= 49) wusCount++;
       if (hub == 'ISTRI' && age >= 15 && age <= 49) pusCount++;
 
-      if (disabilitas != null && disabilitas.isNotEmpty) disabilitasCount++;
+      if (disabilitas != null &&
+          disabilitas.isNotEmpty &&
+          disabilitas.toUpperCase() != 'TIDAK ADA' &&
+          disabilitas.toUpperCase() != 'TIDAK') {
+        disabilitasCount++;
+      }
 
       pendidikanGrouping[pdd] = (pendidikanGrouping[pdd] ?? 0) + 1;
       pekerjaanGrouping[pkj] = (pekerjaanGrouping[pkj] ?? 0) + 1;
@@ -230,5 +235,192 @@ class DashboardRepositoryImpl implements DashboardRepository {
       jumlahPindah: pindahCount,
       jumlahDatang: datangCount,
     );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getDemografiDetail({
+    String? rw,
+    String? rt,
+    String? kelompokDawis,
+    required String category,
+  }) async {
+    if (kelompokDawis == 'Semua') kelompokDawis = null;
+
+    final allBangunan = await _supabase
+        .from('bangunan')
+        .select('id, rw, rt, kelompok_dawis');
+
+    final filteredBangunan = allBangunan.where((b) {
+      if (rw != null &&
+          rw.isNotEmpty &&
+          rw != 'Semua' &&
+          b['rw']?.toString() != rw) {
+        return false;
+      }
+      if (rt != null &&
+          rt.isNotEmpty &&
+          rt != 'Semua' &&
+          b['rt']?.toString() != rt) {
+        return false;
+      }
+      if (kelompokDawis != null && kelompokDawis.isNotEmpty) {
+        final kd =
+            b['kelompok_dawis']
+                ?.toString()
+                .replaceAll('.', '')
+                .replaceAll(' ', '')
+                .toLowerCase() ??
+            '';
+        final nkd = kelompokDawis
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        if (kd != nkd) return false;
+      }
+      return true;
+    }).toList();
+
+    if (filteredBangunan.isEmpty) return [];
+
+    final bIds = filteredBangunan.map((e) => e['id'] as String).toSet();
+    final bMap = {for (var b in filteredBangunan) b['id']: b};
+
+    final allKrt = await _supabase
+        .from('krt')
+        .select('id, id_bangunan, nama_krt');
+    final filteredKrt = allKrt
+        .where((k) => bIds.contains(k['id_bangunan']))
+        .toList();
+    final krtIds = filteredKrt.map((k) => k['id'] as String).toSet();
+    final krtMap = {for (var k in filteredKrt) k['id']: k};
+
+    final allKeluarga = await _supabase
+        .from('keluarga')
+        .select('id, id_krt, no_kk');
+    final filteredKeluarga = allKeluarga
+        .where((k) => krtIds.contains(k['id_krt']))
+        .toList();
+    final kelIds = filteredKeluarga.map((k) => k['id'] as String).toSet();
+    final kelMap = {for (var k in filteredKeluarga) k['id']: k};
+
+    if (category == 'Jumlah Bangunan') {
+      return filteredBangunan
+          .map(
+            (b) => {
+              'rw': b['rw'],
+              'rt': b['rt'],
+              'kelompok_dawis': b['kelompok_dawis'],
+            },
+          )
+          .toList();
+    }
+
+    if (category == 'Jumlah KK') {
+      return filteredKeluarga.map((k) {
+        final krt = krtMap[k['id_krt']];
+        final b = krt != null ? bMap[krt['id_bangunan']] : null;
+        return {
+          'no_kk': k['no_kk'],
+          'nama_krt': krt != null ? krt['nama_krt'] : '-',
+          'rt': b != null ? b['rt'] : '-',
+          'rw': b != null ? b['rw'] : '-',
+        };
+      }).toList();
+    }
+
+    if ([
+      'Total Mutasi',
+      'Lahir',
+      'Meninggal',
+      'Pindah',
+      'Datang',
+    ].contains(category)) {
+      final allMutasi = await _supabase.from('mutasi').select();
+      final filteredMutasi = allMutasi
+          .where((m) => bIds.contains(m['id_bangunan']))
+          .toList();
+
+      return filteredMutasi
+          .where((m) {
+            final type = m['jenis_mutasi']?.toString().toUpperCase() ?? '';
+            if (category == 'Total Mutasi') return true;
+            if (category == 'Lahir' && type == 'LAHIR') return true;
+            if (category == 'Meninggal' && type == 'MENINGGAL') return true;
+            if (category == 'Pindah' && type == 'PINDAH') return true;
+            if (category == 'Datang' && type == 'DATANG') return true;
+            return false;
+          })
+          .map((m) {
+            final b = bMap[m['id_bangunan']];
+            return {
+              'jenis_mutasi': m['jenis_mutasi'],
+              'keterangan_mutasi': m['keterangan_mutasi'],
+              'rt': b != null ? b['rt'] : '-',
+              'rw': b != null ? b['rw'] : '-',
+            };
+          })
+          .toList();
+    }
+
+    // the rest are individu-based categories
+    final allIndividu = await _supabase.from('individu').select();
+    final filteredIndividu = allIndividu
+        .where((i) => kelIds.contains(i['id_keluarga']))
+        .toList();
+
+    return filteredIndividu
+        .where((ind) {
+          final jk = ind['jenis_kelamin']?.toString();
+          final tglLahir = ind['tanggal_lahir']?.toString();
+          final hub = ind['hubungan_keluarga']?.toString().toUpperCase();
+          final disabilitas = ind['kriteria_berkebutuhan_khusus']?.toString();
+          int age = _calculateAge(tglLahir);
+
+          if (category == 'Total Penduduk') return true;
+          if (category == 'Balita (0-4 thn)' && age >= 0 && age <= 4) {
+            return true;
+          }
+          if (category == 'Anak (5-9 thn)' && age >= 5 && age <= 9) return true;
+          if (category == 'Remaja (10-24 thn)' && age >= 10 && age <= 24) {
+            return true;
+          }
+          if (category == 'Dewasa (25-59 thn)' && age >= 25 && age <= 59) {
+            return true;
+          }
+          if (category == 'Lansia (>=60 thn)' && age >= 60) return true;
+          if (category == 'Laki-laki' && jk == 'Laki-laki') return true;
+          if (category == 'Perempuan' && jk == 'Perempuan') return true;
+          if (category == 'WUS' &&
+              jk == 'Perempuan' &&
+              age >= 15 &&
+              age <= 49) {
+            return true;
+          }
+          if (category == 'PUS' && hub == 'ISTRI' && age >= 15 && age <= 49) {
+            return true;
+          }
+          if (category == 'Disabilitas' &&
+              disabilitas != null &&
+              disabilitas.isNotEmpty) {
+            return true;
+          }
+
+          return false;
+        })
+        .map((ind) {
+          final k = kelMap[ind['id_keluarga']];
+          final krt = k != null ? krtMap[k['id_krt']] : null;
+          final b = krt != null ? bMap[krt['id_bangunan']] : null;
+
+          return {
+            'nama_lengkap': ind['nama_lengkap'],
+            'nik': ind['nik'],
+            'jenis_kelamin': ind['jenis_kelamin'],
+            'tanggal_lahir': ind['tanggal_lahir'],
+            'rt': b != null ? b['rt'] : '-',
+            'rw': b != null ? b['rw'] : '-',
+          };
+        })
+        .toList();
   }
 }

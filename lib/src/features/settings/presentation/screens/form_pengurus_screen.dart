@@ -228,16 +228,6 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
         ),
         elevation: 0,
         actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: const Text(
-              'BATAL',
-              style: TextStyle(
-                color: Colors.white70,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
@@ -306,6 +296,9 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                 initialValue: _selectedRole,
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText: 'Role',
                                                       border:
                                                           OutlineInputBorder(),
@@ -338,6 +331,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _idKaderController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'ID / Username',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -359,6 +354,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                             controller: _passwordController,
                                             obscureText: _obscurePassword,
                                             decoration: InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Password',
                                               border:
                                                   const OutlineInputBorder(),
@@ -422,6 +419,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _namaController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Nama Lengkap',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -445,6 +444,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _nikController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'NIK',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -465,6 +466,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _tempatLahirController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Tempat Lahir',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -487,6 +490,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                             onTap: () =>
                                                 _selectTanggalLahir(context),
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Tanggal Lahir',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -509,6 +514,9 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                     _selectedPendidikan,
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText:
                                                           'Pendidikan Terakhir',
                                                       border:
@@ -569,6 +577,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _alamatController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Alamat',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -631,6 +641,9 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                 },
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText: 'RT',
                                                       border:
                                                           OutlineInputBorder(),
@@ -694,6 +707,9 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                 },
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText: 'RW',
                                                       border:
                                                           OutlineInputBorder(),
@@ -714,6 +730,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _kelurahanController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Kelurahan',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -729,6 +747,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _kecamatanController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Kecamatan',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -750,6 +770,9 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                 initialValue: _selectedPropinsi,
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText: 'Propinsi',
                                                       border:
                                                           OutlineInputBorder(),
@@ -777,6 +800,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _kodePosController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Kode Pos',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -801,6 +826,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _alamatKtpController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Alamat KTP',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -820,6 +847,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _noHpController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'No HP',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -841,6 +870,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _emailController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Alamat Email',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -889,6 +920,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                             controller:
                                                 _noRekeningBankController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'No Rekening Bank DKI',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -909,6 +942,8 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                           child: TextFormField(
                                             controller: _npwpController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'NPWP',
                                               border: OutlineInputBorder(),
                                               contentPadding:

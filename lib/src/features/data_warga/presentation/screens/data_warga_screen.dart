@@ -6,6 +6,8 @@ import '../providers/data_warga_provider.dart';
 import '../../domain/entities/data_warga_keluarga.dart';
 import '../../domain/entities/data_warga_bangunan.dart';
 import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
+import '../widgets/dashboard_statistik_widget.dart';
 
 class DataWargaScreen extends ConsumerWidget {
   const DataWargaScreen({super.key});
@@ -16,26 +18,66 @@ class DataWargaScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: _bgBody,
-      appBar: AppBar(
-        backgroundColor: Colors.blue.shade700,
-        title: const SharedAppBarTitle(
-          title: 'DATA WARGA',
-          subtitle: 'Sistem Informasi Dasawisma',
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: Icon(Icons.people, color: Colors.white),
+    final user = ref.watch(loggedInUserProvider);
+    final hasDashboardAccess =
+        user != null &&
+        (user.role == 'ADMIN' || user.role == 'RT' || user.role == 'RW');
+
+    final content = LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 800;
+        return _buildResponsiveLayout(context, ref, constraints, isDesktop);
+      },
+    );
+
+    if (!hasDashboardAccess) {
+      return Scaffold(
+        backgroundColor: _bgBody,
+        appBar: AppBar(
+          backgroundColor: Colors.blue.shade700,
+          title: const SharedAppBarTitle(
+            title: 'DATA WARGA',
+            subtitle: 'Sistem Informasi Dasawisma',
           ),
-        ],
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth > 800;
-          return _buildResponsiveLayout(context, ref, constraints, isDesktop);
-        },
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.people, color: Colors.white),
+            ),
+          ],
+        ),
+        body: content,
+      );
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: _bgBody,
+        appBar: AppBar(
+          backgroundColor: Colors.blue.shade700,
+          title: const SharedAppBarTitle(
+            title: 'DATA WARGA',
+            subtitle: 'Sistem Informasi Dasawisma',
+          ),
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.people, color: Colors.white),
+            ),
+          ],
+          bottom: const TabBar(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorColor: Colors.white,
+            indicatorWeight: 3,
+            tabs: [
+              Tab(text: 'Daftar Warga', icon: Icon(Icons.list)),
+              Tab(text: 'Dasbor & Laporan Khusus', icon: Icon(Icons.analytics)),
+            ],
+          ),
+        ),
+        body: TabBarView(children: [content, const DashboardStatistikWidget()]),
       ),
     );
   }
@@ -64,24 +106,29 @@ class DataWargaScreen extends ConsumerWidget {
       } else {
         return Column(
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              color: Colors.white,
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      ref
-                          .read(selectedBangunanIdProvider.notifier)
-                          .select(null);
-                    },
-                  ),
-                  const Text(
-                    'Kembali',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ],
+            InkWell(
+              onTap: () {
+                ref.read(selectedBangunanIdProvider.notifier).select(null);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                color: Colors.white,
+                child: Row(
+                  children: [
+                    const Icon(Icons.arrow_back, size: 20),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Kembali',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const Divider(height: 1, color: Color(0xFFE2E8F0)),
@@ -233,7 +280,7 @@ class DataWargaScreen extends ConsumerWidget {
                     }
 
                     // Auto-select first if none selected
-                    if (selectedId == null && list.isNotEmpty) {
+                    if (isDesktop && selectedId == null && list.isNotEmpty) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         ref
                             .read(selectedBangunanIdProvider.notifier)
@@ -448,124 +495,131 @@ class DataWargaScreen extends ConsumerWidget {
             children: [
               // Header Card
               Container(
-                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Column(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEF2FF), // Indigo 50
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.business,
+                              color: _primaryDark,
+                              size: 32,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  selectedBangunan.namaBangunan,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFFE0E7FF,
+                                    ), // Indigo 100
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    selectedBangunan.jenisBangunan,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: _primaryDark,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on_outlined,
+                                      size: 16,
+                                      color: _textMuted,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        selectedBangunan.formattedAddress,
+                                        style: const TextStyle(
+                                          color: _textMuted,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(color: Color(0xFFE2E8F0), height: 1),
+                    // Stats Grid (2x2)
                     Row(
                       children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEEF2FF), // Indigo 50
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.business,
-                            color: _primaryDark,
-                            size: 28,
+                        Expanded(
+                          child: _buildStatItem(
+                            'TOTAL PENGHUNI',
+                            '${selectedBangunan.totalPenghuni} Orang',
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        Container(
+                          width: 1,
+                          height: 80,
+                          color: const Color(0xFFE2E8F0),
+                        ),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      selectedBangunan.namaBangunan,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(
-                                        0xFFE0E7FF,
-                                      ), // Indigo 100
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      selectedBangunan.jenisBangunan,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: _primaryDark,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.location_on_outlined,
-                                    size: 16,
-                                    color: _textMuted,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      selectedBangunan.formattedAddress,
-                                      style: const TextStyle(color: _textMuted),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          child: _buildStatItem(
+                            'TOTAL KK',
+                            '${selectedBangunan.totalKk} Keluarga',
                           ),
                         ),
                       ],
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Divider(color: Color(0xFFF1F5F9), height: 1),
-                    ),
+                    const Divider(color: Color(0xFFE2E8F0), height: 1),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStatItem(
-                          'TOTAL PENGHUNI',
-                          '${selectedBangunan.totalPenghuni} Orang',
+                        Expanded(
+                          child: _buildStatItem(
+                            'LAKI-LAKI',
+                            '${selectedBangunan.lakiLaki} Orang',
+                          ),
                         ),
-                        _buildStatDivider(),
-                        _buildStatItem(
-                          'TOTAL KK',
-                          '${selectedBangunan.totalKk} Keluarga',
+                        Container(
+                          width: 1,
+                          height: 80,
+                          color: const Color(0xFFE2E8F0),
                         ),
-                        _buildStatDivider(),
-                        _buildStatItem(
-                          'LAKI-LAKI',
-                          '${selectedBangunan.lakiLaki} Orang',
-                        ),
-                        _buildStatDivider(),
-                        _buildStatItem(
-                          'PEREMPUAN',
-                          '${selectedBangunan.perempuan} Orang',
+                        Expanded(
+                          child: _buildStatItem(
+                            'PEREMPUAN',
+                            '${selectedBangunan.perempuan} Orang',
+                          ),
                         ),
                       ],
                     ),
@@ -576,19 +630,14 @@ class DataWargaScreen extends ConsumerWidget {
               const SizedBox(height: 32),
 
               // Data Penghuni Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Data Penghuni (Kartu Keluarga)',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              const Text(
+                'Data Penghuni (Kartu Keluarga)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 16),
 
-              _buildKeluargaList(selectedBangunan),
+              _buildKeluargaList(selectedBangunan, isDesktop),
             ],
           ),
         );
@@ -597,35 +646,34 @@ class DataWargaScreen extends ConsumerWidget {
   }
 
   Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: _textMuted,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatDivider() {
     return Container(
-      width: 1,
-      height: 40,
-      color: const Color(0xFFF1F5F9), // Slate 100
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF334155),
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildKeluargaList(DataWargaBangunan selectedBangunan) {
+  Widget _buildKeluargaList(
+    DataWargaBangunan selectedBangunan,
+    bool isDesktop,
+  ) {
     return Consumer(
       builder: (context, ref, _) {
         final keluargaAsync = ref.watch(dataWargaKeluargaListProvider);
@@ -652,20 +700,14 @@ class DataWargaScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Column(
                 children: [
                   // Table Header
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
+                      horizontal: 20,
                       vertical: 16,
                     ),
                     decoration: const BoxDecoration(
@@ -677,56 +719,93 @@ class DataWargaScreen extends ConsumerWidget {
                         bottom: BorderSide(color: Color(0xFFE2E8F0)),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                           flex: 3,
                           child: Text(
                             'KEPALA KELUARGA / NO. KK',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: _textMuted,
+                              color: Color(0xFF334155),
                             ),
                           ),
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            'JML. ANGGOTA',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: _textMuted,
+                        if (isDesktop) ...[
+                          const Expanded(
+                            flex: 1,
+                            child: Text(
+                              'JML. ANGGOTA',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF334155),
+                              ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            'STATUS HUNIAN',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: _textMuted,
+                          const Expanded(
+                            flex: 1,
+                            child: Text(
+                              'STATUS HUNIAN',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF334155),
+                              ),
                             ),
                           ),
-                        ),
+                        ] else ...[
+                          const Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Text(
+                                'JML. ANGGOTA',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF334155),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          const Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Text(
+                                'STATUS HUNIAN',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF334155),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
 
                   // Table Body
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: list.length,
-                    separatorBuilder: (context, index) =>
-                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                    itemBuilder: (context, index) {
+                  Column(
+                    children: List.generate(list.length, (index) {
                       final kk = list[index];
-                      return _buildKeluargaRow(context, kk, selectedBangunan);
-                    },
+                      return Column(
+                        children: [
+                          if (index > 0)
+                            const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                          _buildKeluargaRow(
+                            context,
+                            kk,
+                            selectedBangunan,
+                            isDesktop,
+                          ),
+                        ],
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -743,6 +822,7 @@ class DataWargaScreen extends ConsumerWidget {
     BuildContext context,
     DataWargaKeluarga kk,
     DataWargaBangunan bangunan,
+    bool isDesktop,
   ) {
     // Generate initials for avatar
     final words = kk.namaKepalaKeluarga
@@ -773,110 +853,230 @@ class DataWargaScreen extends ConsumerWidget {
       statusTextColor = const Color(0xFF334155); // Slate 700
     }
 
-    return InkWell(
-      onTap: () {
-        context.push('/detail-keluarga/${kk.id}');
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: const Color(0xFFDBEAFE), // Blue 100
-                    foregroundColor: const Color(0xFF1E3A8A), // Blue 900
-                    child: Text(
-                      initials,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+    if (isDesktop) {
+      return InkWell(
+        onTap: () {
+          context.push('/detail-keluarga/${kk.id}');
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: const Color(0xFFDBEAFE), // Blue 100
+                      foregroundColor: const Color(0xFF1E3A8A), // Blue 900
+                      child: Text(
+                        initials,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          kk.namaKepalaKeluarga,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          bangunan.formattedAddress,
-                          style: const TextStyle(
-                            color: _textMuted,
-                            fontSize: 12,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            kk.namaKepalaKeluarga,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          kk.noKk,
-                          style: const TextStyle(
-                            color: _textMuted,
-                            fontSize: 13,
+                          const SizedBox(height: 2),
+                          Text(
+                            bangunan.formattedAddress,
+                            style: const TextStyle(
+                              color: _textMuted,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3E8FF), // Purple 100
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.people_alt,
-                      size: 14,
-                      color: Color(0xFF7E22CE),
-                    ), // Purple 700
-                    const SizedBox(width: 4),
-                    Text(
-                      '${kk.jumlahAnggota}',
-                      style: const TextStyle(
-                        color: Color(0xFF7E22CE),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                          const SizedBox(height: 2),
+                          Text(
+                            kk.noKk,
+                            style: const TextStyle(
+                              color: _textMuted,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusBgColor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  kk.statusHunian.toUpperCase(),
-                  style: TextStyle(
-                    color: statusTextColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
                   ),
-                  textAlign: TextAlign.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3E8FF), // Purple 100
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.people_alt,
+                        size: 14,
+                        color: Color(0xFF7E22CE),
+                      ), // Purple 700
+                      const SizedBox(width: 4),
+                      Text(
+                        '${kk.jumlahAnggota}',
+                        style: const TextStyle(
+                          color: Color(0xFF7E22CE),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    kk.statusHunian.toUpperCase(),
+                    style: TextStyle(
+                      color: statusTextColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return InkWell(
+      onTap: () {
+        context.push('/detail-keluarga/${kk.id}');
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: const Color(0xFFDBEAFE), // Blue 100
+              foregroundColor: const Color(0xFF1E3A8A), // Blue 900
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    kk.namaKepalaKeluarga,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    bangunan.formattedAddress,
+                    style: const TextStyle(
+                      color: Color(0xFF475569), // Slate 600
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    kk.noKk,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B), // Slate 500
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3E8FF), // Purple 100
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.people_alt,
+                              size: 14,
+                              color: Color(0xFF7E22CE),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${kk.jumlahAnggota}',
+                              style: const TextStyle(
+                                color: Color(0xFF7E22CE),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusBgColor, // Slate 200 equivalent default
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          kk.statusHunian.toUpperCase(),
+                          style: TextStyle(
+                            color:
+                                statusTextColor, // Slate 700 equivalent default
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

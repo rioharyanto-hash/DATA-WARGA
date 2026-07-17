@@ -326,6 +326,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _showRegionSettingsDialog() async {
     final region = ref.read(regionProvider);
+    final provController = TextEditingController(text: region.provinsi);
     final kotaController = TextEditingController(text: region.kotaKab);
     final kecController = TextEditingController(text: region.kecamatan);
     final kelController = TextEditingController(text: region.kelurahan);
@@ -337,6 +338,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            TextField(
+              controller: provController,
+              decoration: const InputDecoration(labelText: 'Provinsi'),
+            ),
+            const SizedBox(height: 8),
             TextField(
               controller: kotaController,
               decoration: const InputDecoration(labelText: 'Kota / Kabupaten'),
@@ -363,6 +369,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ref
                   .read(regionProvider.notifier)
                   .saveRegion(
+                    provinsi: provController.text.trim(),
                     kotaKab: kotaController.text.trim(),
                     kecamatan: kecController.text.trim(),
                     kelurahan: kelController.text.trim(),

@@ -186,315 +186,330 @@ class DetailKeluargaScreen extends ConsumerWidget {
                     horizontal: 16.0,
                     vertical: 4.0,
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        // Table Header
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.02),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(12),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Table Header
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
                             ),
-                            border: Border(
-                              bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
+                              border: Border(
+                                bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                            ),
+                            child: const Row(
+                              children: [
+                                SizedBox(
+                                  width: 200,
+                                  child: Text('NAMA', style: _headerStyle),
+                                ),
+                                SizedBox(
+                                  width: 140,
+                                  child: Text('NIK', style: _headerStyle),
+                                ),
+                                SizedBox(
+                                  width: 130,
+                                  child: Text(
+                                    'STATUS KELUARGA',
+                                    style: _headerStyle,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 80,
+                                  child: Text('USIA', style: _headerStyle),
+                                ),
+                                SizedBox(
+                                  width: 120,
+                                  child: Text('TELEPON', style: _headerStyle),
+                                ),
+                                SizedBox(
+                                  width: 50,
+                                  child: Text(
+                                    'AKSI',
+                                    style: _headerStyle,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: const Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Text('NAMA', style: _headerStyle),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text('NIK', style: _headerStyle),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  'STATUS KELUARGA',
-                                  style: _headerStyle,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: Text('USIA', style: _headerStyle),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text('TELEPON', style: _headerStyle),
-                              ),
-                              SizedBox(
-                                width: 50,
-                                child: Text(
-                                  'AKSI',
-                                  style: _headerStyle,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Table Rows
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: individuItems.length,
-                          separatorBuilder: (context, index) => const Divider(
-                            height: 1,
-                            color: Color(0xFFE2E8F0),
-                          ),
-                          itemBuilder: (context, index) {
-                            final individu = individuItems[index];
+                          // Table Rows
+                          Column(
+                            children: List.generate(individuItems.length, (
+                              index,
+                            ) {
+                              final individu = individuItems[index];
 
-                            // Hitung Usia
-                            String ageText = '-';
-                            if (individu.tanggalLahir.isNotEmpty) {
-                              try {
-                                DateTime tglLahir;
-                                final parts = individu.tanggalLahir.split(
-                                  RegExp(r'[-/]'),
-                                );
-                                if (parts.length == 3) {
-                                  if (parts[0].length == 4) {
-                                    // YYYY-MM-DD
-                                    tglLahir = DateTime(
-                                      int.parse(parts[0]),
-                                      int.parse(parts[1]),
-                                      int.parse(parts[2]),
-                                    );
-                                  } else {
-                                    // DD-MM-YYYY
-                                    tglLahir = DateTime(
-                                      int.parse(parts[2]),
-                                      int.parse(parts[1]),
-                                      int.parse(parts[0]),
-                                    );
-                                  }
-                                } else {
-                                  tglLahir = DateTime.parse(
-                                    individu.tanggalLahir,
+                              // Hitung Usia
+                              String ageText = '-';
+                              if (individu.tanggalLahir.isNotEmpty) {
+                                try {
+                                  DateTime tglLahir;
+                                  final parts = individu.tanggalLahir.split(
+                                    RegExp(r'[-/]'),
                                   );
-                                }
-
-                                final today = DateTime.now();
-                                int age = today.year - tglLahir.year;
-                                if (today.month < tglLahir.month ||
-                                    (today.month == tglLahir.month &&
-                                        today.day < tglLahir.day)) {
-                                  age--;
-                                }
-                                ageText = '$age Tahun';
-                              } catch (e) {
-                                ageText = '-';
-                              }
-                            }
-
-                            final status = individu.hubunganKeluarga;
-                            final statusColor = _getStatusColor(status);
-                            final statusBgColor = _getStatusBgColor(status);
-                            final isLaki = individu.jenisKelamin == 'Laki-laki';
-
-                            Widget trailingIcon;
-                            if (mode == 'master') {
-                              trailingIcon = const Icon(
-                                Icons.chevron_right,
-                                color: Color(0xFF94A3B8),
-                              );
-                            } else {
-                              trailingIcon = Icon(
-                                mode == 'catatan'
-                                    ? Icons.edit_document
-                                    : (mode == 'potensi'
-                                          ? Icons.analytics_rounded
-                                          : Icons.pregnant_woman_rounded),
-                                color: const Color(0xFF4338CA),
-                                size: 20,
-                              );
-                            }
-
-                            return InkWell(
-                              onTap: () async {
-                                if (mode == 'master') {
-                                  context.push('/view-individu/${individu.id}');
-                                } else if (mode == 'catatan') {
-                                  context
-                                      .push(
-                                        '/form-catatan-keluarga/${individu.id}',
-                                      )
-                                      .then((_) {
-                                        ref.invalidate(
-                                          individuByKeluargaProvider(
-                                            keluargaId,
-                                          ),
-                                        );
-                                      });
-                                } else if (mode == 'potensi') {
-                                  context
-                                      .push(
-                                        '/form-potensi-warga/${individu.id}',
-                                      )
-                                      .then((_) {
-                                        ref.invalidate(
-                                          individuByKeluargaProvider(
-                                            keluargaId,
-                                          ),
-                                        );
-                                      });
-                                } else if (mode == 'mutasi') {
-                                  final idBangunan = await ref.read(
-                                    idBangunanByKeluargaProvider(
-                                      keluargaId,
-                                    ).future,
-                                  );
-                                  if (idBangunan != null && context.mounted) {
-                                    context
-                                        .push(
-                                          Uri(
-                                            path: '/form-mutasi/$idBangunan',
-                                            queryParameters: {
-                                              'idIndividuAsal': individu.id,
-                                              'defaultNama':
-                                                  individu.namaLengkap,
-                                              'defaultNik': individu.nik,
-                                            },
-                                          ).toString(),
-                                        )
-                                        .then((_) {
-                                          ref.invalidate(
-                                            individuByKeluargaProvider(
-                                              keluargaId,
-                                            ),
-                                          );
-                                        });
-                                  } else {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Gagal menemukan data Bangunan.',
-                                          ),
-                                        ),
+                                  if (parts.length == 3) {
+                                    if (parts[0].length == 4) {
+                                      // YYYY-MM-DD
+                                      tglLahir = DateTime(
+                                        int.parse(parts[0]),
+                                        int.parse(parts[1]),
+                                        int.parse(parts[2]),
+                                      );
+                                    } else {
+                                      // DD-MM-YYYY
+                                      tglLahir = DateTime(
+                                        int.parse(parts[2]),
+                                        int.parse(parts[1]),
+                                        int.parse(parts[0]),
                                       );
                                     }
+                                  } else {
+                                    tglLahir = DateTime.parse(
+                                      individu.tanggalLahir,
+                                    );
                                   }
+
+                                  final today = DateTime.now();
+                                  int age = today.year - tglLahir.year;
+                                  if (today.month < tglLahir.month ||
+                                      (today.month == tglLahir.month &&
+                                          today.day < tglLahir.day)) {
+                                    age--;
+                                  }
+                                  ageText = '$age Tahun';
+                                } catch (e) {
+                                  ageText = '-';
                                 }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 12.0,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
+                              }
+
+                              final status = individu.hubunganKeluarga;
+                              final statusColor = _getStatusColor(status);
+                              final statusBgColor = _getStatusBgColor(status);
+                              final isLaki =
+                                  individu.jenisKelamin == 'Laki-laki';
+
+                              Widget trailingIcon;
+                              if (mode == 'master') {
+                                trailingIcon = const Icon(
+                                  Icons.chevron_right,
+                                  color: Color(0xFF94A3B8),
+                                );
+                              } else {
+                                trailingIcon = Icon(
+                                  mode == 'catatan'
+                                      ? Icons.edit_document
+                                      : (mode == 'potensi'
+                                            ? Icons.analytics_rounded
+                                            : Icons.pregnant_woman_rounded),
+                                  color: const Color(0xFF4338CA),
+                                  size: 20,
+                                );
+                              }
+
+                              return Column(
+                                children: [
+                                  InkWell(
+                                    onTap: () async {
+                                      if (mode == 'master') {
+                                        context.push(
+                                          '/view-individu/${individu.id}',
+                                        );
+                                      } else if (mode == 'catatan') {
+                                        context
+                                            .push(
+                                              '/form-catatan-keluarga/${individu.id}',
+                                            )
+                                            .then((_) {
+                                              ref.invalidate(
+                                                individuByKeluargaProvider(
+                                                  keluargaId,
+                                                ),
+                                              );
+                                            });
+                                      } else if (mode == 'potensi') {
+                                        context
+                                            .push(
+                                              '/form-potensi-warga/${individu.id}',
+                                            )
+                                            .then((_) {
+                                              ref.invalidate(
+                                                individuByKeluargaProvider(
+                                                  keluargaId,
+                                                ),
+                                              );
+                                            });
+                                      } else if (mode == 'mutasi') {
+                                        final idBangunan = await ref.read(
+                                          idBangunanByKeluargaProvider(
+                                            keluargaId,
+                                          ).future,
+                                        );
+                                        if (idBangunan != null &&
+                                            context.mounted) {
+                                          context
+                                              .push(
+                                                Uri(
+                                                  path:
+                                                      '/form-mutasi/$idBangunan',
+                                                  queryParameters: {
+                                                    'idIndividuAsal':
+                                                        individu.id,
+                                                    'defaultNama':
+                                                        individu.namaLengkap,
+                                                    'defaultNik': individu.nik,
+                                                  },
+                                                ).toString(),
+                                              )
+                                              .then((_) {
+                                                ref.invalidate(
+                                                  individuByKeluargaProvider(
+                                                    keluargaId,
+                                                  ),
+                                                );
+                                              });
+                                        } else {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Gagal menemukan data Bangunan.',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                        vertical: 12.0,
+                                      ),
                                       child: Row(
                                         children: [
-                                          Container(
-                                            width: 32,
-                                            height: 32,
-                                            decoration: BoxDecoration(
-                                              color: statusBgColor,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              isLaki
-                                                  ? Icons.person
-                                                  : Icons.person_2,
-                                              size: 16,
-                                              color: statusColor,
+                                          SizedBox(
+                                            width: 200,
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  width: 32,
+                                                  height: 32,
+                                                  decoration: BoxDecoration(
+                                                    color: statusBgColor,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    isLaki
+                                                        ? Icons.person
+                                                        : Icons.person_2,
+                                                    size: 16,
+                                                    color: statusColor,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    individu.namaLengkap,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color(0xFF0F172A),
+                                                      fontSize: 13,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
+                                          SizedBox(
+                                            width: 140,
                                             child: Text(
-                                              individu.namaLengkap,
+                                              individu.nik,
                                               style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFF0F172A),
+                                                color: Color(0xFF475569),
                                                 fontSize: 13,
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
+                                          ),
+                                          SizedBox(
+                                            width: 130,
+                                            child: Text(
+                                              status.isNotEmpty ? status : '-',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: statusColor,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 80,
+                                            child: Text(
+                                              ageText,
+                                              style: const TextStyle(
+                                                color: Color(0xFF475569),
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 120,
+                                            child: Text(
+                                              individu.noTlp?.isNotEmpty == true
+                                                  ? individu.noTlp!
+                                                  : '-',
+                                              style: const TextStyle(
+                                                color: Color(0xFF475569),
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 50,
+                                            child: Center(child: trailingIcon),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        individu.nik,
-                                        style: const TextStyle(
-                                          color: Color(0xFF475569),
-                                          fontSize: 13,
-                                        ),
-                                      ),
+                                  ),
+                                  if (index < individuItems.length - 1)
+                                    const Divider(
+                                      height: 1,
+                                      color: Color(0xFFE2E8F0),
                                     ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        status.isNotEmpty ? status : '-',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: statusColor,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        ageText,
-                                        style: const TextStyle(
-                                          color: Color(0xFF475569),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        individu.noTlp?.isNotEmpty == true
-                                            ? individu.noTlp!
-                                            : '-',
-                                        style: const TextStyle(
-                                          color: Color(0xFF475569),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 50,
-                                      child: Center(child: trailingIcon),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                                ],
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

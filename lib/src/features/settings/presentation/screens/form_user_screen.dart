@@ -49,14 +49,14 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
   String? _dawisNoUrut = '001';
 
   final List<String> _pendidikanList = [
-    'SD',
-    'SMP',
-    'SMA',
-    'D3',
-    'S1',
+    'Tidak/Belum Sekolah',
+    'SD/MI',
+    'SMP/MTs',
+    'SMA/SMK/MA',
+    'D1/D2/D3',
+    'S1/D4',
     'S2',
     'S3',
-    'Lainnya',
   ];
   final List<String> _propinsiList = [
     'DKI Jakarta',
@@ -242,16 +242,6 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
         title: Text(widget.userId == null ? 'Tambah Kader' : 'Edit Kader'),
         elevation: 0,
         actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: const Text(
-              'BATAL',
-              style: TextStyle(
-                color: Colors.white70,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
@@ -318,6 +308,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _idKaderController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'ID / Username',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -339,6 +331,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                             controller: _passwordController,
                                             obscureText: _obscurePassword,
                                             decoration: InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Password',
                                               border:
                                                   const OutlineInputBorder(),
@@ -396,158 +390,149 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    Row(
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
                                       children: [
-                                        if (_selectedRole == 'KADER')
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Text(
-                                                  'Nama Kelompok',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.black54,
+                                        if (_selectedRole == 'KADER') ...[
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                flex: 5,
+                                                child: TextFormField(
+                                                  initialValue:
+                                                      'BUAH GOWOK 010.',
+                                                  readOnly: true,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                        labelText:
+                                                            'Nama Kelompok',
+                                                        floatingLabelBehavior:
+                                                            FloatingLabelBehavior
+                                                                .always,
+                                                        border:
+                                                            OutlineInputBorder(),
+                                                        contentPadding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 8,
+                                                            ),
+                                                        fillColor: Color(
+                                                          0xFFF1F3F5,
+                                                        ),
+                                                        filled: true,
+                                                      ),
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13,
                                                   ),
                                                 ),
-                                                const SizedBox(height: 8),
-                                                Container(
-                                                  height: 48,
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                      color:
-                                                          Colors.grey.shade400,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 8,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                flex: 3,
+                                                child: DropdownButtonFormField<String>(
+                                                  initialValue:
+                                                      _dawisRt ?? '001',
+                                                  decoration:
+                                                      const InputDecoration(
+                                                        labelText: 'RT',
+                                                        floatingLabelBehavior:
+                                                            FloatingLabelBehavior
+                                                                .always,
+                                                        border:
+                                                            OutlineInputBorder(),
+                                                        contentPadding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 8,
+                                                            ),
                                                       ),
-                                                  child: Row(
-                                                    children: [
-                                                      const Text(
-                                                        'BUAH GOWOK 010.',
-                                                        style: TextStyle(
+                                                  items: List.generate(20, (
+                                                    index,
+                                                  ) {
+                                                    final val = (index + 1)
+                                                        .toString()
+                                                        .padLeft(3, '0');
+                                                    return DropdownMenuItem(
+                                                      value: val,
+                                                      child: Text(
+                                                        val,
+                                                        style: const TextStyle(
                                                           fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.bold,
                                                         ),
                                                       ),
-                                                      DropdownButtonHideUnderline(
-                                                        child: DropdownButton<String>(
-                                                          isDense: true,
-                                                          value: _dawisRt,
-                                                          icon: const Icon(
-                                                            Icons
-                                                                .arrow_drop_down,
-                                                            size: 16,
-                                                          ),
-                                                          items: List.generate(20, (
-                                                            index,
-                                                          ) {
-                                                            final val =
-                                                                (index + 1)
-                                                                    .toString()
-                                                                    .padLeft(
-                                                                      3,
-                                                                      '0',
-                                                                    );
-                                                            return DropdownMenuItem(
-                                                              value: val,
-                                                              child: Text(
-                                                                val,
-                                                                style:
-                                                                    const TextStyle(
-                                                                      fontSize:
-                                                                          13,
-                                                                    ),
-                                                              ),
-                                                            );
-                                                          }),
-                                                          onChanged: (val) =>
-                                                              setState(
-                                                                () => _dawisRt =
-                                                                    val,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                      const Text(
-                                                        '.',
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      DropdownButtonHideUnderline(
-                                                        child: DropdownButton<String>(
-                                                          isDense: true,
-                                                          value: _dawisNoUrut,
-                                                          icon: const Icon(
-                                                            Icons
-                                                                .arrow_drop_down,
-                                                            size: 16,
-                                                          ),
-                                                          items: List.generate(5, (
-                                                            index,
-                                                          ) {
-                                                            final val =
-                                                                (index + 1)
-                                                                    .toString()
-                                                                    .padLeft(
-                                                                      3,
-                                                                      '0',
-                                                                    );
-                                                            return DropdownMenuItem(
-                                                              value: val,
-                                                              child: Text(
-                                                                val,
-                                                                style:
-                                                                    const TextStyle(
-                                                                      fontSize:
-                                                                          13,
-                                                                    ),
-                                                              ),
-                                                            );
-                                                          }),
-                                                          onChanged: (val) =>
-                                                              setState(
-                                                                () =>
-                                                                    _dawisNoUrut =
-                                                                        val,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ],
+                                                    );
+                                                  }),
+                                                  onChanged: (val) => setState(
+                                                    () => _dawisRt = val,
                                                   ),
                                                 ),
-                                              ],
-                                            ),
-                                          ),
-                                        if (_selectedRole == 'KADER')
-                                          const SizedBox(width: 16),
-                                        Expanded(
-                                          child: TextFormField(
-                                            controller: _namaController,
-                                            decoration: const InputDecoration(
-                                              labelText: 'Nama Lengkap',
-                                              border: OutlineInputBorder(),
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 8,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                flex: 3,
+                                                child: DropdownButtonFormField<String>(
+                                                  initialValue:
+                                                      _dawisNoUrut ?? '001',
+                                                  decoration:
+                                                      const InputDecoration(
+                                                        labelText: 'No Urut',
+                                                        floatingLabelBehavior:
+                                                            FloatingLabelBehavior
+                                                                .always,
+                                                        border:
+                                                            OutlineInputBorder(),
+                                                        contentPadding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 8,
+                                                            ),
+                                                      ),
+                                                  items: List.generate(5, (
+                                                    index,
+                                                  ) {
+                                                    final val = (index + 1)
+                                                        .toString()
+                                                        .padLeft(3, '0');
+                                                    return DropdownMenuItem(
+                                                      value: val,
+                                                      child: Text(
+                                                        val,
+                                                        style: const TextStyle(
+                                                          fontSize: 13,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }),
+                                                  onChanged: (val) => setState(
+                                                    () => _dawisNoUrut = val,
                                                   ),
-                                            ),
-                                            validator: (val) =>
-                                                val == null || val.isEmpty
-                                                ? 'Wajib diisi'
-                                                : null,
+                                                ),
+                                              ),
+                                            ],
                                           ),
+                                          const SizedBox(height: 16),
+                                        ],
+                                        TextFormField(
+                                          controller: _namaController,
+                                          decoration: const InputDecoration(
+                                            floatingLabelBehavior:
+                                                FloatingLabelBehavior.always,
+                                            labelText: 'Nama Lengkap',
+                                            border: OutlineInputBorder(),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 8,
+                                                ),
+                                          ),
+                                          validator: (val) =>
+                                              val == null || val.isEmpty
+                                              ? 'Wajib diisi'
+                                              : null,
                                         ),
                                       ],
                                     ),
@@ -558,6 +543,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _nikController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'NIK',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -578,6 +565,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _tempatLahirController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Tempat Lahir',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -600,6 +589,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                             onTap: () =>
                                                 _selectTanggalLahir(context),
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Tanggal Lahir',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -622,6 +613,9 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                     _selectedPendidikan,
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText:
                                                           'Pendidikan Terakhir',
                                                       border:
@@ -675,28 +669,27 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    Row(
+                                    Column(
                                       children: [
-                                        Expanded(
-                                          flex: 6,
-                                          child: TextFormField(
-                                            controller: _alamatController,
-                                            decoration: const InputDecoration(
-                                              labelText: 'Alamat',
-                                              border: OutlineInputBorder(),
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 8,
-                                                  ),
-                                            ),
+                                        TextFormField(
+                                          controller: _alamatController,
+                                          decoration: const InputDecoration(
+                                            floatingLabelBehavior:
+                                                FloatingLabelBehavior.always,
+                                            labelText: 'Alamat',
+                                            border: OutlineInputBorder(),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 8,
+                                                ),
                                           ),
                                         ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          flex: 1,
-                                          child:
-                                              DropdownButtonFormField<String>(
+                                        const SizedBox(height: 16),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: DropdownButtonFormField<String>(
                                                 initialValue:
                                                     _rtController.text.isEmpty
                                                     ? null
@@ -744,6 +737,9 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                 },
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText: 'RT',
                                                       border:
                                                           OutlineInputBorder(),
@@ -754,12 +750,10 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                           ),
                                                     ),
                                               ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          flex: 1,
-                                          child:
-                                              DropdownButtonFormField<String>(
+                                            ),
+                                            const SizedBox(width: 16),
+                                            Expanded(
+                                              child: DropdownButtonFormField<String>(
                                                 initialValue:
                                                     _rwController.text.isEmpty
                                                     ? null
@@ -807,6 +801,9 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                 },
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText: 'RW',
                                                       border:
                                                           OutlineInputBorder(),
@@ -817,6 +814,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                           ),
                                                     ),
                                               ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -827,6 +826,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _kelurahanController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Kelurahan',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -842,6 +843,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _kecamatanController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Kecamatan',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -863,6 +866,9 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                 initialValue: _selectedPropinsi,
                                                 decoration:
                                                     const InputDecoration(
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .always,
                                                       labelText: 'Propinsi',
                                                       border:
                                                           OutlineInputBorder(),
@@ -890,6 +896,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _kodePosController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Kode Pos',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -914,6 +922,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _alamatKtpController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Alamat KTP',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -933,6 +943,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _noHpController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'No HP',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -954,6 +966,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _emailController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'Alamat Email',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -1002,6 +1016,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                             controller:
                                                 _noRekeningBankController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'No Rekening Bank DKI',
                                               border: OutlineInputBorder(),
                                               contentPadding:
@@ -1022,6 +1038,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                           child: TextFormField(
                                             controller: _npwpController,
                                             decoration: const InputDecoration(
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.always,
                                               labelText: 'NPWP',
                                               border: OutlineInputBorder(),
                                               contentPadding:

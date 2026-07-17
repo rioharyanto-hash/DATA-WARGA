@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/report_provider.dart';
+import '../../../../../core/services/sync_service.dart';
 import 'report_preview_screen.dart';
 import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
 
@@ -377,6 +378,40 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           subtitle: 'Pratinjau dan cetak laporan Dasawisma',
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            tooltip: 'Refresh & Sinkronisasi Data',
+            onPressed: () async {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              );
+
+              try {
+                await SyncService.syncSupabaseToLocal();
+              } catch (e) {
+                // Ignore error
+              }
+
+              if (context.mounted) {
+                Navigator.of(context).pop(); // close dialog
+                ref.invalidate(kelompokDawisListProvider);
+                ref.invalidate(reportControllerProvider);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Data berhasil disinkronisasi dengan server.',
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+          ),
           if (context.canPop())
             Padding(
               padding: const EdgeInsets.only(right: 16.0),

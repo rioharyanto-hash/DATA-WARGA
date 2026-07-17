@@ -45,7 +45,7 @@ class MainLayoutScreen extends ConsumerWidget {
     _NavItem(
       icon: Icons.people_outline,
       activeIcon: Icons.people,
-      label: 'DATA WARGA',
+      label: 'Data Warga',
       branchIndex: 3,
     ),
     _NavItem(

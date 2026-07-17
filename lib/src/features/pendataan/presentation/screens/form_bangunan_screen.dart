@@ -7,6 +7,7 @@ import '../../domain/entities/bangunan.dart';
 import '../providers/bangunan_provider.dart';
 import '../../../settings/presentation/providers/app_user_provider.dart';
 import '../../../../../core/database/local_db_helper.dart';
+import '../../../settings/presentation/providers/region_provider.dart';
 
 class FormBangunanScreen extends ConsumerStatefulWidget {
   final String? bangunanId;
@@ -25,6 +26,10 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
   final _nomorUrutController = TextEditingController();
   final _namaBangunanController = TextEditingController();
   final _alamatController = TextEditingController();
+  final _kelurahanController = TextEditingController();
+  final _kecamatanController = TextEditingController();
+  final _kotaController = TextEditingController();
+  final _provinsiController = TextEditingController();
   final _rtController = TextEditingController();
   final _rwController = TextEditingController();
   final _nopPbbController = TextEditingController();
@@ -164,6 +169,17 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
         });
       }
     }
+
+    // Always load region data for the read-only fields
+    final region = ref.read(regionProvider);
+    if (mounted) {
+      setState(() {
+        _kelurahanController.text = region.kelurahan;
+        _kecamatanController.text = region.kecamatan;
+        _kotaController.text = region.kotaKab;
+        _provinsiController.text = region.provinsi;
+      });
+    }
   }
 
   @override
@@ -171,6 +187,10 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
     _nomorUrutController.dispose();
     _namaBangunanController.dispose();
     _alamatController.dispose();
+    _kelurahanController.dispose();
+    _kecamatanController.dispose();
+    _kotaController.dispose();
+    _provinsiController.dispose();
     _rtController.dispose();
     _rwController.dispose();
     _nopPbbController.dispose();
@@ -474,7 +494,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
               ),
               const SizedBox(height: 16),
               _buildOutlinedInput(
-                'Alamat Lengkap',
+                'Alamat (Jalan/Gang/Nomor Rumah)',
                 _alamatController,
                 isRequired: true,
               ),
@@ -526,6 +546,46 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                       (val) {
                         if (val != null) _rwController.text = val;
                       },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildOutlinedInput(
+                      'Kelurahan / Desa',
+                      _kelurahanController,
+                      isReadOnly: true,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildOutlinedInput(
+                      'Kecamatan',
+                      _kecamatanController,
+                      isReadOnly: true,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildOutlinedInput(
+                      'Kabupaten / Kota',
+                      _kotaController,
+                      isReadOnly: true,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildOutlinedInput(
+                      'Provinsi',
+                      _provinsiController,
+                      isReadOnly: true,
                     ),
                   ),
                 ],
@@ -932,6 +992,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
     TextEditingController controller, {
     bool isNumber = false,
     bool isRequired = false,
+    bool isReadOnly = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -947,13 +1008,16 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
+          readOnly: isReadOnly,
           keyboardType: isNumber
               ? const TextInputType.numberWithOptions(decimal: true)
               : TextInputType.text,
           inputFormatters: isNumber
               ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))]
               : null,
-          decoration: _outlinedDecoration(),
+          decoration: _outlinedDecoration().copyWith(
+            fillColor: isReadOnly ? const Color(0xFFF1F5F9) : Colors.white,
+          ),
           validator: isRequired
               ? (val) => val == null || val.isEmpty ? 'Wajib diisi' : null
               : null,

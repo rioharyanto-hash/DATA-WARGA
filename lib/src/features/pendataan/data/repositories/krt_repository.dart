@@ -14,7 +14,8 @@ class KrtRepository {
     final response = await _supabase
         .from('krt')
         .select()
-        .eq('id_bangunan', bangunanId);
+        .eq('id_bangunan', bangunanId)
+        .order('created_at', ascending: true);
     return response.map((json) => KrtModel.fromJson(json)).toList();
   }
 

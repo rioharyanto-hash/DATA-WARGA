@@ -214,7 +214,26 @@ class _FormInputPotensiWargaScreenState
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: const Text('Aktif Posyandu?'),
+                    title: Text(() {
+                      int age = 0;
+                      if (individu.tanggalLahir.isNotEmpty) {
+                        try {
+                          final birthDate = DateTime.parse(
+                            individu.tanggalLahir,
+                          );
+                          final today = DateTime.now();
+                          age = today.year - birthDate.year;
+                          if (today.month < birthDate.month ||
+                              (today.month == birthDate.month &&
+                                  today.day < birthDate.day)) {
+                            age--;
+                          }
+                        } catch (_) {}
+                      }
+                      if (age >= 10 && age <= 24) return 'Aktif Posrem?';
+                      if (age >= 60) return 'Aktif Poslan?';
+                      return 'Aktif Posyandu?';
+                    }()),
                     value: _aktifPosyandu == 1,
                     onChanged: (val) =>
                         setState(() => _aktifPosyandu = val ? 1 : 0),

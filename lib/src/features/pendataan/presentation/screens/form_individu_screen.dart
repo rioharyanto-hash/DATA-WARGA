@@ -1026,7 +1026,9 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                   ],
                   const SizedBox(height: 16),
                   CheckboxListTile(
-                    title: const Text('Aktif Dalam Kegiatan Posyandu'),
+                    title: const Text(
+                      'Aktif Dalam Kegiatan Posyandu / Posrem / Poslan',
+                    ),
                     value: _aktifPosyandu,
                     onChanged: (val) =>
                         setState(() => _aktifPosyandu = val ?? false),
@@ -1038,7 +1040,8 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                     TextFormField(
                       controller: _frekuensiPosyanduController,
                       decoration: const InputDecoration(
-                        labelText: 'Frekuensi Posyandu',
+                        labelText:
+                            'Frekuensi Kehadiran (Posyandu/Posrem/Poslan)',
                         hintText: 'Contoh: 3 kali',
                       ),
                     ),

@@ -19,7 +19,10 @@ void main() async {
     final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
 
     if (supabaseUrl != null && supabaseAnonKey != null) {
-      await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseAnonKey);
+      await Supabase.initialize(
+        url: supabaseUrl,
+        publishableKey: supabaseAnonKey,
+      );
     }
   } catch (e) {
     debugPrint('[INIT] Gagal memuat .env atau inisialisasi Supabase: $e');
