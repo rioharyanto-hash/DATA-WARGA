@@ -168,7 +168,7 @@ class _FormMutasiMasterScreenState
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade900,
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButtonHideUnderline(
@@ -268,11 +268,6 @@ class _FormMutasiMasterScreenState
                   },
                   icon: const Icon(Icons.child_friendly),
                   label: const Text('Lanjut Isi Form Data Anak Lahir'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
                 ),
               ] else if (_jenisMutasi == 'Datang') ...[
                 const Text(
@@ -286,11 +281,6 @@ class _FormMutasiMasterScreenState
                   },
                   icon: const Icon(Icons.family_restroom),
                   label: const Text('Lanjut Buat Keluarga Datang'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
                 ),
               ] else if (_jenisMutasi != null) ...[
                 // Meninggal, Pindah, Status Ibu
@@ -405,11 +395,7 @@ class _FormMutasiMasterScreenState
 
                 ElevatedButton(
                   onPressed: _isLoading ? null : _saveMutasi,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text('Simpan Data Mutasi'),

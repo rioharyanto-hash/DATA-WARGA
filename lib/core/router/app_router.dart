@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:typed_data';
 import 'package:go_router/go_router.dart';
 
 import '../../src/features/settings/presentation/providers/app_user_provider.dart';
@@ -24,6 +25,7 @@ import '../../src/features/pendataan/presentation/screens/search_keluarga_screen
 import '../../src/features/pendataan/presentation/screens/lampid_list_screen.dart';
 import '../../src/features/navigation/presentation/widgets/main_layout_screen.dart';
 import '../../src/features/report/presentation/screens/report_screen.dart';
+import '../../src/features/report/presentation/screens/report_preview_screen.dart';
 import '../../src/features/data_warga/presentation/screens/data_warga_screen.dart';
 import '../../src/features/settings/presentation/screens/settings_screen.dart';
 import '../../src/features/settings/presentation/screens/user_list_screen.dart';
@@ -268,6 +270,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/laporan',
                 builder: (context, state) => const ReportScreen(),
+              ),
+              GoRoute(
+                path: '/report-preview',
+                builder: (context, state) {
+                  final args = state.extra as Map<String, dynamic>;
+                  return ReportPreviewScreen(
+                    isRingkasan: args['isRingkasan'] as bool,
+                    title: args['title'] as String,
+                    generatePdf:
+                        args['generatePdf'] as Future<Uint8List> Function(),
+                  );
+                },
               ),
             ],
           ),

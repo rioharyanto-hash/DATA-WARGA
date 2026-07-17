@@ -1232,9 +1232,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => context.pop(),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+
                       child: const Text('Batal'),
                     ),
                   ),
@@ -1242,9 +1240,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                   Expanded(
                     child: FilledButton(
                       onPressed: _simpanData,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+
                       child: const Text('Simpan Data'),
                     ),
                   ),

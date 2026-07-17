@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/database/local_db_helper.dart';
 import 'core/router/app_router.dart';
+import 'core/themes/app_theme.dart';
 import 'src/features/settings/presentation/providers/app_user_provider.dart';
 import 'core/services/sync_service.dart';
 
@@ -62,26 +62,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Dasawisma App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme:
-            ColorScheme.fromSeed(
-              seedColor: const Color(0xFF6366F1), // Electric Indigo
-              brightness: Brightness.light,
-            ).copyWith(
-              surface: const Color(0xFFF8FAFC), // Slate 50
-            ),
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.blue.shade700,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          centerTitle: true,
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
-        useMaterial3: true,
-        textTheme: GoogleFonts.interTextTheme(),
-      ),
+      theme: AppTheme.lightTheme,
       routerConfig: goRouter,
     );
   }

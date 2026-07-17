@@ -426,12 +426,6 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                   'Simpan Profil',
                   style: TextStyle(fontSize: 16),
                 ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
               ),
             ],
           ),

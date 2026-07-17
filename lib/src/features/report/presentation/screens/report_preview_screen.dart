@@ -21,7 +21,7 @@ class ReportPreviewScreen extends StatelessWidget {
         title: Text('Preview: $title'),
         backgroundColor: isRingkasan
             ? Colors.amber.shade700
-            : Colors.blue.shade700,
+            : Theme.of(context).colorScheme.primary,
       ),
       body: PdfPreview.builder(
         build: (format) => generatePdf(),

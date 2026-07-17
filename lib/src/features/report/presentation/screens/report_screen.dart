@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/report_provider.dart';
 import '../../../../../core/services/sync_service.dart';
-import 'report_preview_screen.dart';
+
 import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
@@ -505,23 +505,18 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Form I & II'),
-                          generatePdf: () {
-                            final name = _isRingkasan
-                                ? 'Semua Kelompok RT ${_rtController.text} RW ${_rwController.text}'
-                                : _namaKelompokController.text;
-                            return ref
-                                .read(reportControllerProvider.notifier)
-                                .generateForm1And2Pdf(name);
-                          },
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Form I & II'),
+                      'generatePdf': () {
+                        final name = _isRingkasan
+                            ? 'Semua Kelompok RT ${_rtController.text} RW ${_rwController.text}'
+                            : _namaKelompokController.text;
+                        return ref
+                            .read(reportControllerProvider.notifier)
+                            .generateForm1And2Pdf(name);
+                      },
+                    });
                   },
                 ),
                 _buildActionCard(
@@ -529,24 +524,19 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Data Kuantitas'),
-                          generatePdf: () => _isRingkasan
-                              ? ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateForm3RingkasanPdf()
-                              : ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateForm3Pdf(
-                                      _namaKelompokController.text,
-                                    ),
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Data Kuantitas'),
+                      'generatePdf': () => _isRingkasan
+                          ? ref
+                                .read(reportControllerProvider.notifier)
+                                .generateForm3RingkasanPdf()
+                          : ref
+                                .read(reportControllerProvider.notifier)
+                                .generateForm3Pdf(
+                                  _namaKelompokController.text,
+                                ),
+                    });
                   },
                 ),
                 _buildActionCard(
@@ -554,24 +544,19 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Rekapitulasi'),
-                          generatePdf: () => _isRingkasan
-                              ? ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateRekapPkkRingkasanPdf()
-                              : ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateRekapPkkPdf(
-                                      _namaKelompokController.text,
-                                    ),
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Rekapitulasi'),
+                      'generatePdf': () => _isRingkasan
+                          ? ref
+                                .read(reportControllerProvider.notifier)
+                                .generateRekapPkkRingkasanPdf()
+                          : ref
+                                .read(reportControllerProvider.notifier)
+                                .generateRekapPkkPdf(
+                                  _namaKelompokController.text,
+                                ),
+                    });
                   },
                 ),
                 _buildActionCard(
@@ -579,24 +564,19 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Profil Kependudukan'),
-                          generatePdf: () => _isRingkasan
-                              ? ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateProfilPendudukRingkasanPdf()
-                              : ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateProfilPendudukPdf(
-                                      _namaKelompokController.text,
-                                    ),
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Profil Kependudukan'),
+                      'generatePdf': () => _isRingkasan
+                          ? ref
+                                .read(reportControllerProvider.notifier)
+                                .generateProfilPendudukRingkasanPdf()
+                          : ref
+                                .read(reportControllerProvider.notifier)
+                                .generateProfilPendudukPdf(
+                                  _namaKelompokController.text,
+                                ),
+                    });
                   },
                 ),
                 _buildActionCard(
@@ -604,24 +584,19 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Data Potensi Warga'),
-                          generatePdf: () => _isRingkasan
-                              ? ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generatePotensiWargaRingkasanPdf()
-                              : ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generatePotensiWargaPdf(
-                                      _namaKelompokController.text,
-                                    ),
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Data Potensi Warga'),
+                      'generatePdf': () => _isRingkasan
+                          ? ref
+                                .read(reportControllerProvider.notifier)
+                                .generatePotensiWargaRingkasanPdf()
+                          : ref
+                                .read(reportControllerProvider.notifier)
+                                .generatePotensiWargaPdf(
+                                  _namaKelompokController.text,
+                                ),
+                    });
                   },
                 ),
                 _buildActionCard(
@@ -629,24 +604,19 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Form Ibu Hamil'),
-                          generatePdf: () => _isRingkasan
-                              ? ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateLampidRingkasanPdf()
-                              : ref
-                                    .read(reportControllerProvider.notifier)
-                                    .generateLampidPdf(
-                                      _namaKelompokController.text,
-                                    ),
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Form Ibu Hamil'),
+                      'generatePdf': () => _isRingkasan
+                          ? ref
+                                .read(reportControllerProvider.notifier)
+                                .generateLampidRingkasanPdf()
+                          : ref
+                                .read(reportControllerProvider.notifier)
+                                .generateLampidPdf(
+                                  _namaKelompokController.text,
+                                ),
+                    });
                   },
                 ),
                 _buildActionCard(
@@ -654,20 +624,15 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Data Manual'),
-                          generatePdf: () => ref
-                              .read(reportControllerProvider.notifier)
-                              .generateFormDataManualPdf(
-                                _namaKelompokController.text,
-                              ),
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Data Manual'),
+                      'generatePdf': () => ref
+                          .read(reportControllerProvider.notifier)
+                          .generateFormDataManualPdf(
+                            _namaKelompokController.text,
+                          ),
+                    });
                   },
                 ),
                 _buildActionCard(
@@ -675,20 +640,15 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   icon: Icons.picture_as_pdf,
                   isLoading: state.isLoading,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportPreviewScreen(
-                          isRingkasan: _isRingkasan,
-                          title: getFormattedTitle('Data Yatim Piatu'),
-                          generatePdf: () => ref
-                              .read(reportControllerProvider.notifier)
-                              .generateYatimPiatuPdf(
-                                _namaKelompokController.text,
-                              ),
-                        ),
-                      ),
-                    );
+                    context.push('/report-preview', extra: {
+                      'isRingkasan': _isRingkasan,
+                      'title': getFormattedTitle('Data Yatim Piatu'),
+                      'generatePdf': () => ref
+                          .read(reportControllerProvider.notifier)
+                          .generateYatimPiatuPdf(
+                            _namaKelompokController.text,
+                          ),
+                    });
                   },
                 ),
               ],
@@ -849,17 +809,13 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   ) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ReportPreviewScreen(
-              title: title.replaceAll('Cetak ', 'BLANKO_'),
-              generatePdf: () => ref
-                  .read(reportControllerProvider.notifier)
-                  .generateBlankPdf(formType),
-            ),
-          ),
-        );
+        context.push('/report-preview', extra: {
+          'isRingkasan': false,
+          'title': title.replaceAll('Cetak ', 'BLANKO_'),
+          'generatePdf': () => ref
+              .read(reportControllerProvider.notifier)
+              .generateBlankPdf(formType),
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

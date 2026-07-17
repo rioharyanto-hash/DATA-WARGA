@@ -377,13 +377,7 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => context.pop(),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        side: const BorderSide(color: Color(0xFF6366F1)),
-                      ),
+
                       child: const Text(
                         'Batal',
                         style: TextStyle(
@@ -398,13 +392,7 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                   Expanded(
                     child: FilledButton(
                       onPressed: _simpanData,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: const Color(0xFF6366F1),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+
                       child: const Text(
                         'Simpan Data',
                         style: TextStyle(

@@ -35,7 +35,7 @@ class _SearchKeluargaScreenState extends ConsumerState<SearchKeluargaScreen> {
         children: [
           // Search Bar
           Container(
-            color: Colors.blue.shade700,
+            color: Theme.of(context).colorScheme.primary,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: Column(
               children: [

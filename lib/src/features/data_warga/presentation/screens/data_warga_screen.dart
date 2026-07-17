@@ -34,7 +34,7 @@ class DataWargaScreen extends ConsumerWidget {
       return Scaffold(
         backgroundColor: _bgBody,
         appBar: AppBar(
-          backgroundColor: Colors.blue.shade700,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           title: const SharedAppBarTitle(
             title: 'DATA WARGA',
             subtitle: 'Sistem Informasi Dasawisma',
@@ -55,7 +55,7 @@ class DataWargaScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: _bgBody,
         appBar: AppBar(
-          backgroundColor: Colors.blue.shade700,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           title: const SharedAppBarTitle(
             title: 'DATA WARGA',
             subtitle: 'Sistem Informasi Dasawisma',

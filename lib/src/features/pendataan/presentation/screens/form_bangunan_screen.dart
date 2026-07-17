@@ -310,7 +310,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                     decoration: BoxDecoration(
                       color: Colors
                           .blue
-                          .shade700, // or a darker blue like Colors.blue.shade900
+                          .shade700, // or a darker blue like Theme.of(context).colorScheme.primary
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButtonHideUnderline(
@@ -685,16 +685,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
           children: [
             OutlinedButton(
               onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                side: const BorderSide(color: Color(0xFFCBD5E1)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+
               child: const Text(
                 'Simpan Draf',
                 style: TextStyle(
@@ -706,18 +697,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: _nextStep,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
+
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -865,15 +845,6 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                           child: SizedBox(
                             height: 50,
                             child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: Color(0xFFE2E8F0),
-                                ),
-                                foregroundColor: const Color(0xFF64748B),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
                               onPressed: () {
                                 context.pop();
                               },
@@ -892,14 +863,6 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                           child: SizedBox(
                             height: 50,
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6366F1),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 0,
-                              ),
                               onPressed: _simpanData,
                               child: const Text(
                                 'Simpan Data Bangunan',

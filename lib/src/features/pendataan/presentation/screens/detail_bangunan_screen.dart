@@ -148,36 +148,18 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
         onPressed: () => context.push('/form-bangunan/${widget.bangunanId}'),
         icon: const Icon(Icons.edit, size: 16),
         label: const Text('Ubah Data'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade900,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
       );
     } else if (_tabController.index == 1) {
       return ElevatedButton.icon(
         onPressed: () => context.push('/form-krt/${widget.bangunanId}'),
         icon: const Icon(Icons.add, size: 16),
         label: const Text('Tambah KRT'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade900,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
       );
     } else if (_tabController.index == 2) {
       return ElevatedButton.icon(
         onPressed: () => context.push('/form-mutasi/${widget.bangunanId}'),
         icon: const Icon(Icons.sync_alt, size: 16),
         label: const Text('Catat Mutasi'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade900,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
       );
     }
     return null;
@@ -252,7 +234,7 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.blue.shade900,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 24),
@@ -341,7 +323,10 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
         children: [
           Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.blue.shade900),
+              Icon(
+                Icons.info_outline,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               const Text(
                 'Informasi Umum',
@@ -611,9 +596,6 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
                                 child: const Text('Batal'),
                               ),
                               FilledButton(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                ),
                                 onPressed: () async {
                                   context.pop();
                                   await ref

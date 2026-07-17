@@ -97,7 +97,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+
             child: const Text('Hapus'),
           ),
         ],

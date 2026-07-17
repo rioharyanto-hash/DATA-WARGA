@@ -226,7 +226,7 @@ class _LampidListScreenState extends ConsumerState<LampidListScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade900,
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButtonHideUnderline(
@@ -579,11 +579,7 @@ class _LampidListItem extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
-                    foregroundColor: Colors.black87,
-                    elevation: 0,
-                  ),
+
                   child: const Text('Tutup'),
                 ),
               ),

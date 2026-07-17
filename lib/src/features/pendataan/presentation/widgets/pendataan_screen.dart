@@ -18,7 +18,7 @@ class PendataanScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: _bgColor,
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Theme.of(context).colorScheme.primary,
 
         title: const SharedAppBarTitle(
           title: 'Pendataan',

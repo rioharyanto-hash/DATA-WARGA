@@ -235,14 +235,7 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
             ),
             child: ElevatedButton(
               onPressed: _saveUser,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.blue.shade700,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
+
               child: const Text(
                 'SIMPAN',
                 style: TextStyle(fontWeight: FontWeight.bold),

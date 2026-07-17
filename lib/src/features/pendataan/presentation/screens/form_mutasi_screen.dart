@@ -535,10 +535,7 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => context.pop(),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        foregroundColor: Colors.grey[700],
-                      ),
+
                       child: const Text('Batal'),
                     ),
                   ),
@@ -546,9 +543,7 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _saveForm,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
+
                       child: const Text('Simpan'),
                     ),
                   ),

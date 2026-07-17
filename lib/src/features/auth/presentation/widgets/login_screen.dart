@@ -301,13 +301,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     _passwordController.text,
                                   );
                             },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
+
                       child: isLoading
                           ? const SizedBox(
                               height: 24,

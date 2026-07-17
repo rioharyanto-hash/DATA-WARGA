@@ -278,11 +278,7 @@ class _FormInputPotensiWargaScreenState
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => context.pop(),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            foregroundColor: const Color(0xFFF59E0B),
-                            side: const BorderSide(color: Color(0xFFF59E0B)),
-                          ),
+
                           child: const Text('BATAL'),
                         ),
                       ),
@@ -290,11 +286,7 @@ class _FormInputPotensiWargaScreenState
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () => _save(individu),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF59E0B),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+
                           child: const Text('SIMPAN'),
                         ),
                       ),

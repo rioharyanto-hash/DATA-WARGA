@@ -396,7 +396,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Theme.of(context).colorScheme.primary,
 
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -501,7 +501,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Text(
                       user.role,
                       style: TextStyle(
-                        color: Colors.blue.shade900,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -519,20 +519,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ElevatedButton.icon(
             onPressed: () => context.push('/profil'),
-            icon: Icon(Icons.edit, size: 16, color: Colors.blue.shade900),
+            icon: Icon(
+              Icons.edit,
+              size: 16,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             label: Text(
               'Edit Profil',
               style: TextStyle(
-                color: Colors.blue.shade900,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.indigo.shade50,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
               ),
             ),
           ),
@@ -557,7 +553,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (user.role == 'ADMIN') ...[
                 _buildListTile(
                   icon: Icons.people_alt,
-                  iconColor: Colors.blue.shade700,
+                  iconColor: Theme.of(context).colorScheme.primary,
                   iconBg: Colors.blue.shade50,
                   title: 'Daftar Kader Dawis',
                   subtitle: 'Kelola data seluruh kader',
@@ -615,7 +611,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildDivider(),
               _buildListTile(
                 icon: Icons.upload_file_rounded,
-                iconColor: Colors.blue.shade700,
+                iconColor: Theme.of(context).colorScheme.primary,
                 iconBg: Colors.transparent,
                 title: 'Import Data Mentah (CSV)',
                 subtitle: 'Masukkan data masal dari CSV',
@@ -660,7 +656,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _buildDivider(),
               _buildListTile(
                 icon: Icons.upload_file_rounded,
-                iconColor: Colors.blue.shade700,
+                iconColor: Theme.of(context).colorScheme.primary,
                 iconBg: Colors.transparent,
                 title: 'Import Bangunan (CSV)',
                 subtitle: 'Masukkan data bangunan saja',
@@ -714,9 +710,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         child: const Text('Batal'),
                       ),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                        ),
                         onPressed: () async {
                           Navigator.pop(ctx);
                           showDialog(
@@ -781,9 +774,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       child: const Text('Batal'),
                     ),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
                       onPressed: () {
                         ref.read(loggedInUserProvider.notifier).clearUser();
                         context.go('/login');
@@ -808,7 +798,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: Colors.blue.shade900,
+          color: Theme.of(context).colorScheme.primary,
           letterSpacing: 0.5,
         ),
       ),

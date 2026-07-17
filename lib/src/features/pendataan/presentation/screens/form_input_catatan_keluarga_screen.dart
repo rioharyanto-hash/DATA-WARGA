@@ -371,11 +371,7 @@ class _FormInputCatatanKeluargaScreenState
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => context.pop(),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            foregroundColor: const Color(0xFF10B981),
-                            side: const BorderSide(color: Color(0xFF10B981)),
-                          ),
+
                           child: const Text('BATAL'),
                         ),
                       ),
@@ -383,11 +379,7 @@ class _FormInputCatatanKeluargaScreenState
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () => _save(individu),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF10B981),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
+
                           child: const Text('SIMPAN'),
                         ),
                       ),

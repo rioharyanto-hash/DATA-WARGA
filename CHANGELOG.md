@@ -242,3 +242,8 @@ Semua perubahan yang signifikan pada proyek Dasawisma akan didokumentasikan dala
 ### Changed
 - Refactored Data Kuantitas (Form 3), Rekapitulasi (Tingkat RW), and Potensi Warga PDF generation layouts.
 - Updated demographics ranges: Remaja (10-24), Pra Lansia (45-59).
+
+## [2026-07-17]
+### [PATCH] - Versi 1.9.19+42
+- Standarisasi warna, bentuk tombol, dan tata letak UI (AppTheme).
+- Migrasi ke GoRouter secara menyeluruh untuk navigasi layar laporan.
