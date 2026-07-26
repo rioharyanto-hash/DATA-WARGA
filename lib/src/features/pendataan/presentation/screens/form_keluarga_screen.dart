@@ -102,12 +102,34 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Menyimpan data...')));
-
       try {
         final repo = ref.read(keluargaRepositoryProvider);
+
+        // Pengecekan duplikat No KK
+        final isExist = await repo.isNoKkExists(
+          _noKkController.text,
+          excludeId: widget.keluargaId,
+        );
+        if (isExist) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Gagal: Nomor KK sudah terdaftar, silakan gunakan nomor yang berbeda.',
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Menyimpan data...')));
+        }
+
         String finalKrtId = _existingKrtId ?? '';
 
         if (widget.krtId?.isEmpty == true) {

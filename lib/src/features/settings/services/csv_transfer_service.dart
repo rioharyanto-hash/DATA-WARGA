@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:csv/csv.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dawis/core/database/local_db_helper.dart';
+import 'package:dawis/core/services/sync_service.dart';
 
 class ImportSummary {
   final int totalRows;
@@ -265,15 +266,21 @@ class CsvTransferService {
     final db = await LocalDbHelper.database;
 
     // Cache ID berdasarkan unique key
-    Map<String, String> bangunanMap =
-        {}; // key: "nama_bangunan-rt-rw-no_urut" -> id
+    Map<String, String> bangunanMap = {}; // key: "nama_bangunan-rt-rw" -> id
     final existingBangunan = await db.query(
       'bangunan',
-      columns: ['id', 'nama_bangunan', 'rt', 'rw', 'nomor_urut_bangunan'],
+      columns: ['id', 'nama_bangunan', 'rt', 'rw'],
     );
     for (var b in existingBangunan) {
-      String key =
-          '${b['nama_bangunan']}-${b['rt']}-${b['rw']}-${b['nomor_urut_bangunan'] ?? ''}';
+      String bRt =
+          int.tryParse(b['rt']?.toString() ?? '')?.toString().padLeft(3, '0') ??
+          b['rt']?.toString() ??
+          '';
+      String bRw =
+          int.tryParse(b['rw']?.toString() ?? '')?.toString().padLeft(3, '0') ??
+          b['rw']?.toString() ??
+          '';
+      String key = "${b['nama_bangunan']}-$bRt-$bRw";
       bangunanMap[key] = b['id'].toString();
     }
 
@@ -330,8 +337,10 @@ class CsvTransferService {
       }
 
       String kelompokDawis = _normalizeKelompokDawis(row[0]?.toString() ?? '');
-      String rt = row[1]?.toString().trim() ?? '';
-      String rw = row[2]?.toString().trim() ?? '';
+      String rtRaw = row[1]?.toString().trim() ?? '';
+      String rt = int.tryParse(rtRaw)?.toString().padLeft(3, '0') ?? rtRaw;
+      String rwRaw = row[2]?.toString().trim() ?? '';
+      String rw = int.tryParse(rwRaw)?.toString().padLeft(3, '0') ?? rwRaw;
       String nomorUrutBangunan = row[3]?.toString().trim() ?? '';
       String namaBangunan = row[4]?.toString().trim() ?? '';
       String alamat = row[5]?.toString().trim() ?? '';
@@ -396,7 +405,7 @@ class CsvTransferService {
 
       try {
         // 1. Bangunan
-        String bangunanKey = '$namaBangunan-$rt-$rw-$nomorUrutBangunan';
+        String bangunanKey = '$namaBangunan-$rt-$rw';
         String idBangunan;
         if (bangunanMap.containsKey(bangunanKey)) {
           idBangunan = bangunanMap[bangunanKey]!;
@@ -509,6 +518,8 @@ class CsvTransferService {
         errors.add('Baris ${i + 1}: Terjadi kesalahan internal ($e).');
       }
     }
+
+    await SyncService.syncLocalUnsyncedToSupabase();
 
     return ImportSummary(
       totalRows: totalRows,
@@ -644,7 +655,15 @@ class CsvTransferService {
     final existingData = await db.query('bangunan');
     Map<String, String> bangunanMap = {};
     for (var b in existingData) {
-      String key = "${b['nama_bangunan']}-${b['rt']}-${b['rw']}";
+      String bRt =
+          int.tryParse(b['rt']?.toString() ?? '')?.toString().padLeft(3, '0') ??
+          b['rt']?.toString() ??
+          '';
+      String bRw =
+          int.tryParse(b['rw']?.toString() ?? '')?.toString().padLeft(3, '0') ??
+          b['rw']?.toString() ??
+          '';
+      String key = "${b['nama_bangunan']}-$bRt-$bRw";
       bangunanMap[key] = b['id'].toString();
     }
 
@@ -678,11 +697,15 @@ class CsvTransferService {
       String kelompokDawis = _normalizeKelompokDawis(
         row[0 + offset]?.toString() ?? '',
       );
-      String rt = row[1 + offset]?.toString().trim() ?? '';
-      String rw = row[2 + offset]?.toString().trim() ?? '';
+      String rtRaw = row[1 + offset]?.toString().trim() ?? '';
+      String rt = int.tryParse(rtRaw)?.toString().padLeft(3, '0') ?? rtRaw;
+      String rwRaw = row[2 + offset]?.toString().trim() ?? '';
+      String rw = int.tryParse(rwRaw)?.toString().padLeft(3, '0') ?? rwRaw;
       String nomorUrutBangunan = row[3 + offset]?.toString().trim() ?? '';
       String namaBangunan = row[4 + offset]?.toString().trim() ?? '';
-      String kategoriBangunan = row[5 + offset]?.toString().trim() ?? 'Lainnya';
+      String kategoriBangunanStr =
+          row[5 + offset]?.toString().trim() ?? 'Lainnya';
+      int kategoriBangunan = _parseKategoriBangunan(kategoriBangunanStr);
       String alamat = row[6 + offset]?.toString().trim() ?? '';
 
       String statusHunian = row.length > 7 + offset
@@ -756,11 +779,54 @@ class CsvTransferService {
       }
     }
 
+    await SyncService.syncLocalUnsyncedToSupabase();
+
     return ImportSummary(
       totalRows: totalRows,
       acceptedRows: acceptedRows,
       rejectedRows: rejectedRows,
       errors: errors,
     );
+  }
+
+  int _parseKategoriBangunan(String kategoriStr) {
+    kategoriStr = kategoriStr.trim().toLowerCase();
+
+    // Check if it's a numeric string
+    final int? numericVal = int.tryParse(kategoriStr);
+    if (numericVal != null && numericVal >= 1 && numericVal <= 14) {
+      return numericVal;
+    }
+
+    switch (kategoriStr) {
+      case 'rumah tinggal':
+        return 1;
+      case 'kontrakan':
+        return 2;
+      case 'kos-kosan':
+        return 3;
+      case 'asrama/mess':
+        return 4;
+      case 'rusun':
+        return 5;
+      case 'rumah dinas':
+        return 6;
+      case 'apartemen':
+        return 7;
+      case 'rukan/ruko':
+        return 8;
+      case 'kios/toko/warung':
+        return 9;
+      case 'tempat usaha lainnya':
+        return 10;
+      case 'sekolah':
+        return 11;
+      case 'tempat ibadah':
+        return 12;
+      case 'panti':
+        return 13;
+      default:
+        return 14;
+    }
   }
 }

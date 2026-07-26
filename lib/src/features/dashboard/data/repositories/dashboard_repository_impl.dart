@@ -248,7 +248,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     final allBangunan = await _supabase
         .from('bangunan')
-        .select('id, rw, rt, kelompok_dawis');
+        .select('id, rw, rt, kelompok_dawis, nama_bangunan, alamat_lengkap');
 
     final filteredBangunan = allBangunan.where((b) {
       if (rw != null &&
@@ -304,28 +304,61 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final kelMap = {for (var k in filteredKeluarga) k['id']: k};
 
     if (category == 'Jumlah Bangunan') {
-      return filteredBangunan
+      final list = filteredBangunan
           .map(
             (b) => {
-              'rw': b['rw'],
-              'rt': b['rt'],
-              'kelompok_dawis': b['kelompok_dawis'],
+              'rw': b['rw'] ?? '-',
+              'rt': b['rt'] ?? '-',
+              'nama_bangunan': b['nama_bangunan'] ?? '-',
+              'alamat_lengkap': b['alamat_lengkap'] ?? '-',
+              'kelompok_dawis': b['kelompok_dawis'] ?? '-',
             },
           )
           .toList();
+
+      list.sort((a, b) {
+        final rtA = int.tryParse(a['rt']?.toString() ?? '') ?? 999;
+        final rtB = int.tryParse(b['rt']?.toString() ?? '') ?? 999;
+        final rtCompare = rtA.compareTo(rtB);
+        if (rtCompare != 0) return rtCompare;
+
+        final nameA = a['nama_bangunan']?.toString().toLowerCase() ?? '';
+        final nameB = b['nama_bangunan']?.toString().toLowerCase() ?? '';
+        return nameA.compareTo(nameB);
+      });
+
+      return list;
     }
 
     if (category == 'Jumlah KK') {
-      return filteredKeluarga.map((k) {
+      final list = filteredKeluarga.map((k) {
         final krt = krtMap[k['id_krt']];
         final b = krt != null ? bMap[krt['id_bangunan']] : null;
         return {
-          'no_kk': k['no_kk'],
+          'no_kk': k['no_kk'] ?? '-',
           'nama_krt': krt != null ? krt['nama_krt'] : '-',
           'rt': b != null ? b['rt'] : '-',
           'rw': b != null ? b['rw'] : '-',
         };
       }).toList();
+
+      list.sort((a, b) {
+        final rtA = int.tryParse(a['rt']?.toString() ?? '') ?? 999;
+        final rtB = int.tryParse(b['rt']?.toString() ?? '') ?? 999;
+        final rtCompare = rtA.compareTo(rtB);
+        if (rtCompare != 0) return rtCompare;
+
+        final kkA = a['no_kk']?.toString() ?? '';
+        final kkB = b['no_kk']?.toString() ?? '';
+        final kkCompare = kkA.compareTo(kkB);
+        if (kkCompare != 0) return kkCompare;
+
+        final nameA = a['nama_krt']?.toString().toLowerCase() ?? '';
+        final nameB = b['nama_krt']?.toString().toLowerCase() ?? '';
+        return nameA.compareTo(nameB);
+      });
+
+      return list;
     }
 
     if ([
@@ -368,7 +401,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
         .where((i) => kelIds.contains(i['id_keluarga']))
         .toList();
 
-    return filteredIndividu
+    final result = filteredIndividu
         .where((ind) {
           final jk = ind['jenis_kelamin']?.toString();
           final tglLahir = ind['tanggal_lahir']?.toString();
@@ -422,5 +455,28 @@ class DashboardRepositoryImpl implements DashboardRepository {
           };
         })
         .toList();
+
+    result.sort((a, b) {
+      final rtA = int.tryParse(a['rt']?.toString() ?? '') ?? 999;
+      final rtB = int.tryParse(b['rt']?.toString() ?? '') ?? 999;
+      final rtCompare = rtA.compareTo(rtB);
+      if (rtCompare != 0) return rtCompare;
+
+      final nameA = a['nama_lengkap']?.toString().toLowerCase() ?? '';
+      final nameB = b['nama_lengkap']?.toString().toLowerCase() ?? '';
+      final nameCompare = nameA.compareTo(nameB);
+      if (nameCompare != 0) return nameCompare;
+
+      final nikA = a['nik']?.toString() ?? '';
+      final nikB = b['nik']?.toString() ?? '';
+      final nikCompare = nikA.compareTo(nikB);
+      if (nikCompare != 0) return nikCompare;
+
+      final jkA = a['jenis_kelamin']?.toString() ?? '';
+      final jkB = b['jenis_kelamin']?.toString() ?? '';
+      return jkA.compareTo(jkB);
+    });
+
+    return result;
   }
 }

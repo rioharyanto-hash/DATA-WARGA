@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../settings/presentation/providers/app_user_provider.dart';
 import '../providers/keluarga_provider.dart';
 import '../providers/krt_provider.dart';
 
@@ -14,6 +15,7 @@ class DetailKrtScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keluargaList = ref.watch(keluargaByKrtProvider(krtId));
     final krtData = ref.watch(krtByIdProvider(krtId));
+    final isAdmin = ref.watch(loggedInUserProvider)?.role == 'ADMIN';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail KRT')),
@@ -129,6 +131,73 @@ class DetailKrtScreen extends ConsumerWidget {
                                 '/form-keluarga-edit/${keluarga.id}',
                               ),
                             ),
+                            if (isAdmin)
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Hapus Keluarga'),
+                                      content: const Text(
+                                        'Yakin ingin menghapus data Keluarga ini? Semua data individu di dalamnya mungkin juga akan terhapus.',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('Batal'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            Navigator.pop(context);
+                                            try {
+                                              await ref
+                                                  .read(
+                                                    keluargaRepositoryProvider,
+                                                  )
+                                                  .deleteKeluarga(keluarga.id);
+                                              ref.invalidate(
+                                                keluargaByKrtProvider(krtId),
+                                              );
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Keluarga berhasil dihapus',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Gagal menghapus: $e',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          },
+                                          child: const Text(
+                                            'Hapus',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
                             const Icon(Icons.chevron_right),
                           ],
                         ),

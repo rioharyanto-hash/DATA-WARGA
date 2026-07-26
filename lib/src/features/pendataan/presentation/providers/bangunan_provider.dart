@@ -56,20 +56,32 @@ final filteredDaftarBangunanProvider = Provider<AsyncValue<List<Bangunan>>>((
   final filter = ref.watch(selectedKelompokDawisFilterProvider);
 
   return asyncList.whenData((list) {
+    List<Bangunan> filteredList;
     if (filter == null || filter.isEmpty || filter == 'Semua') {
-      return list;
-    }
-    final normalizedFilter = filter
-        .replaceAll('.', '')
-        .replaceAll(' ', '')
-        .toLowerCase();
-    return list.where((b) {
-      final normalizedName = b.kelompokDawis
+      filteredList = list;
+    } else {
+      final normalizedFilter = filter
           .replaceAll('.', '')
           .replaceAll(' ', '')
           .toLowerCase();
-      return normalizedName == normalizedFilter;
-    }).toList();
+      filteredList = list.where((b) {
+        final normalizedName = b.kelompokDawis
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        return normalizedName == normalizedFilter;
+      }).toList();
+    }
+
+    // Mengurutkan secara numerik berdasarkan nomor urut bangunan
+    final sortedList = List<Bangunan>.from(filteredList);
+    sortedList.sort((a, b) {
+      final numA = int.tryParse(a.nomorUrutBangunan ?? '') ?? 999999;
+      final numB = int.tryParse(b.nomorUrutBangunan ?? '') ?? 999999;
+      return numA.compareTo(numB);
+    });
+
+    return sortedList;
   });
 });
 

@@ -105,7 +105,7 @@ class PdfBlankService {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             font: isHeader ? boldFont : regularFont,
-            fontSize: isHeader ? 6 : 8,
+            fontSize: isHeader ? 4.5 : 8,
           ),
         ),
       );
@@ -444,7 +444,7 @@ class PdfBlankService {
                                           isHeader: true,
                                         ),
                                         buildCell(
-                                          'BERKE-\nBUTUHAN\nKHUSUS',
+                                          'BERKEBUTUHAN\nKHUSUS',
                                           flex: 1,
                                           isHeader: true,
                                           noRightBorder: true,
@@ -637,7 +637,7 @@ class PdfBlankService {
                                           isHeader: true,
                                         ),
                                         buildCell(
-                                          'PEMANFAATAN\nTANAH\nPEKARANGAN',
+                                          'PEMANFAATAN\nPEKARANGAN',
                                           flex: 1,
                                           isHeader: true,
                                         ),

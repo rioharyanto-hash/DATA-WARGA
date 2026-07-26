@@ -42,8 +42,8 @@ class ReportState {
 class ReportRtNotifier extends Notifier<String> {
   @override
   String build() {
-    final user = ref.read(loggedInUserProvider);
-    return user?.rt ?? '01';
+    final user = ref.watch(loggedInUserProvider);
+    return (user?.rt ?? '001').padLeft(3, '0');
   }
 
   void update(String value) {
@@ -58,8 +58,8 @@ final reportRtProvider = NotifierProvider<ReportRtNotifier, String>(
 class ReportRwNotifier extends Notifier<String> {
   @override
   String build() {
-    final user = ref.read(loggedInUserProvider);
-    return user?.rw ?? '02';
+    final user = ref.watch(loggedInUserProvider);
+    return (user?.rw ?? '010').padLeft(3, '0');
   }
 
   void update(String value) {
@@ -105,7 +105,7 @@ final kelompokDawisListProvider =
       final repo = ref.read(reportRepositoryProvider);
       final allList = await repo.getAllKelompokDawisList();
 
-      final currentUser = ref.read(loggedInUserProvider);
+      final currentUser = ref.watch(loggedInUserProvider);
       if (currentUser == null || currentUser.role == 'ADMIN') {
         return allList;
       }
@@ -766,7 +766,9 @@ class ReportController extends Notifier<ReportState> {
       }
 
       final ringkasanData = {
-        'namaKader': allowedNames.join(', '),
+        'namaKader': rt == 'Semua'
+            ? 'KELOMPOK DAWIS RW.${rw.padLeft(3, '0')}'
+            : allowedNames.join(', '),
         'kelompokName': 'Semua Kelompok RT $pkkRt RW $pkkRw',
         'rt': pkkRt,
         'rw': pkkRw,
@@ -856,17 +858,30 @@ class ReportController extends Notifier<ReportState> {
           kerja += _parseInt(r['kerjaBakti']);
         }
 
-        final match = RegExp(r'\d+').firstMatch(name);
-        String dasawismaNo = match != null
-            ? match.group(0)!
-            : globalIndex.toString();
-        // Fallback if we can't extract kader RT
+        String rtFromName = pkkRt;
+        String dasawismaNo = '1';
+        final RegExp dRegex = RegExp(r'\.([0-9]{1,3})\.([0-9]{1,3})$');
+        final dMatch = dRegex.firstMatch(name);
+        if (dMatch != null) {
+          if (pkkRt == '...' || pkkRt == 'Semua' || pkkRt.isEmpty) {
+            rtFromName = dMatch.group(1)!;
+          }
+          dasawismaNo = dMatch.group(2)!;
+        } else {
+          final match = RegExp(r'\d+').firstMatch(name);
+          if (match != null) dasawismaNo = match.group(0)!;
+        }
+
         final dataKader = await repo.getForm3Data(name, rt, rw);
-        final kaderRt = dataKader['rt']?.toString() ?? pkkRt;
+        final kaderRt = dataKader['rt']?.toString() ?? rtFromName;
+        final finalRt =
+            (kaderRt.isNotEmpty && kaderRt != 'Semua' && kaderRt != '...')
+            ? kaderRt
+            : rtFromName;
 
         ringkasanRows.add({
           'no': globalIndex++,
-          'rt': kaderRt.isNotEmpty && kaderRt != 'Semua' ? kaderRt : pkkRt,
+          'rt': finalRt,
           'dasawisma': dasawismaNo,
           'jmlKrt': krtCount,
           'jmlKk': totalKk,
@@ -912,7 +927,9 @@ class ReportController extends Notifier<ReportState> {
       };
 
       final pdfBytes = await pdfService.generateRekapPkkPdf(
-        namaKelompok: 'Semua Kelompok RT $pkkRt RW $pkkRw',
+        namaKelompok: rt == 'Semua'
+            ? 'KELOMPOK DAWIS RW.${rw.padLeft(3, '0')}'
+            : 'Semua Kelompok RT $pkkRt RW $pkkRw',
         rt: pkkRt,
         rw: pkkRw,
         desa: region.kelurahan,
@@ -997,9 +1014,11 @@ class ReportController extends Notifier<ReportState> {
 
       final pdfBytes = await pdfService.generateProfilUsiaRingkasanPortraitPdf(
         perKelompokData: perKelompokTotals,
-        namaKelompok: allowedNames.isNotEmpty
-            ? formatKelompokNames(allowedNames)
-            : 'Semua Kelompok RT $pkkRt RW $pkkRw',
+        namaKelompok: rt == 'Semua'
+            ? 'KELOMPOK DAWIS RW.${rw.padLeft(3, '0')}'
+            : (allowedNames.isNotEmpty
+                  ? formatKelompokNames(allowedNames)
+                  : 'Semua Kelompok RT $pkkRt RW $pkkRw'),
         namaKader: namaKaderList.isNotEmpty ? namaKaderList.join(', ') : '',
         rt: pkkRt,
         rw: pkkRw,
@@ -1089,9 +1108,11 @@ class ReportController extends Notifier<ReportState> {
       }
       final ringkasanData = {
         'rows': ringkasanRows,
-        'kelompok': dasawismaList.isNotEmpty
-            ? 'BUAH GOWOK.$pkkRw.$pkkRt. ${dasawismaList.join(', ')}'
-            : 'BUAH GOWOK.$pkkRw.$pkkRt',
+        'kelompok': rt == 'Semua'
+            ? 'KELOMPOK DAWIS RW.${rw.padLeft(3, '0')}'
+            : (dasawismaList.isNotEmpty
+                  ? 'BUAH GOWOK.$pkkRw.$pkkRt. ${dasawismaList.join(', ')}'
+                  : 'BUAH GOWOK.$pkkRw.$pkkRt'),
         'rt': pkkRt,
         'rw': pkkRw,
         'kelurahan': region.kelurahan,

@@ -69,7 +69,26 @@ class _FormMutasiMasterScreenState
     }
   }
 
+  bool _checkAdminKelompok() {
+    final user = ref.read(loggedInUserProvider);
+    if (user != null && user.role == 'ADMIN') {
+      if (_selectedKelompokDawis == null || _selectedKelompokDawis!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Peringatan: Sebagai Admin, Anda wajib memilih Kelompok Dawis (di kanan atas) terlebih dahulu!',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<void> _saveMutasi() async {
+    if (!_checkAdminKelompok()) return;
     if (!_formKey.currentState!.validate()) return;
     if (_selectedIndividu == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -264,6 +283,7 @@ class _FormMutasiMasterScreenState
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: () {
+                    if (!_checkAdminKelompok()) return;
                     context.push('/form-individu-lahir');
                   },
                   icon: const Icon(Icons.child_friendly),
@@ -277,6 +297,7 @@ class _FormMutasiMasterScreenState
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: () {
+                    if (!_checkAdminKelompok()) return;
                     context.push('/form-keluarga-datang');
                   },
                   icon: const Icon(Icons.family_restroom),

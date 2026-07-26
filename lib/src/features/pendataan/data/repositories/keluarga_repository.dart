@@ -59,6 +59,24 @@ class KeluargaRepository {
     return KeluargaModel.fromJson(response);
   }
 
+  Future<bool> isNoKkExists(String noKk, {String? excludeId}) async {
+    // If no_kk is empty or just a placeholder like '-', we can optionally allow it,
+    // but typically we should check if it's identical unless it's '-'
+    if (noKk.trim().isEmpty || noKk.trim() == '-') return false;
+
+    var query = _supabase
+        .from('keluarga')
+        .select('id')
+        .eq('no_kk', noKk.trim());
+
+    if (excludeId != null) {
+      query = query.neq('id', excludeId);
+    }
+
+    final response = await query.limit(1);
+    return response.isNotEmpty;
+  }
+
   Future<void> updateKeluarga(Keluarga keluarga) async {
     final model = KeluargaModel.fromEntity(keluarga);
     await _supabase

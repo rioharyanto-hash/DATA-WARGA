@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
+import '../../domain/entities/individu.dart';
 import '../providers/individu_provider.dart';
 import '../providers/keluarga_provider.dart';
 
@@ -38,6 +40,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final individuList = ref.watch(individuByKeluargaProvider(keluargaId));
     final keluargaData = ref.watch(keluargaByIdProvider(keluargaId));
+    final isAdmin = ref.watch(loggedInUserProvider)?.role == 'ADMIN';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -181,6 +184,72 @@ class DetailKeluargaScreen extends ConsumerWidget {
                   );
                 }
 
+                // ── Sorting Logic ──
+                final sortedItems = List<Individu>.from(individuItems);
+                sortedItems.sort((a, b) {
+                  // 1. Prioritas Hubungan Keluarga
+                  int getPriority(String status) {
+                    final s = status.toUpperCase();
+                    if (s == 'KK' ||
+                        s == 'KEPALA KELUARGA' ||
+                        s == 'KEPALA RUMAH TANGGA') {
+                      return 1;
+                    }
+                    if (s == 'ISTRI') return 2;
+                    if (s == 'ANAK') return 3;
+                    return 4; // Lainnya (Mertua, Menantu, dll)
+                  }
+
+                  int priorityA = getPriority(a.hubunganKeluarga);
+                  int priorityB = getPriority(b.hubunganKeluarga);
+
+                  if (priorityA != priorityB) {
+                    return priorityA.compareTo(priorityB);
+                  }
+
+                  // 2. Jika prioritas sama (misal sama-sama ANAK), urutkan berdasarkan Tanggal Lahir (yang lebih tua di atas)
+                  DateTime? parseDate(String dateStr) {
+                    if (dateStr.isEmpty) return null;
+                    try {
+                      final parts = dateStr.split(RegExp(r'[-/]'));
+                      if (parts.length == 3) {
+                        if (parts[0].length == 4) {
+                          return DateTime(
+                            int.parse(parts[0]),
+                            int.parse(parts[1]),
+                            int.parse(parts[2]),
+                          );
+                        } else {
+                          return DateTime(
+                            int.parse(parts[2]),
+                            int.parse(parts[1]),
+                            int.parse(parts[0]),
+                          );
+                        }
+                      }
+                      return DateTime.parse(dateStr);
+                    } catch (_) {
+                      return null;
+                    }
+                  }
+
+                  final dateA = parseDate(a.tanggalLahir);
+                  final dateB = parseDate(b.tanggalLahir);
+
+                  if (dateA != null && dateB != null) {
+                    return dateA.compareTo(
+                      dateB,
+                    ); // Ascending: older dates (smaller) come first
+                  } else if (dateA != null) {
+                    return -1;
+                  } else if (dateB != null) {
+                    return 1;
+                  }
+
+                  // 3. Fallback: urutkan berdasarkan nama
+                  return a.namaLengkap.compareTo(b.namaLengkap);
+                });
+
                 return SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -256,10 +325,10 @@ class DetailKeluargaScreen extends ConsumerWidget {
                           ),
                           // Table Rows
                           Column(
-                            children: List.generate(individuItems.length, (
+                            children: List.generate(sortedItems.length, (
                               index,
                             ) {
-                              final individu = individuItems[index];
+                              final individu = sortedItems[index];
 
                               // Hitung Usia
                               String ageText = '-';
@@ -406,8 +475,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0,
-                                        vertical: 12.0,
+                                        vertical: 12,
                                       ),
                                       child: Row(
                                         children: [
@@ -415,17 +483,14 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                             width: 200,
                                             child: Row(
                                               children: [
-                                                Container(
-                                                  width: 32,
-                                                  height: 32,
-                                                  decoration: BoxDecoration(
-                                                    color: statusBgColor,
-                                                    shape: BoxShape.circle,
-                                                  ),
+                                                CircleAvatar(
+                                                  radius: 14,
+                                                  backgroundColor:
+                                                      statusBgColor,
                                                   child: Icon(
                                                     isLaki
                                                         ? Icons.person
-                                                        : Icons.person_2,
+                                                        : Icons.person_3,
                                                     size: 16,
                                                     color: statusColor,
                                                   ),
@@ -436,8 +501,7 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                                     individu.namaLengkap,
                                                     style: const TextStyle(
                                                       fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Color(0xFF0F172A),
+                                                          FontWeight.w600,
                                                       fontSize: 13,
                                                     ),
                                                     maxLines: 1,
@@ -453,19 +517,19 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                             child: Text(
                                               individu.nik,
                                               style: const TextStyle(
-                                                color: Color(0xFF475569),
                                                 fontSize: 13,
+                                                color: Color(0xFF64748B),
                                               ),
                                             ),
                                           ),
                                           SizedBox(
                                             width: 130,
                                             child: Text(
-                                              status.isNotEmpty ? status : '-',
+                                              status,
                                               style: TextStyle(
+                                                fontSize: 13,
                                                 fontWeight: FontWeight.bold,
                                                 color: statusColor,
-                                                fontSize: 13,
                                               ),
                                             ),
                                           ),
@@ -474,8 +538,8 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                             child: Text(
                                               ageText,
                                               style: const TextStyle(
-                                                color: Color(0xFF475569),
                                                 fontSize: 13,
+                                                color: Color(0xFF64748B),
                                               ),
                                             ),
                                           ),
@@ -486,14 +550,112 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                                   ? individu.noTlp!
                                                   : '-',
                                               style: const TextStyle(
-                                                color: Color(0xFF475569),
                                                 fontSize: 13,
+                                                color: Color(0xFF64748B),
                                               ),
                                             ),
                                           ),
                                           SizedBox(
                                             width: 50,
-                                            child: Center(child: trailingIcon),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                if (isAdmin && mode == 'master')
+                                                  InkWell(
+                                                    onTap: () {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (context) => AlertDialog(
+                                                          title: const Text(
+                                                            'Hapus Individu',
+                                                          ),
+                                                          content: Text(
+                                                            'Yakin ingin menghapus ${individu.namaLengkap}?',
+                                                          ),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.pop(
+                                                                    context,
+                                                                  ),
+                                                              child: const Text(
+                                                                'Batal',
+                                                              ),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () async {
+                                                                Navigator.pop(
+                                                                  context,
+                                                                );
+                                                                try {
+                                                                  await ref
+                                                                      .read(
+                                                                        individuRepositoryProvider,
+                                                                      )
+                                                                      .deleteIndividu(
+                                                                        individu
+                                                                            .id,
+                                                                      );
+                                                                  ref.invalidate(
+                                                                    individuByKeluargaProvider(
+                                                                      keluargaId,
+                                                                    ),
+                                                                  );
+                                                                  if (context
+                                                                      .mounted) {
+                                                                    ScaffoldMessenger.of(
+                                                                      context,
+                                                                    ).showSnackBar(
+                                                                      const SnackBar(
+                                                                        content:
+                                                                            Text(
+                                                                              'Individu berhasil dihapus',
+                                                                            ),
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                } catch (e) {
+                                                                  if (context
+                                                                      .mounted) {
+                                                                    ScaffoldMessenger.of(
+                                                                      context,
+                                                                    ).showSnackBar(
+                                                                      SnackBar(
+                                                                        content:
+                                                                            Text(
+                                                                              'Gagal menghapus: $e',
+                                                                            ),
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                }
+                                                              },
+                                                              child: const Text(
+                                                                'Hapus',
+                                                                style: TextStyle(
+                                                                  color: Colors
+                                                                      .red,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                    child: const Padding(
+                                                      padding: EdgeInsets.only(
+                                                        right: 8.0,
+                                                      ),
+                                                      child: Icon(
+                                                        Icons.delete,
+                                                        color: Colors.red,
+                                                        size: 18,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                trailingIcon,
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),

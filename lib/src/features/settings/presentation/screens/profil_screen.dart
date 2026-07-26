@@ -54,10 +54,10 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     );
     _alamatController = TextEditingController(text: user?.alamat ?? '');
     _rtController = TextEditingController(
-      text: user?.rt?.isNotEmpty == true ? user!.rt!.padLeft(2, '0') : '',
+      text: user?.rt?.isNotEmpty == true ? user!.rt!.padLeft(3, '0') : '',
     );
     _rwController = TextEditingController(
-      text: user?.rw?.isNotEmpty == true ? user!.rw!.padLeft(2, '0') : '',
+      text: user?.rw?.isNotEmpty == true ? user!.rw!.padLeft(3, '0') : '',
     );
     _kelurahanController = TextEditingController(text: user?.kelurahan ?? '');
     _kecamatanController = TextEditingController(text: user?.kecamatan ?? '');
@@ -235,7 +235,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
       'S3',
     ];
     final rtRwList = [
-      ...List.generate(20, (i) => (i + 1).toString().padLeft(2, '0')),
+      ...List.generate(20, (i) => (i + 1).toString().padLeft(3, '0')),
     ];
     if (_rtController.text.isNotEmpty &&
         !rtRwList.contains(_rtController.text)) {

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,21 +100,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         dialogShown = false;
       }
 
+      final bytes = Uint8List.fromList(utf8.encode(csvData));
+
       String? outputFile = await FilePicker.saveFile(
         dialogTitle: 'Simpan Export Data CSV',
+
         fileName: 'export_dawis_data.csv',
+
         type: FileType.custom,
+
         allowedExtensions: ['csv'],
+
+        bytes: bytes,
       );
 
-      if (outputFile != null) {
-        final file = File(outputFile);
-        await file.writeAsString(csvData);
-
+      if (kIsWeb) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Data berhasil diekspor ke: $outputFile')),
+            const SnackBar(content: Text('File CSV berhasil diunduh.')),
           );
+        }
+      } else {
+        if (outputFile != null) {
+          final file = File(outputFile);
+
+          await file.writeAsBytes(bytes);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Data berhasil diekspor ke: \$outputFile'),
+              ),
+            );
+          }
         }
       }
     } catch (e) {
@@ -176,21 +195,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       final csvData = await _csvService.generateTemplateCsv();
 
+      final bytes = Uint8List.fromList(utf8.encode(csvData));
+
       String? outputFile = await FilePicker.saveFile(
         dialogTitle: 'Simpan Template CSV',
+
         fileName: 'template_import.csv',
+
         type: FileType.custom,
+
         allowedExtensions: ['csv'],
+
+        bytes: bytes,
       );
 
-      if (outputFile != null) {
-        final file = File(outputFile);
-        await file.writeAsString(csvData);
-
+      if (kIsWeb) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Template disimpan di: $outputFile')),
+            const SnackBar(content: Text('File CSV berhasil diunduh.')),
           );
+        }
+      } else {
+        if (outputFile != null) {
+          final file = File(outputFile);
+
+          await file.writeAsBytes(bytes);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Template disimpan di: \$outputFile')),
+            );
+          }
         }
       }
     } catch (e) {
@@ -220,23 +255,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         dialogShown = false;
       }
 
+      final bytes = Uint8List.fromList(utf8.encode(csvData));
       String? outputFile = await FilePicker.saveFile(
         dialogTitle: 'Simpan Export Data Bangunan CSV',
         fileName: 'export_bangunan.csv',
         type: FileType.custom,
         allowedExtensions: ['csv'],
+        bytes: bytes,
       );
 
-      if (outputFile != null) {
-        final file = File(outputFile);
-        await file.writeAsString(csvData);
-
+      if (kIsWeb) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data Bangunan berhasil diekspor ke: $outputFile'),
-            ),
+            const SnackBar(content: Text('File CSV berhasil diunduh.')),
           );
+        }
+      } else {
+        if (outputFile != null) {
+          final file = File(outputFile);
+          await file.writeAsBytes(bytes);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Data Bangunan berhasil diekspor ke: $outputFile',
+                ),
+              ),
+            );
+          }
         }
       }
     } catch (e) {
@@ -298,21 +345,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       final csvData = await _csvService.generateTemplateBangunanCsv();
 
+      final bytes = Uint8List.fromList(utf8.encode(csvData));
+
       String? outputFile = await FilePicker.saveFile(
         dialogTitle: 'Simpan Template Bangunan CSV',
+
         fileName: 'template_bangunan.csv',
+
         type: FileType.custom,
+
         allowedExtensions: ['csv'],
+
+        bytes: bytes,
       );
 
-      if (outputFile != null) {
-        final file = File(outputFile);
-        await file.writeAsString(csvData);
-
+      if (kIsWeb) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Template disimpan di: $outputFile')),
+            const SnackBar(content: Text('File CSV berhasil diunduh.')),
           );
+        }
+      } else {
+        if (outputFile != null) {
+          final file = File(outputFile);
+
+          await file.writeAsBytes(bytes);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Template disimpan di: \$outputFile')),
+            );
+          }
         }
       }
     } catch (e) {
@@ -330,6 +393,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final kotaController = TextEditingController(text: region.kotaKab);
     final kecController = TextEditingController(text: region.kecamatan);
     final kelController = TextEditingController(text: region.kelurahan);
+    final rwController = TextEditingController(text: region.rw);
 
     return showDialog(
       context: context,
@@ -357,6 +421,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               controller: kelController,
               decoration: const InputDecoration(labelText: 'Kelurahan'),
             ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: rwController,
+              decoration: const InputDecoration(
+                labelText: 'RW (Opsional, untuk default Form Bangunan)',
+              ),
+            ),
           ],
         ),
         actions: [
@@ -373,6 +444,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     kotaKab: kotaController.text.trim(),
                     kecamatan: kecController.text.trim(),
                     kelurahan: kelController.text.trim(),
+                    rw: rwController.text.trim(),
                   );
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -519,17 +591,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ElevatedButton.icon(
             onPressed: () => context.push('/profil'),
-            icon: Icon(
-              Icons.edit,
-              size: 16,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            label: Text(
+            icon: const Icon(Icons.edit, size: 16),
+            label: const Text(
               'Edit Profil',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ],

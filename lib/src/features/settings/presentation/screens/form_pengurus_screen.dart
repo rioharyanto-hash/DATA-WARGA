@@ -84,10 +84,10 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
         _selectedRole = user.role;
       });
       _rwController.text = user.rw?.isNotEmpty == true
-          ? user.rw!.padLeft(2, '0')
+          ? user.rw!.padLeft(3, '0')
           : '';
       _rtController.text = user.rt?.isNotEmpty == true
-          ? user.rt!.padLeft(2, '0')
+          ? user.rt!.padLeft(3, '0')
           : '';
 
       _nikController.text = user.nik ?? '';
@@ -598,7 +598,7 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                             (i) => (i + 1)
                                                                 .toString()
                                                                 .padLeft(
-                                                                  2,
+                                                                  3,
                                                                   '0',
                                                                 ),
                                                           ),
@@ -610,7 +610,7 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                                 (i) => (i + 1)
                                                                     .toString()
                                                                     .padLeft(
-                                                                      2,
+                                                                      3,
                                                                       '0',
                                                                     ),
                                                               ).contains(
@@ -664,7 +664,7 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                             (i) => (i + 1)
                                                                 .toString()
                                                                 .padLeft(
-                                                                  2,
+                                                                  3,
                                                                   '0',
                                                                 ),
                                                           ),
@@ -676,7 +676,7 @@ class _FormPengurusScreenState extends ConsumerState<FormPengurusScreen> {
                                                                 (i) => (i + 1)
                                                                     .toString()
                                                                     .padLeft(
-                                                                      2,
+                                                                      3,
                                                                       '0',
                                                                     ),
                                                               ).contains(

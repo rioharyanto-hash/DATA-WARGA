@@ -1008,7 +1008,7 @@ class PdfRingkasanService {
     final regularFont = pw.Font.helvetica();
     final boldFont = pw.Font.helveticaBold();
 
-    final style = pw.TextStyle(font: boldFont, fontSize: 8);
+    final style = pw.TextStyle(font: boldFont, fontSize: 4.5);
     final borderRight = const pw.Border(right: pw.BorderSide(width: 0.5));
     final borderBottom = const pw.Border(bottom: pw.BorderSide(width: 0.5));
 
@@ -1035,7 +1035,7 @@ class PdfRingkasanService {
         constraints: const pw.BoxConstraints(minHeight: 12),
         child: pw.Text(
           text.isEmpty ? ' ' : text,
-          style: pw.TextStyle(font: font ?? regularFont, fontSize: 8),
+          style: pw.TextStyle(font: font ?? regularFont, fontSize: 6),
         ),
       );
     }
@@ -1049,8 +1049,8 @@ class PdfRingkasanService {
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
           headerCell('NO', 1.5),
-          headerCell('NOMOR RT', 2.5),
-          headerCell('JUMLAH\nDASA\nWISMA', 2.5),
+          headerCell('NOMOR RT', 3.5),
+          headerCell('JUMLAH\nDASAWISMA', 2.5),
           headerCell('JUMLAH\nKRT', 2.5),
           headerCell('JUMLAH\nKK', 2.5),
           pw.Expanded(
@@ -1136,7 +1136,7 @@ class PdfRingkasanService {
                         headerCell('PRA\nLANSIA', 2),
                         headerCell('LANSIA', 2),
                         headerCell('3 BUTA', 2),
-                        headerCell('BERKEB.\nKHUSUS', 2.5, pw.Border()),
+                        headerCell('BERKEBUTUHAN\nKHUSUS', 2.5, pw.Border()),
                       ],
                     ),
                   ),
@@ -1245,7 +1245,7 @@ class PdfRingkasanService {
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
                         headerCell('UP2K', 2),
-                        headerCell('PEMANF.\nPEKARA\nNGAN', 2.5),
+                        headerCell('PEMANFAATAN\nPEKARANGAN', 2.5),
                         headerCell('INDUSTRI\nRT', 2.5),
                         headerCell('KERJA\nBAKTI', 2, pw.Border()),
                       ],
@@ -1262,7 +1262,7 @@ class PdfRingkasanService {
 
     final columnWidths = <int, pw.TableColumnWidth>{
       0: const pw.FlexColumnWidth(1.5),
-      1: const pw.FlexColumnWidth(2.5),
+      1: const pw.FlexColumnWidth(3.5),
       2: const pw.FlexColumnWidth(2.5),
       3: const pw.FlexColumnWidth(2.5),
       4: const pw.FlexColumnWidth(2.5),
@@ -1457,7 +1457,7 @@ class PdfRingkasanService {
                           alignment: pw.Alignment.center,
                           child: pw.Text(
                             '${i + 1}',
-                            style: pw.TextStyle(font: regularFont, fontSize: 8),
+                            style: pw.TextStyle(font: regularFont, fontSize: 6),
                           ),
                         ),
                       ),

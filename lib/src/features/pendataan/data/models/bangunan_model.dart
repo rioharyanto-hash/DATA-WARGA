@@ -36,7 +36,7 @@ class BangunanModel extends Bangunan {
       rw: json['rw']?.toString() ?? '',
       statusHunian: json['status_hunian'] as String,
       namaBangunan: json['nama_bangunan'] as String,
-      nomorUrutBangunan: json['nomor_urut_bangunan'] as String?,
+      nomorUrutBangunan: json['nomor_urut_bangunan']?.toString(),
       nopPbb: json['nop_pbb'] as String?,
       luasBangunan: json['luas_bangunan'] != null
           ? (json['luas_bangunan'] as num).toDouble()
@@ -44,7 +44,11 @@ class BangunanModel extends Bangunan {
       luasTanah: json['luas_tanah'] != null
           ? (json['luas_tanah'] as num).toDouble()
           : null,
-      kategoriBangunan: json['kategori_bangunan'] as int?,
+      kategoriBangunan: json['kategori_bangunan'] != null
+          ? (json['kategori_bangunan'] is int
+                ? json['kategori_bangunan'] as int
+                : int.tryParse(json['kategori_bangunan'].toString()))
+          : null,
       statusKepemilikan: json['status_kepemilikan'] as String?,
       sumberAirMinum: json['sumber_air_minum'] as String?,
       jumlahFasilitasBab: json['jumlah_fasilitas_bab'] as int?,

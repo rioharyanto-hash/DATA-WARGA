@@ -113,4 +113,42 @@ class SyncService {
       debugPrint('[SyncService] Error during sync: $e');
     }
   }
+
+  static Future<void> syncLocalUnsyncedToSupabase() async {
+    try {
+      debugPrint('[SyncService] Starting push of unsynced data to Supabase...');
+      final db = await LocalDbHelper.database;
+
+      final tables = ['bangunan', 'krt', 'keluarga', 'individu', 'mutasi'];
+
+      for (final table in tables) {
+        final unsyncedRows = await db.query(
+          table,
+          where: 'is_synced = ?',
+          whereArgs: [0],
+        );
+        for (var row in unsyncedRows) {
+          try {
+            final payload = Map<String, dynamic>.from(row);
+            payload.remove('is_synced');
+            await _supabase.from(table).upsert(payload);
+            await db.update(
+              table,
+              {'is_synced': 1},
+              where: 'id = ?',
+              whereArgs: [row['id']],
+            );
+          } catch (e) {
+            debugPrint(
+              '[SyncService] Failed to push row ${row['id']} from $table: $e',
+            );
+          }
+        }
+      }
+
+      debugPrint('[SyncService] Push completed successfully.');
+    } catch (e) {
+      debugPrint('[SyncService] Error during push: $e');
+    }
+  }
 }

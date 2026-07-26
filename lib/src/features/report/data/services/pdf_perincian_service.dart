@@ -2172,7 +2172,7 @@ class PdfPerincianService {
     final regularFont = pw.Font.helvetica();
     final boldFont = pw.Font.helveticaBold();
 
-    final style = pw.TextStyle(font: boldFont, fontSize: 5);
+    final style = pw.TextStyle(font: boldFont, fontSize: 4.5);
     final borderRight = const pw.Border(right: pw.BorderSide(width: 0.5));
     final borderBottom = const pw.Border(bottom: pw.BorderSide(width: 0.5));
 
@@ -2399,7 +2399,7 @@ class PdfPerincianService {
                             decoration: pw.BoxDecoration(border: borderRight),
                             child: pw.Center(
                               child: pw.Text(
-                                'IBU\nMENYU\nSUI',
+                                'IBU\nMENYUSUI',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2413,7 +2413,7 @@ class PdfPerincianService {
                             decoration: pw.BoxDecoration(border: borderRight),
                             child: pw.Center(
                               child: pw.Text(
-                                'LAN\nSIA',
+                                'LANSIA',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2426,7 +2426,7 @@ class PdfPerincianService {
                           child: pw.Container(
                             child: pw.Center(
                               child: pw.Text(
-                                '3\nBUTA',
+                                '3 BUTA',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2464,7 +2464,7 @@ class PdfPerincianService {
                             decoration: pw.BoxDecoration(border: borderRight),
                             child: pw.Center(
                               child: pw.Text(
-                                'RUMAH/\nBANGU\nNAN\nKHUSUS',
+                                'RUMAH\nBANGUNAN\nKHUSUS',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2503,7 +2503,7 @@ class PdfPerincianService {
                             decoration: pw.BoxDecoration(border: borderRight),
                             child: pw.Center(
                               child: pw.Text(
-                                'MEMILIKI\nTMP.\nPEMB.\nSAMPAH',
+                                'MEMILIKI\nTMP. PEMB.\nSAMPAH',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2516,7 +2516,7 @@ class PdfPerincianService {
                             decoration: pw.BoxDecoration(border: borderRight),
                             child: pw.Center(
                               child: pw.Text(
-                                'MEMI\nLIKI\nJAMBAN',
+                                'MEMILIKI\nJAMBAN\nKELUARGA',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2529,7 +2529,7 @@ class PdfPerincianService {
                             decoration: pw.BoxDecoration(border: borderRight),
                             child: pw.Center(
                               child: pw.Text(
-                                'MEMI\nLIKI\nSPAL',
+                                'MEMILIKI\nSPAL',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2541,7 +2541,7 @@ class PdfPerincianService {
                           child: pw.Container(
                             child: pw.Center(
                               child: pw.Text(
-                                'MENEMPEL\nSTIKER\nP4K',
+                                'MENEMPEL\nSTIKER P4K',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2685,7 +2685,7 @@ class PdfPerincianService {
                             decoration: pw.BoxDecoration(border: borderRight),
                             child: pw.Center(
                               child: pw.Text(
-                                'PEMAN\nFAATAN\nTANAH\nPEKA\nRANGAN',
+                                'PEMANFAATAN\nPEKARANGAN',
                                 style: style,
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -2950,7 +2950,7 @@ class PdfPerincianService {
                           alignment: pw.Alignment.center,
                           child: pw.Text(
                             '${i + 1}',
-                            style: pw.TextStyle(font: regularFont, fontSize: 5),
+                            style: pw.TextStyle(font: regularFont, fontSize: 6),
                           ),
                         ),
                       ),
@@ -3011,7 +3011,7 @@ class PdfPerincianService {
                 alignment: align,
                 child: pw.Text(
                   text,
-                  style: pw.TextStyle(font: regularFont, fontSize: 5),
+                  style: pw.TextStyle(font: regularFont, fontSize: 6),
                 ),
               );
             }
@@ -3061,7 +3061,7 @@ class PdfPerincianService {
               alignment: pw.Alignment.center,
               child: pw.Text(
                 text,
-                style: pw.TextStyle(font: boldFont, fontSize: 5),
+                style: pw.TextStyle(font: boldFont, fontSize: 6),
               ),
             );
           }

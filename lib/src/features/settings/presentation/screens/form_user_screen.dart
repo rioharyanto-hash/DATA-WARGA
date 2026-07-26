@@ -87,10 +87,10 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
         _selectedRole = user.role;
       });
       _rwController.text = user.rw?.isNotEmpty == true
-          ? user.rw!.padLeft(2, '0')
+          ? user.rw!.padLeft(3, '0')
           : '';
       _rtController.text = user.rt?.isNotEmpty == true
-          ? user.rt!.padLeft(2, '0')
+          ? user.rt!.padLeft(3, '0')
           : '';
       _dawisController.text = user.kelompokDawis ?? '';
 
@@ -484,7 +484,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                               vertical: 8,
                                                             ),
                                                       ),
-                                                  items: List.generate(5, (
+                                                  items: List.generate(10, (
                                                     index,
                                                   ) {
                                                     final val = (index + 1)
@@ -694,7 +694,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                             (i) => (i + 1)
                                                                 .toString()
                                                                 .padLeft(
-                                                                  2,
+                                                                  3,
                                                                   '0',
                                                                 ),
                                                           ),
@@ -706,7 +706,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                                 (i) => (i + 1)
                                                                     .toString()
                                                                     .padLeft(
-                                                                      2,
+                                                                      3,
                                                                       '0',
                                                                     ),
                                                               ).contains(
@@ -758,7 +758,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                             (i) => (i + 1)
                                                                 .toString()
                                                                 .padLeft(
-                                                                  2,
+                                                                  3,
                                                                   '0',
                                                                 ),
                                                           ),
@@ -770,7 +770,7 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
                                                                 (i) => (i + 1)
                                                                     .toString()
                                                                     .padLeft(
-                                                                      2,
+                                                                      3,
                                                                       '0',
                                                                     ),
                                                               ).contains(

@@ -50,7 +50,7 @@ class PdfReportService {
         children: [
           headerCell('NO', 1.5),
           headerCell('NOMOR RT', 2.5),
-          headerCell('JUMLAH\\nDASA\\nWISMA', 2.5),
+          headerCell('JUMLAH\nDASAWISMA', 2.5),
           headerCell('JUMLAH\\nKRT', 2.5),
           headerCell('JUMLAH\\nKK', 2.5),
           pw.Expanded(
@@ -75,7 +75,7 @@ class PdfReportService {
                         headerCell('BALITA\\nL', 2),
                         headerCell('BALITA\\nP', 2),
                         headerCell('3 BUTA', 2),
-                        headerCell('BERKEB.\\nKHUSUS', 2.5),
+                        headerCell('BERKEBUTUHAN\nKHUSUS', 2.5),
                         headerCell('REMAJA', 2),
                         headerCell('PUS', 2),
                         headerCell('WUS', 2),
@@ -195,7 +195,7 @@ class PdfReportService {
                       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                       children: [
                         headerCell('UP2K', 2),
-                        headerCell('PEMANF.\\nPEKARA\\nNGAN', 2.5),
+                        headerCell('PEMANFAATAN\nPEKARANGAN', 2.5),
                         headerCell('INDUSTRI\\nRT', 2.5),
                         headerCell('KERJA\\nBAKTI', 2, pw.Border()),
                       ],

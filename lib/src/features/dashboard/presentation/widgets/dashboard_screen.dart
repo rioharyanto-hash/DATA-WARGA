@@ -18,6 +18,51 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardSummaryAsync = ref.watch(dashboardSummaryProvider);
 
+    void onTapJumlahBangunan() => _showDemografiDetail(
+      context,
+      ref,
+      'Detail Jumlah Bangunan',
+      'Jumlah Bangunan',
+      ['RT', 'RW', 'Nama Bangunan', 'Alamat Rumah', 'Kelompok'],
+      (e) => [
+        (e['rt'] ?? '').toString(),
+        (e['rw'] ?? '').toString(),
+        (e['nama_bangunan'] ?? '').toString(),
+        (e['alamat_lengkap'] ?? '').toString(),
+        (e['kelompok_dawis'] ?? '').toString(),
+      ],
+    );
+
+    void onTapJumlahKk() => _showDemografiDetail(
+      context,
+      ref,
+      'Detail Jumlah KK',
+      'Jumlah KK',
+      ['RT', 'RW', 'No. KK', 'Kepala Keluarga'],
+      (e) => [
+        (e['rt'] ?? '').toString(),
+        (e['rw'] ?? '').toString(),
+        (e['no_kk'] ?? '').toString(),
+        (e['nama_krt'] ?? '').toString(),
+      ],
+    );
+
+    void onTapTotalPenduduk() => _showDemografiDetail(
+      context,
+      ref,
+      'Detail Total Penduduk',
+      'Total Penduduk',
+      ['RT', 'RW', 'Nama Lengkap', 'NIK', 'L/P', 'Tgl Lahir'],
+      (e) => [
+        (e['rt'] ?? '').toString(),
+        (e['rw'] ?? '').toString(),
+        (e['nama_lengkap'] ?? '').toString(),
+        (e['nik'] ?? '').toString(),
+        (e['jenis_kelamin'] ?? '').toString(),
+        (e['tanggal_lahir'] ?? '').toString(),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: _bgColor,
       appBar: AppBar(
@@ -69,19 +114,7 @@ class DashboardScreen extends ConsumerWidget {
                                             summary.jumlahBangunan.toString(),
                                             Icons.apartment_rounded,
                                             const Color(0xFF3B82F6),
-                                            onTap: () => _showDemografiDetail(
-                                              context,
-                                              ref,
-                                              'Detail Jumlah Bangunan',
-                                              'Jumlah Bangunan',
-                                              ['RW', 'RT', 'Kelompok Dawis'],
-                                              (e) => [
-                                                (e['rw'] ?? '').toString(),
-                                                (e['rt'] ?? '').toString(),
-                                                (e['kelompok_dawis'] ?? '')
-                                                    .toString(),
-                                              ],
-                                            ),
+                                            onTap: onTapJumlahBangunan,
                                           ),
                                         ),
                                         const SizedBox(width: 14),
@@ -91,25 +124,7 @@ class DashboardScreen extends ConsumerWidget {
                                             summary.jumlahKk.toString(),
                                             Icons.family_restroom_rounded,
                                             const Color(0xFF6366F1),
-                                            onTap: () => _showDemografiDetail(
-                                              context,
-                                              ref,
-                                              'Detail Jumlah KK',
-                                              'Jumlah KK',
-                                              [
-                                                'No. KK',
-                                                'Kepala Keluarga',
-                                                'RT',
-                                                'RW',
-                                              ],
-                                              (e) => [
-                                                (e['no_kk'] ?? '').toString(),
-                                                (e['nama_krt'] ?? '')
-                                                    .toString(),
-                                                (e['rt'] ?? '').toString(),
-                                                (e['rw'] ?? '').toString(),
-                                              ],
-                                            ),
+                                            onTap: onTapJumlahKk,
                                           ),
                                         ),
                                         const SizedBox(width: 14),
@@ -121,31 +136,7 @@ class DashboardScreen extends ConsumerWidget {
                                                 .toString(),
                                             Icons.people_alt_rounded,
                                             const Color(0xFF10B981),
-                                            onTap: () => _showDemografiDetail(
-                                              context,
-                                              ref,
-                                              'Detail Total Penduduk',
-                                              'Total Penduduk',
-                                              [
-                                                'Nama Lengkap',
-                                                'NIK',
-                                                'L/P',
-                                                'Tgl Lahir',
-                                                'RT',
-                                                'RW',
-                                              ],
-                                              (e) => [
-                                                (e['nama_lengkap'] ?? '')
-                                                    .toString(),
-                                                (e['nik'] ?? '').toString(),
-                                                (e['jenis_kelamin'] ?? '')
-                                                    .toString(),
-                                                (e['tanggal_lahir'] ?? '')
-                                                    .toString(),
-                                                (e['rt'] ?? '').toString(),
-                                                (e['rw'] ?? '').toString(),
-                                              ],
-                                            ),
+                                            onTap: onTapTotalPenduduk,
                                           ),
                                         ),
                                         const SizedBox(width: 14),
@@ -192,27 +183,7 @@ class DashboardScreen extends ConsumerWidget {
                                                     .toString(),
                                                 Icons.apartment_rounded,
                                                 const Color(0xFF3B82F6),
-                                                onTap: () =>
-                                                    _showDemografiDetail(
-                                                      context,
-                                                      ref,
-                                                      'Detail Jumlah Bangunan',
-                                                      'Jumlah Bangunan',
-                                                      [
-                                                        'RW',
-                                                        'RT',
-                                                        'Kelompok Dawis',
-                                                      ],
-                                                      (e) => [
-                                                        (e['rw'] ?? '')
-                                                            .toString(),
-                                                        (e['rt'] ?? '')
-                                                            .toString(),
-                                                        (e['kelompok_dawis'] ??
-                                                                '')
-                                                            .toString(),
-                                                      ],
-                                                    ),
+                                                onTap: onTapJumlahBangunan,
                                               ),
                                             ),
                                             const SizedBox(width: 14),
@@ -222,29 +193,7 @@ class DashboardScreen extends ConsumerWidget {
                                                 summary.jumlahKk.toString(),
                                                 Icons.family_restroom_rounded,
                                                 const Color(0xFF6366F1),
-                                                onTap: () =>
-                                                    _showDemografiDetail(
-                                                      context,
-                                                      ref,
-                                                      'Detail Jumlah KK',
-                                                      'Jumlah KK',
-                                                      [
-                                                        'No. KK',
-                                                        'Kepala Keluarga',
-                                                        'RT',
-                                                        'RW',
-                                                      ],
-                                                      (e) => [
-                                                        (e['no_kk'] ?? '')
-                                                            .toString(),
-                                                        (e['nama_krt'] ?? '')
-                                                            .toString(),
-                                                        (e['rt'] ?? '')
-                                                            .toString(),
-                                                        (e['rw'] ?? '')
-                                                            .toString(),
-                                                      ],
-                                                    ),
+                                                onTap: onTapJumlahKk,
                                               ),
                                             ),
                                           ],
@@ -260,38 +209,7 @@ class DashboardScreen extends ConsumerWidget {
                                                     .toString(),
                                                 Icons.people_alt_rounded,
                                                 const Color(0xFF10B981),
-                                                onTap: () =>
-                                                    _showDemografiDetail(
-                                                      context,
-                                                      ref,
-                                                      'Detail Total Penduduk',
-                                                      'Total Penduduk',
-                                                      [
-                                                        'Nama Lengkap',
-                                                        'NIK',
-                                                        'L/P',
-                                                        'Tgl Lahir',
-                                                        'RT',
-                                                        'RW',
-                                                      ],
-                                                      (e) => [
-                                                        (e['nama_lengkap'] ??
-                                                                '')
-                                                            .toString(),
-                                                        (e['nik'] ?? '')
-                                                            .toString(),
-                                                        (e['jenis_kelamin'] ??
-                                                                '')
-                                                            .toString(),
-                                                        (e['tanggal_lahir'] ??
-                                                                '')
-                                                            .toString(),
-                                                        (e['rt'] ?? '')
-                                                            .toString(),
-                                                        (e['rw'] ?? '')
-                                                            .toString(),
-                                                      ],
-                                                    ),
+                                                onTap: onTapTotalPenduduk,
                                               ),
                                             ),
                                             const SizedBox(width: 14),
@@ -337,19 +255,7 @@ class DashboardScreen extends ConsumerWidget {
                                         summary.jumlahBangunan.toString(),
                                         Icons.apartment_rounded,
                                         const Color(0xFF3B82F6),
-                                        onTap: () => _showDemografiDetail(
-                                          context,
-                                          ref,
-                                          'Detail Jumlah Bangunan',
-                                          'Jumlah Bangunan',
-                                          ['RW', 'RT', 'Kelompok Dawis'],
-                                          (e) => [
-                                            (e['rw'] ?? '').toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['kelompok_dawis'] ?? '')
-                                                .toString(),
-                                          ],
-                                        ),
+                                        onTap: onTapJumlahBangunan,
                                       ),
                                       const SizedBox(height: 14),
                                       _buildStatCard(
@@ -357,24 +263,7 @@ class DashboardScreen extends ConsumerWidget {
                                         summary.jumlahKk.toString(),
                                         Icons.family_restroom_rounded,
                                         const Color(0xFF6366F1),
-                                        onTap: () => _showDemografiDetail(
-                                          context,
-                                          ref,
-                                          'Detail Jumlah KK',
-                                          'Jumlah KK',
-                                          [
-                                            'No. KK',
-                                            'Kepala Keluarga',
-                                            'RT',
-                                            'RW',
-                                          ],
-                                          (e) => [
-                                            (e['no_kk'] ?? '').toString(),
-                                            (e['nama_krt'] ?? '').toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
-                                          ],
-                                        ),
+                                        onTap: onTapJumlahKk,
                                       ),
                                       const SizedBox(height: 14),
                                       _buildStatCard(
@@ -384,31 +273,7 @@ class DashboardScreen extends ConsumerWidget {
                                             .toString(),
                                         Icons.people_alt_rounded,
                                         const Color(0xFF10B981),
-                                        onTap: () => _showDemografiDetail(
-                                          context,
-                                          ref,
-                                          'Detail Total Penduduk',
-                                          'Total Penduduk',
-                                          [
-                                            'Nama Lengkap',
-                                            'NIK',
-                                            'L/P',
-                                            'Tgl Lahir',
-                                            'RT',
-                                            'RW',
-                                          ],
-                                          (e) => [
-                                            (e['nama_lengkap'] ?? '')
-                                                .toString(),
-                                            (e['nik'] ?? '').toString(),
-                                            (e['jenis_kelamin'] ?? '')
-                                                .toString(),
-                                            (e['tanggal_lahir'] ?? '')
-                                                .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
-                                          ],
-                                        ),
+                                        onTap: onTapTotalPenduduk,
                                       ),
                                       const SizedBox(height: 14),
                                       _buildStatCard(
@@ -1229,7 +1094,7 @@ class DashboardScreen extends ConsumerWidget {
         return Row(
           children: [
             if (user?.role == 'ADMIN') ...[
-              _buildDropdown(
+              buildDropdown(
                 value: selectedRw,
                 items: options['rw'] ?? [],
                 hint: 'RW',
@@ -1239,7 +1104,7 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(width: 8),
             ],
             if (user?.role == 'ADMIN' || user?.role == 'RW') ...[
-              _buildDropdown(
+              buildDropdown(
                 value: selectedRt,
                 items: options['rt'] ?? [],
                 hint: 'RT',
@@ -1249,7 +1114,7 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(width: 8),
             ],
             if (user?.role != 'KADER') ...[
-              _buildDropdown(
+              buildDropdown(
                 value: selectedKader,
                 items: options['kader'] ?? [],
                 hint: 'Kader',
@@ -1266,7 +1131,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDropdown({
+  Widget buildDropdown({
     required String? value,
     required List<String> items,
     required String hint,

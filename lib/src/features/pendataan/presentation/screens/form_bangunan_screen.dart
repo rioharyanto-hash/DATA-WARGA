@@ -124,8 +124,8 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
           _nomorUrutController.text = bangunan.nomorUrutBangunan ?? '';
           _namaBangunanController.text = bangunan.namaBangunan;
           _alamatController.text = bangunan.alamatLengkap;
-          _rtController.text = bangunan.rt.padLeft(2, '0');
-          _rwController.text = bangunan.rw.padLeft(2, '0');
+          _rtController.text = bangunan.rt.padLeft(3, '0');
+          _rwController.text = bangunan.rw.padLeft(3, '0');
           _nopPbbController.text = bangunan.nopPbb ?? '';
           _luasBangunanController.text =
               bangunan.luasBangunan?.toString() ?? '';
@@ -172,12 +172,32 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
 
     // Always load region data for the read-only fields
     final region = ref.read(regionProvider);
+    final user = ref.read(loggedInUserProvider);
     if (mounted) {
       setState(() {
         _kelurahanController.text = region.kelurahan;
         _kecamatanController.text = region.kecamatan;
         _kotaController.text = region.kotaKab;
         _provinsiController.text = region.provinsi;
+
+        // Default RW from Region settings for new forms
+        if (_rwController.text.isEmpty) {
+          _rwController.text = region.rw;
+        }
+
+        // Default RT from user's kelompok dawis for new forms
+        if (_rtController.text.isEmpty &&
+            user != null &&
+            user.kelompokDawis != null &&
+            user.kelompokDawis!.isNotEmpty) {
+          final RegExp dRegex = RegExp(r'\.([0-9]{3})\.([0-9]{3})$');
+          final match = dRegex.firstMatch(user.kelompokDawis!);
+          if (match != null) {
+            final rtValue = match.group(1)!;
+            // Pad to 3 digits to match dropdown format (e.g. '7' -> '007')
+            _rtController.text = int.parse(rtValue).toString().padLeft(3, '0');
+          }
+        }
       });
     }
   }
@@ -208,12 +228,41 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
 
   void _nextStep() {
     if (_formKey.currentState!.validate()) {
+      final user = ref.read(loggedInUserProvider);
+      if (user != null && user.role == 'ADMIN') {
+        if (_existingKelompokDawis == null || _existingKelompokDawis!.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Peringatan: Sebagai Admin, Anda wajib memilih Kelompok Dawis (di kanan atas) terlebih dahulu!',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
       setState(() => _currentStep = 2);
     }
   }
 
   void _simpanData() async {
     if (_formKey.currentState!.validate()) {
+      final user = ref.read(loggedInUserProvider);
+      if (user != null && user.role == 'ADMIN') {
+        if (_existingKelompokDawis == null || _existingKelompokDawis!.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Peringatan: Sebagai Admin, Anda wajib memilih Kelompok Dawis (di kanan atas) terlebih dahulu!',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Menyimpan data...')));
@@ -506,18 +555,18 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                       'RT',
                       _rtController.text.isEmpty
                           ? null
-                          : _rtController.text.padLeft(2, '0'),
+                          : _rtController.text.padLeft(3, '0'),
                       [
                         ...List.generate(
                           20,
-                          (i) => (i + 1).toString().padLeft(2, '0'),
+                          (i) => (i + 1).toString().padLeft(3, '0'),
                         ),
                         if (_rtController.text.isNotEmpty &&
                             !List.generate(
                               20,
-                              (i) => (i + 1).toString().padLeft(2, '0'),
-                            ).contains(_rtController.text.padLeft(2, '0')))
-                          _rtController.text.padLeft(2, '0'),
+                              (i) => (i + 1).toString().padLeft(3, '0'),
+                            ).contains(_rtController.text.padLeft(3, '0')))
+                          _rtController.text.padLeft(3, '0'),
                       ],
                       (val) {
                         if (val != null) _rtController.text = val;
@@ -526,26 +575,10 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildOutlinedDropdown(
+                    child: _buildOutlinedInput(
                       'RW',
-                      _rwController.text.isEmpty
-                          ? null
-                          : _rwController.text.padLeft(2, '0'),
-                      [
-                        ...List.generate(
-                          20,
-                          (i) => (i + 1).toString().padLeft(2, '0'),
-                        ),
-                        if (_rwController.text.isNotEmpty &&
-                            !List.generate(
-                              20,
-                              (i) => (i + 1).toString().padLeft(2, '0'),
-                            ).contains(_rwController.text.padLeft(2, '0')))
-                          _rwController.text.padLeft(2, '0'),
-                      ],
-                      (val) {
-                        if (val != null) _rwController.text = val;
-                      },
+                      _rwController,
+                      isReadOnly: true,
                     ),
                   ),
                 ],

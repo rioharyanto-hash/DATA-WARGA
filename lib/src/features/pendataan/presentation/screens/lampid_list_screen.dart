@@ -308,7 +308,60 @@ class _LampidListScreenState extends ConsumerState<LampidListScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: mutasiList.length,
                   itemBuilder: (context, index) {
-                    return _LampidListItem(mutasi: mutasiList[index]);
+                    final mutasi = mutasiList[index];
+                    return _LampidListItem(
+                      mutasi: mutasi,
+                      isAdmin: isAdmin,
+                      onDelete: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Hapus Data'),
+                            content: const Text(
+                              'Apakah Anda yakin ingin menghapus data ini?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Batal'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text(
+                                  'Hapus',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm == true) {
+                          try {
+                            final repo = ref.read(mutasiRepositoryProvider);
+                            await repo.deleteMutasi(mutasi.id);
+                            ref.invalidate(mutasiFilteredProvider);
+                            ref.invalidate(allMutasiProvider);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Data berhasil dihapus'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Gagal menghapus data: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        }
+                      },
+                    );
                   },
                 );
               },
@@ -322,8 +375,14 @@ class _LampidListScreenState extends ConsumerState<LampidListScreen> {
 
 class _LampidListItem extends ConsumerWidget {
   final Mutasi mutasi;
+  final bool isAdmin;
+  final VoidCallback? onDelete;
 
-  const _LampidListItem({required this.mutasi});
+  const _LampidListItem({
+    required this.mutasi,
+    this.isAdmin = false,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -357,6 +416,12 @@ class _LampidListItem extends ConsumerWidget {
           mutasi.namaOrang,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+        trailing: isAdmin
+            ? IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                onPressed: onDelete,
+              )
+            : null,
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

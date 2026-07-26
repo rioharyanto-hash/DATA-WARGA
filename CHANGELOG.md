@@ -1,3 +1,42 @@
+## [2026-07-26]
+### [MINOR] - Versi 1.9.26+49
+- Menambahkan batasan (restriction) dan peringatan otomatis pada form input data individu (`FormIndividuScreen`) untuk mencegah adanya dua atau lebih Kepala Keluarga atau Kepala Rumah Tangga dalam satu Kartu Keluarga (KK):
+  1. **Validasi Dropdown Real-time:** Ketika pengguna memilih opsi "Kepala Keluarga" atau "Kepala Rumah Tangga", sistem otomatis memeriksa seluruh anggota dalam KK tersebut. Jika sudah ada yang menjabat posisi tersebut, dialog peringatan akan langsung muncul dengan mencantumkan nama dan NIK pejabat saat ini.
+  2. **Validasi Tombol Simpan:** Memvalidasi kembali seluruh anggota KK saat tombol "Simpan" ditekan untuk mencegah duplikasi sebelum data disimpan ke database lokal maupun sinkronisasi.
+
+## [2026-07-26]
+### [PATCH] - Versi 1.9.25+48
+- Memperbarui tampilan kolom dan logika pengurutan (sorting) pada modal detail kartu statistik di Dashboard Utama:
+  1. **Detail Jumlah Bangunan:** Menampilkan kolom RT, RW, Nama Bangunan, Alamat Rumah, dan Kelompok. Diurutkan mulai dari RT terkecil, kemudian Nama Bangunan.
+  2. **Detail Jumlah KK:** Diurutkan mulai dari RT terkecil, kemudian No. KK, dan Nama Kepala Keluarga.
+  3. **Detail Total Penduduk:** Diurutkan mulai dari RT terkecil, kemudian Nama Lengkap, NIK, dan Jenis Kelamin.
+
+## [2026-07-25]
+### [PATCH] - Versi 1.9.24+47
+- Menstandarisasi penulisan RT dan RW menjadi format 3 digit (misal: `001`, `010`) di seluruh sistem, mencakup:
+  1. **UI Dropdown & Form:** Memperbarui dropdown pilihan RT/RW dan text controller pada halaman Laporan, Form Bangunan, dan Form Pengurus (Kader).
+  2. **Ekspor & Sinkronisasi:** Memperbarui `CsvTransferService` dan repositori laporan agar penulisan RT/RW serta nama Kelompok Dasawisma diproses dan distandarisasi ke dalam 3 digit secara otomatis.
+  3. **Standarisasi Database Supabase (`standardize_rt_rw.dart`):** Membuat dan menjalankan skrip pembaruan massal pada Supabase untuk menyeragamkan kolom `rt`, `rw`, dan nama `kelompok_dawis` pada tabel `app_user` (59 akun berhasil diperbarui) dan `bangunan`.
+  4. **Migrasi Database Lokal:** Meningkatkan versi SQLite lokal ke versi 28 dengan menambahkan rutinitas normalisasi otomatis saat pembaruan aplikasi di perangkat pengguna.
+
+## [2026-07-25]
+### [PATCH] - Versi 1.9.23+46
+- Membuat dan menjalankan skrip pemeliharaan data (`update_rw_bangunan.dart`) untuk memperbarui secara otomatis angka RW dari `10` menjadi `010` pada tabel `bangunan` di Supabase secara serentak (sebanyak 213 baris data berhasil diperbarui).
+
+## [2026-07-25]
+### [PATCH] - Versi 1.9.22+45
+- Memperbaiki layout dan pemotongan kata pada ekspor PDF Rekapitulasi (Form 4 Terisi dan Blanko). Ukuran font header disesuaikan menjadi 4.5 pt dan font sel data menjadi 6 pt, serta menghapus pemenggalan suku kata dengan tanda hubung/enter yang tidak rapi (seperti `MEMI\nLIKI\nJAMBAN` dan `PEKA\nRANGAN`).
+
+## [2026-07-25]
+### [PATCH] - Versi 1.9.21+44
+- Memperkecil ukuran font pada header (dari 8 pt menjadi 4.5 pt) dan sel data (dari 8 pt menjadi 6 pt) pada tabel PDF Ringkasan Rekapitulasi agar tampilan kolom lebih rapi, proporsional, dan tidak terpotong atau mepet pada 34 kolom tabel.
+
+## [2026-07-25]
+### [PATCH] - Versi 1.9.20+43
+- Memperbaiki masalah pada ekspor PDF Ringkasan Rekapitulasi di mana kolom Nomor RT sering kali menampilkan `...` ketika filter RT diatur ke 'Semua' akibat fallback yang tidak akurat. Kini resolusi RT dilakukan langsung dari data bangunan atau nama Kelompok Dasawisma.
+- Meningkatkan lebar kolom (flex) "NOMOR RT" pada ekspor PDF Ringkasan Rekapitulasi agar teks nomor RT dan nomor panjang tidak lagi terpotong.
+- Menambahkan proteksi validasi anti-duplikasi nomor KK saat penginputan di dalam KRT dan melengkapi fitur hapus KK serta Individu khusus untuk pengguna dengan peran Admin.
+
 ## [2026-07-14]
 ### [PATCH] - Versi 1.9.17+40
 - Memperbaiki *crash* `Unsupported operation: _Namespace` pada peramban Web saat mengimpor atau mengekspor data Excel/CSV yang disebabkan oleh pemeriksaan platform internal dan getter dari package *file_picker*.

@@ -47,7 +47,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 27,
+        version: 28,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -324,6 +324,67 @@ class LocalDbHelper {
                   );
                 }
               }
+            }
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (oldVersion < 28) {
+      try {
+        final tables = ['app_user', 'bangunan'];
+        final regex = RegExp(
+          r'^(.+?)\s*(\d{1,3})\s*[.,-]\s*(\d{1,3})\s*[.,-]\s*(\d{1,3})\s*$',
+        );
+        for (final table in tables) {
+          final rows = await db.query(table);
+          for (final row in rows) {
+            final kelompokDawis = row['kelompok_dawis']?.toString();
+            String? newKd;
+            if (kelompokDawis != null && kelompokDawis.isNotEmpty) {
+              final match = regex.firstMatch(kelompokDawis);
+              if (match != null) {
+                final name = match.group(1)?.trim() ?? '';
+                final rw = match.group(2)?.padLeft(3, '0') ?? '';
+                final rt = match.group(3)?.padLeft(3, '0') ?? '';
+                final urut = match.group(4)?.padLeft(3, '0') ?? '';
+                newKd = '$name $rw.$rt.$urut';
+              } else {
+                newKd = kelompokDawis.trim();
+              }
+            }
+            final oldRt = row['rt']?.toString();
+            final oldRw = row['rw']?.toString();
+            String? newRt;
+            String? newRw;
+            if (oldRt != null && oldRt.isNotEmpty) {
+              final n = int.tryParse(oldRt.trim());
+              newRt = n != null
+                  ? n.toString().padLeft(3, '0')
+                  : oldRt.trim().padLeft(3, '0');
+            }
+            if (oldRw != null && oldRw.isNotEmpty) {
+              final n = int.tryParse(oldRw.trim());
+              newRw = n != null
+                  ? n.toString().padLeft(3, '0')
+                  : oldRw.trim().padLeft(3, '0');
+            }
+
+            final updates = <String, dynamic>{};
+            if (newKd != null && newKd != kelompokDawis) {
+              updates['kelompok_dawis'] = newKd;
+            }
+            if (newRt != null && newRt != oldRt) updates['rt'] = newRt;
+            if (newRw != null && newRw != oldRw) updates['rw'] = newRw;
+
+            if (updates.isNotEmpty) {
+              await db.update(
+                table,
+                updates,
+                where: 'id = ?',
+                whereArgs: [row['id']],
+              );
             }
           }
         }
