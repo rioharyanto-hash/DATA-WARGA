@@ -40,7 +40,10 @@ class DetailKeluargaScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final individuList = ref.watch(individuByKeluargaProvider(keluargaId));
     final keluargaData = ref.watch(keluargaByIdProvider(keluargaId));
-    final isAdmin = ref.watch(loggedInUserProvider)?.role == 'ADMIN';
+    final userRole = ref.watch(loggedInUserProvider)?.role;
+    final isAdmin = userRole == 'ADMIN';
+    final isKader = userRole == 'KADER';
+    final canDeleteIndividu = isAdmin || isKader;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -560,7 +563,8 @@ class DetailKeluargaScreen extends ConsumerWidget {
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                if (isAdmin && mode == 'master')
+                                                if (canDeleteIndividu &&
+                                                    mode == 'master')
                                                   InkWell(
                                                     onTap: () {
                                                       showDialog(

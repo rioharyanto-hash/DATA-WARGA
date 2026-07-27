@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dawis/src/features/pendataan/domain/entities/keluarga.dart';
 import 'package:dawis/src/features/pendataan/data/repositories/keluarga_repository.dart';
 import 'package:dawis/core/database/local_db_helper.dart';
@@ -27,24 +28,46 @@ final idBangunanByKeluargaProvider = FutureProvider.family<String?, String>((
   ref,
   keluargaId,
 ) async {
-  final db = await LocalDbHelper.database;
-  final keluargaMaps = await db.query(
-    'keluarga',
-    where: 'id = ?',
-    whereArgs: [keluargaId],
-    limit: 1,
-  );
-  if (keluargaMaps.isEmpty) return null;
-  final idKrt = keluargaMaps.first['id_krt'] as String;
+  try {
+    final db = await LocalDbHelper.database;
+    final keluargaMaps = await db.query(
+      'keluarga',
+      where: 'id = ?',
+      whereArgs: [keluargaId],
+      limit: 1,
+    );
+    if (keluargaMaps.isNotEmpty) {
+      final idKrt = keluargaMaps.first['id_krt'] as String;
+      final krtMaps = await db.query(
+        'krt',
+        where: 'id = ?',
+        whereArgs: [idKrt],
+        limit: 1,
+      );
+      if (krtMaps.isNotEmpty) {
+        final idBangunan = krtMaps.first['id_bangunan']?.toString();
+        if (idBangunan != null && idBangunan.isNotEmpty) {
+          return idBangunan;
+        }
+      }
+    }
+  } catch (_) {}
 
-  final krtMaps = await db.query(
-    'krt',
-    where: 'id = ?',
-    whereArgs: [idKrt],
-    limit: 1,
-  );
-  if (krtMaps.isEmpty) return null;
-  return krtMaps.first['id_bangunan'] as String;
+  try {
+    final res = await Supabase.instance.client
+        .from('keluarga')
+        .select('id_krt, krt(id_bangunan)')
+        .eq('id', keluargaId)
+        .maybeSingle();
+    if (res != null && res['krt'] != null) {
+      final idBangunan = res['krt']['id_bangunan']?.toString();
+      if (idBangunan != null && idBangunan.isNotEmpty) {
+        return idBangunan;
+      }
+    }
+  } catch (_) {}
+
+  return null;
 });
 
 final searchKeluargaProvider =

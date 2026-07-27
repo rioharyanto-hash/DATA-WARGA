@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/entities/mutasi.dart';
 import '../../domain/entities/individu.dart';
@@ -57,6 +58,7 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
   final List<String> _statusIbuList = ['Hamil', 'Melahirkan', 'Nifas'];
 
   String? _idBangunan;
+  bool _isLoading = false;
 
   Individu? _asalIndividu;
   bool _isKk = false;
@@ -69,6 +71,7 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
   @override
   void initState() {
     super.initState();
+    _idBangunan = widget.bangunanId;
     if (widget.defaultJenisMutasi != null &&
         _jenisMutasiList.contains(widget.defaultJenisMutasi)) {
       _jenisMutasi = widget.defaultJenisMutasi;
@@ -157,19 +160,46 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
       return;
     }
 
-    if (_idBangunan == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gagal menemukan data bangunan dari warga ini'),
-        ),
-      );
+    if (_idBangunan == null || _idBangunan!.isEmpty) {
+      if (widget.idIndividuAsal != null) {
+        try {
+          final res = await Supabase.instance.client
+              .from('individu')
+              .select('id_keluarga, keluarga(id_krt, krt(id_bangunan))')
+              .eq('id', widget.idIndividuAsal!)
+              .maybeSingle();
+          if (res != null &&
+              res['keluarga'] != null &&
+              res['keluarga']['krt'] != null) {
+            final idB = res['keluarga']['krt']['id_bangunan']?.toString();
+            if (idB != null && idB.isNotEmpty) {
+              _idBangunan = idB;
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (_idBangunan == null || _idBangunan!.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Gagal menyimpan: ID Bangunan tempat tinggal warga tidak ditemukan di sistem. Harap periksa kembali data keluarga warga tersebut.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
+
+    setState(() => _isLoading = true);
 
     try {
       final mutasi = Mutasi(
         id: const Uuid().v4(),
-        idBangunan: widget.bangunanId,
+        idBangunan: _idBangunan!,
         idIndividuAsal: widget.idIndividuAsal,
         jenisMutasi: _jenisMutasi!,
         namaOrang: _namaController.text,
@@ -334,6 +364,10 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -534,7 +568,7 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.pop(),
+                      onPressed: _isLoading ? null : () => context.pop(),
 
                       child: const Text('Batal'),
                     ),
@@ -542,9 +576,18 @@ class _FormMutasiScreenState extends ConsumerState<FormMutasiScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _saveForm,
+                      onPressed: _isLoading ? null : _saveForm,
 
-                      child: const Text('Simpan'),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Simpan'),
                     ),
                   ),
                 ],

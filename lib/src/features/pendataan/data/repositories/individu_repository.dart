@@ -46,6 +46,42 @@ class IndividuRepository {
     return filtered.map((json) => IndividuModel.fromJson(json)).toList();
   }
 
+  Future<bool> checkDuplicateInKeluarga(
+    String keluargaId,
+    String namaLengkap,
+    String nik, {
+    String? excludeId,
+  }) async {
+    final response = await _supabase
+        .from('individu')
+        .select('id, nama_lengkap, nik')
+        .eq('id_keluarga', keluargaId);
+
+    final excludedIds = await _getExcludedIndividuIds();
+
+    for (final row in response) {
+      final rowId = row['id']?.toString() ?? '';
+      if (excludeId != null && rowId == excludeId) continue;
+      if (excludedIds.contains(rowId)) continue;
+
+      final existingNik = (row['nik'] ?? '').toString().trim();
+      if (nik.trim().isNotEmpty &&
+          existingNik.isNotEmpty &&
+          existingNik == nik.trim()) {
+        return true;
+      }
+      final existingNama = (row['nama_lengkap'] ?? '')
+          .toString()
+          .trim()
+          .toLowerCase();
+      if (existingNama.isNotEmpty &&
+          existingNama == namaLengkap.trim().toLowerCase()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<List<Individu>> getPenggantiKkCandidates(
     String keluargaId,
     String excludeId,

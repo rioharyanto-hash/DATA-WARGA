@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dawis/core/database/local_db_helper.dart';
 
 import '../../domain/entities/mutasi.dart';
@@ -22,8 +23,18 @@ class FormMutasiMasterScreen extends ConsumerStatefulWidget {
 class _FormMutasiMasterScreenState
     extends ConsumerState<FormMutasiMasterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _tanggalMutasiController = TextEditingController();
+  final _asalController = TextEditingController();
+  final _tujuanController = TextEditingController();
+  final _keteranganController = TextEditingController();
+  final _sebabKematianController = TextEditingController();
 
+  Individu? _selectedIndividu;
   String? _jenisMutasi;
+  String? _statusIbu;
+  bool _isLoading = false;
+  String? _selectedKelompokDawis;
+
   final List<String> _jenisMutasiList = [
     'Lahir',
     'Datang',
@@ -32,18 +43,21 @@ class _FormMutasiMasterScreenState
     'Status Ibu (Hamil/Nifas)',
   ];
 
-  Individu? _selectedIndividu;
-  final _tanggalMutasiController = TextEditingController();
-  final _asalController = TextEditingController();
-  final _tujuanController = TextEditingController();
-  final _keteranganController = TextEditingController();
-  final _sebabKematianController = TextEditingController();
-  String? _statusIbu;
-  final List<String> _statusIbuList = ['Hamil', 'Melahirkan', 'Nifas'];
+  final List<String> _statusIbuList = [
+    'Hamil',
+    'Nifas',
+    'Meninggal saat Hamil',
+    'Meninggal saat Melahirkan',
+    'Meninggal saat Nifas',
+  ];
 
-  String? _selectedKelompokDawis;
-
-  bool _isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+    _tanggalMutasiController.text = DateFormat(
+      'yyyy-MM-dd',
+    ).format(DateTime.now());
+  }
 
   @override
   void dispose() {
@@ -56,17 +70,21 @@ class _FormMutasiMasterScreenState
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      lastDate: DateTime(2101),
     );
     if (picked != null) {
-      setState(() {
+      setStateLandscapeSafe(() {
         _tanggalMutasiController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
+  }
+
+  void setStateLandscapeSafe(VoidCallback fn) {
+    if (mounted) setState(fn);
   }
 
   bool _checkAdminKelompok() {
@@ -105,21 +123,55 @@ class _FormMutasiMasterScreenState
           ? DateFormat('yyyy-MM-dd').format(DateTime.now())
           : _tanggalMutasiController.text;
 
-      final db = await LocalDbHelper.database;
-      final res = await db.rawQuery(
-        '''
-        SELECT krt.id_bangunan 
-        FROM individu 
-        JOIN keluarga ON individu.id_keluarga = keluarga.id 
-        JOIN krt ON keluarga.id_krt = krt.id 
-        WHERE individu.id = ?
-      ''',
-        [_selectedIndividu!.id],
-      );
+      String resolvedIdBangunan = '';
+      try {
+        final db = await LocalDbHelper.database;
+        final res = await db.rawQuery(
+          '''
+          SELECT krt.id_bangunan 
+          FROM individu 
+          JOIN keluarga ON individu.id_keluarga = keluarga.id 
+          JOIN krt ON keluarga.id_krt = krt.id 
+          WHERE individu.id = ?
+        ''',
+          [_selectedIndividu!.id],
+        );
+        if (res.isNotEmpty && res.first['id_bangunan'] != null) {
+          resolvedIdBangunan = res.first['id_bangunan'].toString();
+        }
+      } catch (_) {}
 
-      final resolvedIdBangunan = res.isNotEmpty
-          ? res.first['id_bangunan'] as String
-          : '';
+      if (resolvedIdBangunan.isEmpty) {
+        try {
+          final res = await Supabase.instance.client
+              .from('individu')
+              .select('id_keluarga, keluarga(id_krt, krt(id_bangunan))')
+              .eq('id', _selectedIndividu!.id)
+              .maybeSingle();
+          if (res != null &&
+              res['keluarga'] != null &&
+              res['keluarga']['krt'] != null) {
+            final idB = res['keluarga']['krt']['id_bangunan']?.toString();
+            if (idB != null && idB.isNotEmpty) {
+              resolvedIdBangunan = idB;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (resolvedIdBangunan.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Gagal menyimpan: ID Bangunan tempat tinggal warga tidak ditemukan di sistem. Harap periksa kembali data keluarga warga tersebut.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
 
       final mutasi = Mutasi(
         id: id,

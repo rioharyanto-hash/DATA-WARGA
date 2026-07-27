@@ -1,3 +1,13 @@
+## [2026-07-27]
+### [PATCH] - Versi 1.9.28+51
+- **Perbaikan Resolusi ID Bangunan (Hybrid Fallback):** Mengatasi masalah kueri ID Bangunan yang gagal ketika mutasi atau pendataan individu offline/koneksi tidak stabil dengan menerapkan pencarian fallback dari SQLite ke Supabase cloud (`form_mutasi_master_screen.dart`, `form_mutasi_screen.dart`, `form_individu_screen.dart`, dan `keluarga_provider.dart`).
+- **Proteksi Multiple Submit & Duplikasi Data (Slow Internet Defense):** Menambahkan indikator loading (`_isLoading`), menonaktifkan tombol simpan selama proses asinkron berlangsung, serta menambahkan validasi duplikat NIK dan Nama Lengkap dalam satu KK (`checkDuplicateInKeluarga`) untuk mencegah terbentuknya data ganda saat koneksi lambat.
+- **Pembersihan List UI & Form Protections:** Menambahkan proteksi loading pada `FormKeluargaScreen`, `FormKrtScreen`, dan `FormBangunanScreen`, serta mengesampingkan individu mutasi/meninggal agar tidak muncul di list UI.
+
+## [2026-07-27]
+### [MINOR] - Versi 1.9.27+50
+- Menambahkan fungsi hapus individu untuk role Kader Dasawisma (Kader Dawis) pada halaman Detail Keluarga (`DetailKeluargaScreen`). Sebelumnya fitur penghapusan individu hanya dapat diakses oleh role ADMIN. Kini Kader juga dapat menghapus data individu disertai dengan dialog konfirmasi pengaman.
+
 ## [2026-07-26]
 ### [MINOR] - Versi 1.9.26+49
 - Menambahkan batasan (restriction) dan peringatan otomatis pada form input data individu (`FormIndividuScreen`) untuk mencegah adanya dua atau lebih Kepala Keluarga atau Kepala Rumah Tangga dalam satu Kartu Keluarga (KK):

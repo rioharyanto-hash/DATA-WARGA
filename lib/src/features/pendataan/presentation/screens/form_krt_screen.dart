@@ -29,6 +29,7 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
   String? _existingBangunanId;
   List<Map<String, dynamic>> _krtCandidates = [];
   String? _selectedCandidateId;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -99,7 +100,9 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
   }
 
   void _simpanData() async {
+    if (_isLoading) return;
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Menyimpan data...')));
@@ -137,6 +140,10 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
               backgroundColor: Colors.red,
             ),
           );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     }
@@ -376,7 +383,7 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.pop(),
+                      onPressed: _isLoading ? null : () => context.pop(),
 
                       child: const Text(
                         'Batal',
@@ -391,15 +398,24 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: FilledButton(
-                      onPressed: _simpanData,
+                      onPressed: _isLoading ? null : _simpanData,
 
-                      child: const Text(
-                        'Simpan Data',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Simpan Data',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                 ],

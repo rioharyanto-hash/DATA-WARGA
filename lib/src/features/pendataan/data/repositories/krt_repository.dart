@@ -10,13 +10,65 @@ class KrtRepository {
     await _supabase.from('krt').upsert(model.toJson());
   }
 
+  Future<Set<String>> _getExcludedIndividuIds() async {
+    final response = await _supabase
+        .from('mutasi')
+        .select('id_individu_asal')
+        .inFilter('jenis_mutasi', ['Meninggal', 'Pindah']);
+    return response
+        .map((e) => e['id_individu_asal']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toSet();
+  }
+
   Future<List<Krt>> getKrtByBangunanId(String bangunanId) async {
     final response = await _supabase
         .from('krt')
         .select()
         .eq('id_bangunan', bangunanId)
         .order('created_at', ascending: true);
-    return response.map((json) => KrtModel.fromJson(json)).toList();
+    if (response.isEmpty) return [];
+
+    final krtIds = response.map((e) => e['id'] as String).toList();
+    final kels = await _supabase
+        .from('keluarga')
+        .select('id, id_krt')
+        .inFilter('id_krt', krtIds);
+    final kelIds = kels.map((e) => e['id'] as String).toList();
+
+    final excludedIds = await _getExcludedIndividuIds();
+    final inds = kelIds.isEmpty
+        ? []
+        : await _supabase
+              .from('individu')
+              .select('id, id_keluarga')
+              .inFilter('id_keluarga', kelIds);
+
+    final activeKelIds = <String>{};
+    for (var ind in inds) {
+      if (!excludedIds.contains(ind['id']?.toString() ?? '')) {
+        activeKelIds.add(ind['id_keluarga']?.toString() ?? '');
+      }
+    }
+
+    final activeKrtIds = <String>{};
+    for (var kel in kels) {
+      if (activeKelIds.contains(kel['id']?.toString() ?? '')) {
+        activeKrtIds.add(kel['id_krt']?.toString() ?? '');
+      }
+    }
+
+    return response.map((json) {
+      final mod = Map<String, dynamic>.from(json);
+      final id = mod['id']?.toString() ?? '';
+      if (!activeKrtIds.contains(id)) {
+        final origName = mod['nama_krt']?.toString() ?? 'Tanpa Nama';
+        if (!origName.contains('[Kosong')) {
+          mod['nama_krt'] = '$origName [Kosong / Pindah]';
+        }
+      }
+      return KrtModel.fromJson(mod);
+    }).toList();
   }
 
   Future<Krt?> getKrtById(String id) async {

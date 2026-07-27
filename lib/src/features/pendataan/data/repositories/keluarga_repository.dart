@@ -10,6 +10,17 @@ class KeluargaRepository {
     await _supabase.from('keluarga').upsert(model.toJson());
   }
 
+  Future<Set<String>> _getExcludedIndividuIds() async {
+    final response = await _supabase
+        .from('mutasi')
+        .select('id_individu_asal')
+        .inFilter('jenis_mutasi', ['Meninggal', 'Pindah']);
+    return response
+        .map((e) => e['id_individu_asal']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toSet();
+  }
+
   Future<List<Keluarga>> getKeluargaByKrtId(String krtId) async {
     final response = await _supabase
         .from('keluarga')
@@ -17,28 +28,37 @@ class KeluargaRepository {
         .eq('id_krt', krtId);
     if (response.isEmpty) return [];
 
+    final excludedIds = await _getExcludedIndividuIds();
     final kelIds = response.map((e) => e['id'] as String).toList();
     final individuList = await _supabase
         .from('individu')
-        .select('id_keluarga, nama_lengkap, hubungan_keluarga')
+        .select('id, id_keluarga, nama_lengkap, hubungan_keluarga')
         .inFilter('id_keluarga', kelIds);
 
     Map<String, List<dynamic>> kelToInds = {};
     for (var ind in individuList) {
-      kelToInds.putIfAbsent(ind['id_keluarga'], () => []).add(ind);
+      if (!excludedIds.contains(ind['id']?.toString() ?? '')) {
+        kelToInds.putIfAbsent(ind['id_keluarga'], () => []).add(ind);
+      }
     }
 
     List<Keluarga> results = [];
     for (var kel in response) {
       final iList = kelToInds[kel['id']] ?? [];
-      String namaKepala = 'Tanpa Nama';
-      for (var ind in iList) {
-        final hk = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
-        if (hk == 'KK' ||
-            hk == 'KEPALA KELUARGA' ||
-            hk == 'KEPALA RUMAH TANGGA') {
-          namaKepala = ind['nama_lengkap']?.toString() ?? 'Tanpa Nama';
-          break;
+      String namaKepala = '[KK Kosong / Pindah]';
+      if (iList.isNotEmpty) {
+        namaKepala = 'Tanpa Nama';
+        for (var ind in iList) {
+          final hk = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+          if (hk == 'KK' ||
+              hk == 'KEPALA KELUARGA' ||
+              hk == 'KEPALA RUMAH TANGGA') {
+            namaKepala = ind['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+            break;
+          }
+        }
+        if (namaKepala == 'Tanpa Nama' && iList.isNotEmpty) {
+          namaKepala = iList.first['nama_lengkap']?.toString() ?? 'Tanpa Nama';
         }
       }
 
@@ -97,14 +117,17 @@ class KeluargaRepository {
     final krts = await _supabase.from('krt').select();
     final bs = await _supabase.from('bangunan').select();
     final inds = await _supabase.from('individu').select();
+    final excludedIds = await _getExcludedIndividuIds();
 
     final krtMap = {for (var x in krts) x['id']: x};
     final bMap = {for (var x in bs) x['id']: x};
     final kelToInds = <String, List<dynamic>>{};
     for (var ind in inds) {
-      kelToInds
-          .putIfAbsent(ind['id_keluarga']?.toString() ?? '', () => [])
-          .add(ind);
+      if (!excludedIds.contains(ind['id']?.toString() ?? '')) {
+        kelToInds
+            .putIfAbsent(ind['id_keluarga']?.toString() ?? '', () => [])
+            .add(ind);
+      }
     }
 
     final String q = query.toLowerCase();

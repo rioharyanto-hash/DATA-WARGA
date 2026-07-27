@@ -51,6 +51,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
   bool _isSehatLayakHuni = false;
   bool _isTidakSehatLayakHuni = false;
   bool _hasStikerP4k = false;
+  bool _isLoading = false;
 
   String? _existingKelompokDawis;
   List<String> _kelompokDawisOptions = [];
@@ -247,6 +248,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
   }
 
   void _simpanData() async {
+    if (_isLoading) return;
     if (_formKey.currentState!.validate()) {
       final user = ref.read(loggedInUserProvider);
       if (user != null && user.role == 'ADMIN') {
@@ -263,6 +265,7 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
         }
       }
 
+      setState(() => _isLoading = true);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Menyimpan data...')));
@@ -332,6 +335,10 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
               backgroundColor: Colors.red,
             ),
           );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     }
@@ -878,9 +885,11 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                           child: SizedBox(
                             height: 50,
                             child: OutlinedButton(
-                              onPressed: () {
-                                context.pop();
-                              },
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      context.pop();
+                                    },
                               child: const Text(
                                 'Batal',
                                 style: TextStyle(
@@ -896,14 +905,23 @@ class _FormBangunanScreenState extends ConsumerState<FormBangunanScreen> {
                           child: SizedBox(
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: _simpanData,
-                              child: const Text(
-                                'Simpan Data Bangunan',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                ),
-                              ),
+                              onPressed: _isLoading ? null : _simpanData,
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Simpan Data Bangunan',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),

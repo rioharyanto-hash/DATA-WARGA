@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dawis/core/database/local_db_helper.dart';
 import '../../domain/entities/individu.dart';
 import '../../domain/entities/krt.dart';
@@ -34,6 +35,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
   final _uuid = const Uuid();
 
   String? _selectedKeluargaId;
+  bool _isLoading = false;
 
   // ── Bagian 1: Biodata Dasar ──
   final _nikController = TextEditingController();
@@ -532,174 +534,244 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
   }
 
   Future<void> _simpanData() async {
+    if (_isLoading) return;
     if (_formKey.currentState!.validate()) {
-      final hubunganUpper = _hubunganKeluarga.toUpperCase();
-      final krtUpper = _statusDgnKrt.toUpperCase();
-
-      if (hubunganUpper == 'KK' || hubunganUpper == 'KEPALA KELUARGA') {
-        final isDuplicate = await _checkAndWarnDuplicateRole(isKk: true);
-        if (isDuplicate) return;
-      }
-
-      if (krtUpper == 'KK' ||
-          krtUpper == 'KEPALA KELUARGA' ||
-          krtUpper == 'KEPALA RUMAH TANGGA') {
-        final isDuplicate = await _checkAndWarnDuplicateRole(isKk: false);
-        if (isDuplicate) return;
-      }
-
-      final assignedKeluargaId = _selectedKeluargaId ?? widget.keluargaId;
-      final individu = Individu(
-        id: widget.individuId ?? _uuid.v4(),
-        idKeluarga: assignedKeluargaId,
-        namaLengkap: _namaController.text,
-        nik: _nikController.text,
-        hubunganKeluarga: _hubunganKeluarga,
-        statusDgnKrt: _statusDgnKrt,
-        jenisKelamin: _jenisKelamin,
-        tempatLahir: _tempatLahirController.text,
-        tanggalLahir: _tanggalLahirController.text,
-        statusPerkawinan: _statusPerkawinan,
-        pendidikanTerakhir: _pendidikanTerakhir,
-        pekerjaan: _pekerjaan,
-        noTlp: _noTlpController.text.trim(),
-        alamatKtp: _alamatKtpController.text.trim(),
-        alamatDomisili: '',
-        jenisBantuan: _jenisBantuan,
-        tglBantuan: _tglBantuanController.text.isEmpty
-            ? null
-            : _tglBantuanController.text,
-        lamaBantuan: _lamaBantuanController.text.isEmpty
-            ? null
-            : _lamaBantuanController.text,
-        jumlahBantuan: _jumlahBantuanController.text.isEmpty
-            ? null
-            : _jumlahBantuanController.text,
-        metodeKb: _metodeKb,
-        alasanBukanKb: _alasanBukanKb,
-        isButaHuruf: _isButaHuruf ? 1 : 0,
-        isButaAngka: _isButaAngka ? 1 : 0,
-        isButaBahasa: _isButaBahasa ? 1 : 0,
-        kriteriaBerkebutuhanKhusus: _berkebutuhanKhususController.text.isEmpty
-            ? null
-            : _berkebutuhanKhususController.text,
-        makananPokok: _makananPokokController.text.isEmpty
-            ? null
-            : _makananPokokController.text,
-        agama: _agama,
-        punyaAkteKelahiran: _punyaAkteKelahiran ? 1 : 0,
-        noAkteKelahiran: _noAkteController.text.isEmpty
-            ? null
-            : _noAkteController.text,
-        punyaBpjs: _punyaBpjs ? 1 : 0,
-        jenisBpjs: _getJenisBpjs(),
-        aktifPosyandu: _aktifPosyandu ? 1 : 0,
-        frekuensiPosyandu: _frekuensiPosyanduController.text.isEmpty
-            ? null
-            : _frekuensiPosyanduController.text,
-        ikutKerjaBakti: _ikutKerjaBakti ? 1 : 0,
-        isIbuMenyusui: _isIbuMenyusui ? 1 : 0,
-        isIkutUp2k: _isIkutUp2k ? 1 : 0,
-        isIndustriRumahTangga: _isIndustriRumahTangga ? 1 : 0,
-        statusYatimPiatu: _statusYatimPiatu == 'Tidak'
-            ? null
-            : _statusYatimPiatu,
-        namaAyah: _namaAyahController.text.isEmpty
-            ? null
-            : _namaAyahController.text,
-        namaIbu: _namaIbuController.text.isEmpty
-            ? null
-            : _namaIbuController.text,
-        isSynced: 0,
-      );
-
-      final repo = ref.read(individuRepositoryProvider);
-
-      if (widget.individuId != null) {
-        await repo.updateIndividu(individu);
-      } else {
-        await repo.insertIndividu(individu);
-
-        if (widget.jenisMutasi != null && widget.jenisMutasi!.isNotEmpty) {
-          final db = await LocalDbHelper.database;
-          final res = await db.rawQuery(
-            '''
-            SELECT krt.id_bangunan 
-            FROM keluarga 
-            JOIN krt ON keluarga.id_krt = krt.id 
-            WHERE keluarga.id = ?
-          ''',
-            [assignedKeluargaId],
-          );
-
-          final resolvedIdBangunan = res.isNotEmpty
-              ? res.first['id_bangunan'] as String
-              : '';
-
-          final mutasi = Mutasi(
-            id: const Uuid().v4(),
-            idIndividuAsal: individu.id,
-            namaOrang: individu.namaLengkap,
-            jenisMutasi: widget.jenisMutasi!,
-            tanggalMutasi: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-            asal: '',
-            tujuan: '',
-            keterangan: 'Pencatatan Otomatis',
-            idBangunan: resolvedIdBangunan,
-          );
-          await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
-          ref.invalidate(allMutasiProvider);
-          ref.invalidate(mutasiFilteredProvider);
-        }
-      }
-
-      // Refresh list
-      ref.invalidate(individuByKeluargaProvider(assignedKeluargaId));
-
-      // Update KRT jika individu adalah Kepala Keluarga
-      final upperStatus = individu.hubunganKeluarga.toUpperCase();
-      final upperStatusKrt = individu.statusDgnKrt?.toUpperCase() ?? '';
-      if (upperStatus == "KK" ||
-          upperStatus == "KEPALA KELUARGA" ||
-          upperStatus == "KEPALA RUMAH TANGGA" ||
-          upperStatusKrt == "KK" ||
-          upperStatusKrt == "KEPALA KELUARGA" ||
-          upperStatusKrt == "KEPALA RUMAH TANGGA") {
-        final keluargaRepo = ref.read(keluargaRepositoryProvider);
-        final keluarga = await keluargaRepo.getKeluargaById(assignedKeluargaId);
-        if (keluarga != null) {
-          final krtRepo = ref.read(krtRepositoryProvider);
-          final krt = await krtRepo.getKrtById(keluarga.idKrt);
-          if (krt != null) {
-            final updatedKrt = Krt(
-              id: krt.id,
-              idBangunan: krt.idBangunan,
-              namaKrt: individu.namaLengkap,
-              nikKrt: individu.nik,
-              noKkKrt: krt.noKkKrt,
-              isSynced: krt.isSynced,
+      setState(() => _isLoading = true);
+      try {
+        final assignedKeluargaId = _selectedKeluargaId ?? widget.keluargaId;
+        final repo = ref.read(individuRepositoryProvider);
+        final isDuplicateNameOrNik = await repo.checkDuplicateInKeluarga(
+          assignedKeluargaId,
+          _namaController.text,
+          _nikController.text,
+          excludeId: widget.individuId,
+        );
+        if (isDuplicateNameOrNik) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Peringatan: Warga dengan NIK atau Nama yang sama sudah terdaftar dalam Kartu Keluarga ini.',
+                ),
+                backgroundColor: Colors.red,
+              ),
             );
-            await krtRepo.updateKrt(updatedKrt);
-            ref.invalidate(krtByBangunanProvider(krt.idBangunan));
-            ref.invalidate(krtByIdProvider(krt.id));
+          }
+          return;
+        }
+
+        final hubunganUpper = _hubunganKeluarga.toUpperCase();
+        final krtUpper = _statusDgnKrt.toUpperCase();
+
+        if (hubunganUpper == 'KK' || hubunganUpper == 'KEPALA KELUARGA') {
+          final isDuplicate = await _checkAndWarnDuplicateRole(isKk: true);
+          if (isDuplicate) return;
+        }
+
+        if (krtUpper == 'KK' ||
+            krtUpper == 'KEPALA KELUARGA' ||
+            krtUpper == 'KEPALA RUMAH TANGGA') {
+          final isDuplicate = await _checkAndWarnDuplicateRole(isKk: false);
+          if (isDuplicate) return;
+        }
+
+        final individu = Individu(
+          id: widget.individuId ?? _uuid.v4(),
+          idKeluarga: assignedKeluargaId,
+          namaLengkap: _namaController.text,
+          nik: _nikController.text,
+          hubunganKeluarga: _hubunganKeluarga,
+          statusDgnKrt: _statusDgnKrt,
+          jenisKelamin: _jenisKelamin,
+          tempatLahir: _tempatLahirController.text,
+          tanggalLahir: _tanggalLahirController.text,
+          statusPerkawinan: _statusPerkawinan,
+          pendidikanTerakhir: _pendidikanTerakhir,
+          pekerjaan: _pekerjaan,
+          noTlp: _noTlpController.text.trim(),
+          alamatKtp: _alamatKtpController.text.trim(),
+          alamatDomisili: '',
+          jenisBantuan: _jenisBantuan,
+          tglBantuan: _tglBantuanController.text.isEmpty
+              ? null
+              : _tglBantuanController.text,
+          lamaBantuan: _lamaBantuanController.text.isEmpty
+              ? null
+              : _lamaBantuanController.text,
+          jumlahBantuan: _jumlahBantuanController.text.isEmpty
+              ? null
+              : _jumlahBantuanController.text,
+          metodeKb: _metodeKb,
+          alasanBukanKb: _alasanBukanKb,
+          isButaHuruf: _isButaHuruf ? 1 : 0,
+          isButaAngka: _isButaAngka ? 1 : 0,
+          isButaBahasa: _isButaBahasa ? 1 : 0,
+          kriteriaBerkebutuhanKhusus: _berkebutuhanKhususController.text.isEmpty
+              ? null
+              : _berkebutuhanKhususController.text,
+          makananPokok: _makananPokokController.text.isEmpty
+              ? null
+              : _makananPokokController.text,
+          agama: _agama,
+          punyaAkteKelahiran: _punyaAkteKelahiran ? 1 : 0,
+          noAkteKelahiran: _noAkteController.text.isEmpty
+              ? null
+              : _noAkteController.text,
+          punyaBpjs: _punyaBpjs ? 1 : 0,
+          jenisBpjs: _getJenisBpjs(),
+          aktifPosyandu: _aktifPosyandu ? 1 : 0,
+          frekuensiPosyandu: _frekuensiPosyanduController.text.isEmpty
+              ? null
+              : _frekuensiPosyanduController.text,
+          ikutKerjaBakti: _ikutKerjaBakti ? 1 : 0,
+          isIbuMenyusui: _isIbuMenyusui ? 1 : 0,
+          isIkutUp2k: _isIkutUp2k ? 1 : 0,
+          isIndustriRumahTangga: _isIndustriRumahTangga ? 1 : 0,
+          statusYatimPiatu: _statusYatimPiatu == 'Tidak'
+              ? null
+              : _statusYatimPiatu,
+          namaAyah: _namaAyahController.text.isEmpty
+              ? null
+              : _namaAyahController.text,
+          namaIbu: _namaIbuController.text.isEmpty
+              ? null
+              : _namaIbuController.text,
+          isSynced: 0,
+        );
+
+        if (widget.individuId != null) {
+          await repo.updateIndividu(individu);
+        } else {
+          await repo.insertIndividu(individu);
+
+          if (widget.jenisMutasi != null && widget.jenisMutasi!.isNotEmpty) {
+            String resolvedIdBangunan = '';
+            try {
+              final db = await LocalDbHelper.database;
+              final res = await db.rawQuery(
+                '''
+              SELECT krt.id_bangunan 
+              FROM keluarga 
+              JOIN krt ON keluarga.id_krt = krt.id 
+              WHERE keluarga.id = ?
+            ''',
+                [assignedKeluargaId],
+              );
+
+              if (res.isNotEmpty && res.first['id_bangunan'] != null) {
+                resolvedIdBangunan = res.first['id_bangunan'].toString();
+              }
+            } catch (_) {}
+
+            if (resolvedIdBangunan.isEmpty) {
+              try {
+                final res = await Supabase.instance.client
+                    .from('keluarga')
+                    .select('id_krt, krt(id_bangunan)')
+                    .eq('id', assignedKeluargaId)
+                    .maybeSingle();
+                if (res != null && res['krt'] != null) {
+                  final idB = res['krt']['id_bangunan']?.toString();
+                  if (idB != null && idB.isNotEmpty) {
+                    resolvedIdBangunan = idB;
+                  }
+                }
+              } catch (_) {}
+            }
+
+            if (resolvedIdBangunan.isEmpty) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Gagal mencatat mutasi otomatis: ID Bangunan tempat tinggal tidak ditemukan di sistem.',
+                    ),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            } else {
+              final mutasi = Mutasi(
+                id: const Uuid().v4(),
+                idIndividuAsal: individu.id,
+                namaOrang: individu.namaLengkap,
+                jenisMutasi: widget.jenisMutasi!,
+                tanggalMutasi: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                asal: '',
+                tujuan: '',
+                keterangan: 'Pencatatan Otomatis',
+                idBangunan: resolvedIdBangunan,
+              );
+              await ref.read(mutasiRepositoryProvider).insertMutasi(mutasi);
+              ref.invalidate(allMutasiProvider);
+              ref.invalidate(mutasiFilteredProvider);
+            }
           }
         }
-      }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.individuId != null
-                  ? 'Data Individu Berhasil Diperbarui!'
-                  : 'Data Individu Berhasil Disimpan!',
+        // Refresh list
+        ref.invalidate(individuByKeluargaProvider(assignedKeluargaId));
+
+        // Update KRT jika individu adalah Kepala Keluarga
+        final upperStatus = individu.hubunganKeluarga.toUpperCase();
+        final upperStatusKrt = individu.statusDgnKrt?.toUpperCase() ?? '';
+        if (upperStatus == "KK" ||
+            upperStatus == "KEPALA KELUARGA" ||
+            upperStatus == "KEPALA RUMAH TANGGA" ||
+            upperStatusKrt == "KK" ||
+            upperStatusKrt == "KEPALA KELUARGA" ||
+            upperStatusKrt == "KEPALA RUMAH TANGGA") {
+          final keluargaRepo = ref.read(keluargaRepositoryProvider);
+          final keluarga = await keluargaRepo.getKeluargaById(
+            assignedKeluargaId,
+          );
+          if (keluarga != null) {
+            final krtRepo = ref.read(krtRepositoryProvider);
+            final krt = await krtRepo.getKrtById(keluarga.idKrt);
+            if (krt != null) {
+              final updatedKrt = Krt(
+                id: krt.id,
+                idBangunan: krt.idBangunan,
+                namaKrt: individu.namaLengkap,
+                nikKrt: individu.nik,
+                noKkKrt: krt.noKkKrt,
+                isSynced: krt.isSynced,
+              );
+              await krtRepo.updateKrt(updatedKrt);
+              ref.invalidate(krtByBangunanProvider(krt.idBangunan));
+              ref.invalidate(krtByIdProvider(krt.id));
+            }
+          }
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                widget.individuId != null
+                    ? 'Data Individu Berhasil Diperbarui!'
+                    : 'Data Individu Berhasil Disimpan!',
+              ),
             ),
-          ),
-        );
-        if (widget.keluargaId.isEmpty) {
-          context.go('/dashboard');
-        } else {
-          context.pop();
+          );
+          if (widget.keluargaId.isEmpty) {
+            context.go('/dashboard');
+          } else {
+            context.pop();
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal menyimpan data: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     } else {
@@ -1357,7 +1429,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.pop(),
+                      onPressed: _isLoading ? null : () => context.pop(),
 
                       child: const Text('Batal'),
                     ),
@@ -1365,9 +1437,18 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: FilledButton(
-                      onPressed: _simpanData,
+                      onPressed: _isLoading ? null : _simpanData,
 
-                      child: const Text('Simpan Data'),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Simpan Data'),
                     ),
                   ),
                 ],

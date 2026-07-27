@@ -40,6 +40,7 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
   // Untuk penambahan dari Mutasi
   String? _selectedBangunanId;
   List<Bangunan> _bangunanList = [];
+  bool _isLoading = false;
 
   final List<String> _statusVisitasiOptions = [
     'Sudah Dikunjungi',
@@ -92,6 +93,7 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
   }
 
   void _simpanData() async {
+    if (_isLoading) return;
     if (_formKey.currentState!.validate()) {
       if (widget.krtId?.isEmpty == true && _selectedBangunanId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -102,6 +104,7 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
         return;
       }
 
+      setState(() => _isLoading = true);
       try {
         final repo = ref.read(keluargaRepositoryProvider);
 
@@ -183,6 +186,10 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
               backgroundColor: Colors.red,
             ),
           );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     }
@@ -431,7 +438,7 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.pop(),
+                      onPressed: _isLoading ? null : () => context.pop(),
 
                       child: const Text(
                         'Batal',
@@ -446,15 +453,24 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: FilledButton(
-                      onPressed: _simpanData,
+                      onPressed: _isLoading ? null : _simpanData,
 
-                      child: const Text(
-                        'Simpan Data',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Simpan Data',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                 ],
