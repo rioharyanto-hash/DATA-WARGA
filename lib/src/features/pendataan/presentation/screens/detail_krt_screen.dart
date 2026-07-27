@@ -15,7 +15,10 @@ class DetailKrtScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keluargaList = ref.watch(keluargaByKrtProvider(krtId));
     final krtData = ref.watch(krtByIdProvider(krtId));
-    final isAdmin = ref.watch(loggedInUserProvider)?.role == 'ADMIN';
+    final userRole = ref.watch(loggedInUserProvider)?.role;
+    final isAdmin = userRole == 'ADMIN';
+    final isKader = userRole == 'KADER';
+    final canDeleteKeluarga = isAdmin || isKader;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail KRT')),
@@ -131,7 +134,7 @@ class DetailKrtScreen extends ConsumerWidget {
                                 '/form-keluarga-edit/${keluarga.id}',
                               ),
                             ),
-                            if (isAdmin)
+                            if (canDeleteKeluarga)
                               IconButton(
                                 icon: const Icon(
                                   Icons.delete,

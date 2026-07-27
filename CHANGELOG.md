@@ -1,4 +1,8 @@
 ## [2026-07-27]
+### [MINOR] - Versi 1.9.29+52
+- Menambahkan fungsi hapus Kartu Keluarga (KK / Keluarga) untuk role Kader Dasawisma (Kader Dawis) pada halaman Detail KRT (`DetailKrtScreen`). Sebelumnya tombol hapus KK hanya tampil dan dapat diakses oleh role ADMIN.
+
+## [2026-07-27]
 ### [PATCH] - Versi 1.9.28+51
 - **Perbaikan Resolusi ID Bangunan (Hybrid Fallback):** Mengatasi masalah kueri ID Bangunan yang gagal ketika mutasi atau pendataan individu offline/koneksi tidak stabil dengan menerapkan pencarian fallback dari SQLite ke Supabase cloud (`form_mutasi_master_screen.dart`, `form_mutasi_screen.dart`, `form_individu_screen.dart`, dan `keluarga_provider.dart`).
 - **Proteksi Multiple Submit & Duplikasi Data (Slow Internet Defense):** Menambahkan indikator loading (`_isLoading`), menonaktifkan tombol simpan selama proses asinkron berlangsung, serta menambahkan validasi duplikat NIK dan Nama Lengkap dalam satu KK (`checkDuplicateInKeluarga`) untuk mencegah terbentuknya data ganda saat koneksi lambat.
