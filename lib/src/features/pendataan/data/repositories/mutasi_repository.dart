@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/extensions/supabase_extensions.dart';
 import '../models/mutasi_model.dart';
 import '../../domain/entities/mutasi.dart';
 
@@ -29,10 +30,11 @@ class MutasiRepository {
   }
 
   Future<List<Mutasi>> getAllMutasi() async {
-    final response = await _supabase
-        .from('mutasi')
-        .select()
-        .order('tanggal_mutasi', ascending: false);
+    final response = await _supabase.fetchAll(
+      'mutasi',
+      orderBy: 'tanggal_mutasi',
+      ascending: false,
+    );
     return response.map((json) => MutasiModel.fromJson(json)).toList();
   }
 
@@ -41,10 +43,11 @@ class MutasiRepository {
   }
 
   Future<List<Mutasi>> getMutasiByKelompokDawis(String kelompokDawis) async {
-    final mutasiList = await _supabase
-        .from('mutasi')
-        .select()
-        .order('tanggal_mutasi', ascending: false);
+    final mutasiList = await _supabase.fetchAll(
+      'mutasi',
+      orderBy: 'tanggal_mutasi',
+      ascending: false,
+    );
     final bIds = mutasiList
         .map((m) => m['id_bangunan'] as String?)
         .where((id) => id != null && id.isNotEmpty)
@@ -98,10 +101,11 @@ class MutasiRepository {
           .lte('tanggal_mutasi', endDate)
           .order('tanggal_mutasi', ascending: true);
     } else {
-      mutasiList = await _supabase
-          .from('mutasi')
-          .select()
-          .order('tanggal_mutasi', ascending: true);
+      mutasiList = await _supabase.fetchAll(
+        'mutasi',
+        orderBy: 'tanggal_mutasi',
+        ascending: true,
+      );
     }
 
     final bIds = mutasiList

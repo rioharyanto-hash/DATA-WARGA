@@ -125,15 +125,16 @@ class DetailKrtScreen extends ConsumerWidget {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Color(0xFF6366F1),
+                            if (isAdmin || isKader)
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Color(0xFF6366F1),
+                                ),
+                                onPressed: () => context.push(
+                                  '/form-keluarga-edit/${keluarga.id}',
+                                ),
                               ),
-                              onPressed: () => context.push(
-                                '/form-keluarga-edit/${keluarga.id}',
-                              ),
-                            ),
                             if (canDeleteKeluarga)
                               IconButton(
                                 icon: const Icon(

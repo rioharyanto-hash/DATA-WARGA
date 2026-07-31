@@ -28,7 +28,7 @@ class LocalDbHelper {
       return await factory.openDatabase(
         filePath,
         options: OpenDatabaseOptions(
-          version: 25,
+          version: 30,
           onCreate: _createDB,
           onUpgrade: _upgradeDB,
         ),
@@ -47,7 +47,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 28,
+        version: 30,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -392,6 +392,22 @@ class LocalDbHelper {
         // ignore
       }
     }
+
+    if (oldVersion < 29) {
+      try {
+        await db.execute(
+          'ALTER TABLE individu ADD COLUMN alasan_belum_sekolah TEXT',
+        );
+      } catch (_) {}
+    }
+
+    if (oldVersion < 30) {
+      try {
+        await db.execute(
+          'ALTER TABLE keluarga ADD COLUMN id_kepala_keluarga TEXT',
+        );
+      } catch (_) {}
+    }
   }
 
   static Future<void> _createDB(Database db, int version) async {
@@ -448,6 +464,7 @@ class LocalDbHelper {
         id_krt $textType,
         no_kk $textType,
         status_visitasi $textType,
+        id_kepala_keluarga $textNullable,
         is_synced $intType DEFAULT 0,
         FOREIGN KEY (id_krt) REFERENCES krt (id) ON DELETE CASCADE
       )
@@ -476,6 +493,7 @@ class LocalDbHelper {
         jumlah_bantuan $textNullable,
         metode_kb $textNullable,
         alasan_bukan_kb $textNullable,
+        alasan_belum_sekolah $textNullable,
         is_buta_huruf $intNullable DEFAULT 0,
         is_buta_angka $intNullable DEFAULT 0,
         is_buta_bahasa $intNullable DEFAULT 0,

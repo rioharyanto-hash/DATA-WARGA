@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/extensions/supabase_extensions.dart';
 import '../models/bangunan_model.dart';
 import '../../domain/entities/bangunan.dart';
 
@@ -11,12 +12,12 @@ class BangunanRepository {
   }
 
   Future<List<Bangunan>> getAllBangunan() async {
-    final response = await _supabase.from('bangunan').select();
+    final response = await _supabase.fetchAll('bangunan');
     return response.map((json) => BangunanModel.fromJson(json)).toList();
   }
 
   Future<List<Bangunan>> getBangunanByKelompokDawis(String kelompok) async {
-    final response = await _supabase.from('bangunan').select();
+    final response = await _supabase.fetchAll('bangunan');
 
     final normalizedInput = kelompok
         .replaceAll('.', '')
@@ -36,7 +37,7 @@ class BangunanRepository {
   }
 
   Future<List<Bangunan>> getBangunanByRw(String rw) async {
-    final response = await _supabase.from('bangunan').select();
+    final response = await _supabase.fetchAll('bangunan');
     final irw = int.tryParse(rw) ?? 0;
     final filtered = response
         .where((b) => (int.tryParse(b['rw']?.toString() ?? '') ?? -1) == irw)
@@ -45,7 +46,7 @@ class BangunanRepository {
   }
 
   Future<List<Bangunan>> getBangunanByRtRw(String rt, String rw) async {
-    final response = await _supabase.from('bangunan').select();
+    final response = await _supabase.fetchAll('bangunan');
     final irt = int.tryParse(rt) ?? 0;
     final irw = int.tryParse(rw) ?? 0;
     final filtered = response.where((b) {
@@ -101,7 +102,7 @@ class BangunanRepository {
   }
 
   Future<List<String>> getDistinctKelompokDawis() async {
-    final response = await _supabase.from('bangunan').select('kelompok_dawis');
+    final response = await _supabase.fetchAll('bangunan', columns: 'kelompok_dawis');
     final dawisSet = <String>{};
     for (var row in response) {
       final kd = row['kelompok_dawis']?.toString() ?? '';

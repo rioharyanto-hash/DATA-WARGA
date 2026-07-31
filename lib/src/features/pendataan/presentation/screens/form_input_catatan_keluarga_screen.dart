@@ -48,6 +48,8 @@ class _FormInputCatatanKeluargaScreenState
   ];
   final List<String> _pendidikanOptions = [
     'Tidak/Belum Sekolah',
+    'PAUD',
+    'TK / RA',
     'Belum Tamat SD/Sederajat',
     'Tamat SD/Sederajat',
     'SLTP/Sederajat',

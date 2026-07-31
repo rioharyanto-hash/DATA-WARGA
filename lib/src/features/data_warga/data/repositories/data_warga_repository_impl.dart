@@ -7,11 +7,25 @@ import '../../domain/repositories/data_warga_repository.dart';
 class DataWargaRepositoryImpl implements DataWargaRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  Future<List<Map<String, dynamic>>> _fetchAll(String table, [String? columns]) async {
+    List<Map<String, dynamic>> allData = [];
+    int offset = 0;
+    const int limit = 1000;
+    while (true) {
+      final res = await _supabase
+          .from(table)
+          .select(columns ?? '*')
+          .range(offset, offset + limit - 1);
+      allData.addAll(List<Map<String, dynamic>>.from(res));
+      if (res.length < limit) break;
+      offset += limit;
+    }
+    return allData;
+  }
+
   @override
   Future<List<String>> getRtList(AppUser user) async {
-    final response = await _supabase
-        .from('bangunan')
-        .select('rt, rw, kelompok_dawis');
+    final response = await _fetchAll('bangunan', 'rw, rt, kelompok_dawis');
 
     Iterable<dynamic> filteredResults = response.where((e) {
       final rt = e['rt']?.toString() ?? '';
@@ -58,7 +72,7 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
     String? rtFilter,
   }) async {
     // 1. Fetch all Bangunan
-    final allBangunan = await _supabase.from('bangunan').select();
+    final allBangunan = await _fetchAll('bangunan');
 
     // 2. Filter Bangunan based on Role and RT Filter
     var filteredBangunan = allBangunan.where((b) {
@@ -97,13 +111,9 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
     if (filteredBangunan.isEmpty) return [];
 
     // 3. Fetch related data
-    final krtList = await _supabase
-        .from('krt')
-        .select('id, id_bangunan, nama_krt');
-    final keluargaList = await _supabase.from('keluarga').select('id, id_krt');
-    final individuList = await _supabase
-        .from('individu')
-        .select('id, id_keluarga, jenis_kelamin, nama_lengkap');
+    final krtList = await _fetchAll('krt', 'id, id_bangunan, nama_krt');
+    final keluargaList = await _fetchAll('keluarga', 'id, id_krt');
+    final individuList = await _fetchAll('individu', 'id, id_keluarga, jenis_kelamin, nama_lengkap');
 
     // Map relationships
     Map<String, List<Map<String, dynamic>>> bToKrt = {};

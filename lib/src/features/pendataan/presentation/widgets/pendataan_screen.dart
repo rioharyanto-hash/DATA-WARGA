@@ -75,6 +75,17 @@ class PendataanScreen extends ConsumerWidget {
               },
               delay: 700,
             ),
+            _buildMenuCard(
+              context,
+              title: 'Data Anak Usia Sekolah',
+              subtitle: 'Data pendidikan dan mutasi sekolah anak (5-6 Tahun)',
+              icon: Icons.school_rounded,
+              color: const Color(0xFF8B5CF6), // Purple
+              onTap: () {
+                context.push('/report-usia-sekolah');
+              },
+              delay: 1000,
+            ),
           ],
         ),
       ),

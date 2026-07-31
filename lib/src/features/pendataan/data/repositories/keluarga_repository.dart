@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/extensions/supabase_extensions.dart';
 import '../models/keluarga_model.dart';
 import '../../domain/entities/keluarga.dart';
 
@@ -48,13 +49,26 @@ class KeluargaRepository {
       String namaKepala = '[KK Kosong / Pindah]';
       if (iList.isNotEmpty) {
         namaKepala = 'Tanpa Nama';
-        for (var ind in iList) {
-          final hk = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
-          if (hk == 'KK' ||
-              hk == 'KEPALA KELUARGA' ||
-              hk == 'KEPALA RUMAH TANGGA') {
-            namaKepala = ind['nama_lengkap']?.toString() ?? 'Tanpa Nama';
-            break;
+        final idKk = kel['id_kepala_keluarga']?.toString();
+        if (idKk != null && idKk.isNotEmpty) {
+          final matched = iList.cast<Map<String, dynamic>?>().firstWhere(
+            (ind) => ind?['id'] == idKk,
+            orElse: () => null,
+          );
+          if (matched != null) {
+            namaKepala = matched['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+          }
+        }
+
+        if (namaKepala == 'Tanpa Nama') {
+          for (var ind in iList) {
+            final hk = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+            if (hk == 'KK' ||
+                hk == 'KEPALA KELUARGA' ||
+                hk == 'KEPALA RUMAH TANGGA') {
+              namaKepala = ind['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+              break;
+            }
           }
         }
         if (namaKepala == 'Tanpa Nama' && iList.isNotEmpty) {
@@ -113,10 +127,10 @@ class KeluargaRepository {
     String query, {
     String? kelompokDawis,
   }) async {
-    final kels = await _supabase.from('keluarga').select();
-    final krts = await _supabase.from('krt').select();
-    final bs = await _supabase.from('bangunan').select();
-    final inds = await _supabase.from('individu').select();
+    final kels = await _supabase.fetchAll('keluarga');
+    final krts = await _supabase.fetchAll('krt');
+    final bs = await _supabase.fetchAll('bangunan');
+    final inds = await _supabase.fetchAll('individu');
     final excludedIds = await _getExcludedIndividuIds();
 
     final krtMap = {for (var x in krts) x['id']: x};

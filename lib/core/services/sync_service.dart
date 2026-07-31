@@ -13,18 +13,36 @@ import '../../src/features/pendataan/data/models/mutasi_model.dart';
 class SyncService {
   static final SupabaseClient _supabase = Supabase.instance.client;
 
+  static Future<List<Map<String, dynamic>>> _fetchAll(String table) async {
+    List<Map<String, dynamic>> allData = [];
+    int offset = 0;
+    const int limit = 1000;
+    while (true) {
+      final res = await _supabase
+          .from(table)
+          .select()
+          .range(offset, offset + limit - 1);
+      allData.addAll(List<Map<String, dynamic>>.from(res));
+      if (res.length < limit) {
+        break;
+      }
+      offset += limit;
+    }
+    return allData;
+  }
+
   static Future<void> syncSupabaseToLocal() async {
     try {
       debugPrint('[SyncService] Starting sync from Supabase to Local DB...');
       final db = await LocalDbHelper.database;
 
-      // Fetch all data from Supabase
-      final usersRes = await _supabase.from('app_user').select();
-      final bangunanRes = await _supabase.from('bangunan').select();
-      final krtRes = await _supabase.from('krt').select();
-      final keluargaRes = await _supabase.from('keluarga').select();
-      final individuRes = await _supabase.from('individu').select();
-      final mutasiRes = await _supabase.from('mutasi').select();
+      // Fetch all data from Supabase using pagination to bypass 1000 rows limit
+      final usersRes = await _fetchAll('app_user');
+      final bangunanRes = await _fetchAll('bangunan');
+      final krtRes = await _fetchAll('krt');
+      final keluargaRes = await _fetchAll('keluarga');
+      final individuRes = await _fetchAll('individu');
+      final mutasiRes = await _fetchAll('mutasi');
 
       // Convert to models and then to Json to ensure schema safety
       final users = usersRes

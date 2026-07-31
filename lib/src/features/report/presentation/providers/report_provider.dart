@@ -141,6 +141,32 @@ final kelompokDawisListProvider =
       return allList;
     });
 
+final usiaSekolahReportProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, kelompokName) async {
+      final repo = ref.read(reportRepositoryProvider);
+      final bulanStr = ref.watch(reportBulanProvider);
+
+      const mapBulan = {
+        'JANUARI': 1,
+        'FEBRUARI': 2,
+        'MARET': 3,
+        'APRIL': 4,
+        'MEI': 5,
+        'JUNI': 6,
+        'JULI': 7,
+        'AGUSTUS': 8,
+        'SEPTEMBER': 9,
+        'OKTOBER': 10,
+        'NOVEMBER': 11,
+        'DESEMBER': 12,
+      };
+
+      final month = mapBulan[bulanStr] ?? DateTime.now().month;
+      final year = DateTime.now().year;
+
+      return repo.getUsiaSekolahData(kelompokName, month, year);
+    });
+
 class ReportController extends Notifier<ReportState> {
   @override
   ReportState build() {

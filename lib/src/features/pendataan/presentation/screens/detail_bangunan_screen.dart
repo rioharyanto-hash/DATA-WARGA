@@ -5,6 +5,7 @@ import '../providers/bangunan_provider.dart';
 import '../providers/krt_provider.dart';
 import '../providers/mutasi_provider.dart';
 import '../../domain/entities/bangunan.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
 
 class DetailBangunanScreen extends ConsumerStatefulWidget {
   final String bangunanId;
@@ -40,9 +41,11 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
     final daftarBangunan = ref.watch(daftarBangunanProvider);
     final krtList = ref.watch(krtByBangunanProvider(widget.bangunanId));
     final mutasiList = ref.watch(mutasiByBangunanProvider(widget.bangunanId));
+    final userRole = ref.watch(loggedInUserProvider)?.role;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
+      floatingActionButton: _buildActionBtn(userRole),
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -71,12 +74,6 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
             ),
           ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 24.0),
-            child: _buildActionBtn(),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -142,24 +139,26 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
     );
   }
 
-  Widget? _buildActionBtn() {
+  Widget? _buildActionBtn(String? role) {
+    if (role != 'ADMIN' && role != 'KADER') return null;
+    
     if (_tabController.index == 0) {
-      return ElevatedButton.icon(
+      return FloatingActionButton.extended(
         onPressed: () => context.push('/form-bangunan/${widget.bangunanId}'),
-        icon: const Icon(Icons.edit, size: 16),
+        icon: const Icon(Icons.edit),
         label: const Text('Ubah Data'),
       );
     } else if (_tabController.index == 1) {
-      return ElevatedButton.icon(
+      return FloatingActionButton.extended(
         onPressed: () => context.push('/form-krt/${widget.bangunanId}'),
-        icon: const Icon(Icons.add, size: 16),
+        icon: const Icon(Icons.add),
         label: const Text('Tambah KRT'),
       );
     } else if (_tabController.index == 2) {
-      return ElevatedButton.icon(
+      return FloatingActionButton.extended(
         onPressed: () => context.push('/form-mutasi/${widget.bangunanId}'),
-        icon: const Icon(Icons.sync_alt, size: 16),
-        label: const Text('Catat Mutasi'),
+        icon: const Icon(Icons.add),
+        label: const Text('Tambah Mutasi'),
       );
     }
     return null;
@@ -545,19 +544,16 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
     }
   }
 
-  Widget _buildTabKrt(BuildContext context, AsyncValue<List<dynamic>> krtList) {
-    return krtList.when(
+  Widget _buildTabKrt(BuildContext context, AsyncValue<List<dynamic>> krtListAsync) {
+    final userRole = ref.watch(loggedInUserProvider)?.role;
+    final canEdit = userRole == 'ADMIN' || userRole == 'KADER';
+
+    return krtListAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) =>
-          Center(child: Text('Gagal memuat data KRT: $error')),
+      error: (error, stack) => Center(child: Text('Error: $error')),
       data: (krtItems) {
         if (krtItems.isEmpty) {
-          return const Center(
-            child: Text(
-              'Belum ada data KRT.\nTekan tombol + untuk menambah.',
-              textAlign: TextAlign.center,
-            ),
-          );
+          return const Center(child: Text('Belum ada data KRT'));
         }
 
         return ListView.builder(
@@ -573,7 +569,7 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text('NIK: ${krt.nikKrt}\nNo. KK: ${krt.noKkKrt}'),
-                trailing: Row(
+                trailing: canEdit ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
@@ -623,7 +619,7 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
                     ),
                     const Icon(Icons.chevron_right),
                   ],
-                ),
+                ) : null,
                 onTap: () => context.push('/detail-krt/${krt.id}'),
               ),
             );

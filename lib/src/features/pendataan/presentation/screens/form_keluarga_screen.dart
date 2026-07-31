@@ -9,6 +9,8 @@ import '../../domain/entities/bangunan.dart';
 import '../providers/keluarga_provider.dart';
 import '../providers/krt_provider.dart';
 import '../providers/bangunan_provider.dart';
+import '../providers/individu_provider.dart';
+import '../../domain/entities/individu.dart';
 
 class FormKeluargaScreen extends ConsumerStatefulWidget {
   final String? krtId;
@@ -36,10 +38,12 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
   // Dropdown State
   String _statusVisitasi = 'Sudah Dikunjungi';
   String? _existingKrtId;
+  String? _selectedIdKepalaKeluarga;
 
   // Untuk penambahan dari Mutasi
   String? _selectedBangunanId;
   List<Bangunan> _bangunanList = [];
+  List<Individu> _anggotaList = [];
   bool _isLoading = false;
 
   final List<String> _statusVisitasiOptions = [
@@ -79,7 +83,22 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
           _statusVisitasi = _statusVisitasiOptions.contains(sv)
               ? sv
               : _statusVisitasiOptions.first;
+
+          _selectedIdKepalaKeluarga = keluarga.idKepalaKeluarga;
         });
+
+        final indRepo = ref.read(individuRepositoryProvider);
+        final list = await indRepo.getIndividuByKeluargaId(widget.keluargaId!);
+        if (mounted) {
+          setState(() {
+            _anggotaList = list;
+            // Validate if selected id still exists in the list
+            if (_selectedIdKepalaKeluarga != null &&
+                !_anggotaList.any((e) => e.id == _selectedIdKepalaKeluarga)) {
+              _selectedIdKepalaKeluarga = null;
+            }
+          });
+        }
       }
     } else {
       _existingKrtId = widget.krtId;
@@ -156,6 +175,7 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
           noKk: _noKkController.text,
           statusVisitasi: _statusVisitasi,
           isSynced: 0,
+          idKepalaKeluarga: _selectedIdKepalaKeluarga,
         );
 
         if (widget.keluargaId != null) {
@@ -430,6 +450,69 @@ class _FormKeluargaScreenState extends ConsumerState<FormKeluargaScreen> {
                         }
                       },
                     ),
+                    if (widget.keluargaId != null &&
+                        _anggotaList.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Pilihan Nama Kepala Keluarga',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF475569),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedIdKepalaKeluarga,
+                        hint: const Text('Pilih Kepala Keluarga'),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF6366F1),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null,
+                            child: Text(
+                              'Otomatis (Pilih Berdasarkan Status KK)',
+                            ),
+                          ),
+                          ..._anggotaList.map((e) {
+                            return DropdownMenuItem<String>(
+                              value: e.id,
+                              child: Text(
+                                '${e.namaLengkap} - ${e.hubunganKeluarga}',
+                              ),
+                            );
+                          }),
+                        ],
+                        onChanged: (val) {
+                          setState(() => _selectedIdKepalaKeluarga = val);
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),

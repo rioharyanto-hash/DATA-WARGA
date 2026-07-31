@@ -5,6 +5,7 @@ class Keluarga {
   final String statusVisitasi;
   final int isSynced;
   final String? namaKepalaKeluarga;
+  final String? idKepalaKeluarga;
 
   Keluarga({
     required this.id,
@@ -13,5 +14,6 @@ class Keluarga {
     required this.statusVisitasi,
     this.isSynced = 0,
     this.namaKepalaKeluarga,
+    this.idKepalaKeluarga,
   });
 }

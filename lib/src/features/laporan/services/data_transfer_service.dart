@@ -280,6 +280,70 @@ class DataTransferService {
     }
   }
 
+  Future<List<int>> generateImportTemplatePengurus() async {
+    final excel = Excel.createExcel();
+    final sheet = excel['Template Import Pengurus'];
+
+    final defaultSheet = excel.getDefaultSheet();
+    if (defaultSheet != null && defaultSheet != 'Template Import Pengurus') {
+      excel.delete(defaultSheet);
+    }
+
+    sheet.appendRow([
+      TextCellValue('No'), // 0
+      TextCellValue('RW (Contoh: RW.01 atau 01)'), // 1
+      TextCellValue(
+        'RT (Contoh: RT.02. Isi dengan tulisan RW jika Pengurus RW)',
+      ), // 2
+      TextCellValue('Nama Lengkap'), // 3
+      TextCellValue('NIK'), // 4
+      TextCellValue('Tempat Lahir'), // 5
+      TextCellValue('Tanggal Lahir (YYYY-MM-DD)'), // 6
+      TextCellValue('Alamat Lengkap'), // 7
+      TextCellValue('No HP'), // 8
+      TextCellValue(''), // 9 - Not used
+      TextCellValue(''), // 10 - Not used
+      TextCellValue('Email'), // 11
+      TextCellValue('No Rekening Bank'), // 12
+    ]);
+
+    // Sample data row RT
+    sheet.appendRow([
+      TextCellValue('1'),
+      TextCellValue('RW.01'),
+      TextCellValue('RT.02'),
+      TextCellValue('Budi Santoso'),
+      TextCellValue('3301...'),
+      TextCellValue('Jakarta'),
+      TextCellValue('1990-01-01'),
+      TextCellValue('Jl. Merdeka No 1'),
+      TextCellValue('081234567890'),
+      TextCellValue(''),
+      TextCellValue(''),
+      TextCellValue('budi@email.com'),
+      TextCellValue('123456789 (BRI)'),
+    ]);
+
+    // Sample data row RW
+    sheet.appendRow([
+      TextCellValue('2'),
+      TextCellValue('RW.01'),
+      TextCellValue('RW'), // Menandakan bahwa ini adalah ketua RW
+      TextCellValue('Ahmad Dahlan'),
+      TextCellValue('3302...'),
+      TextCellValue('Bandung'),
+      TextCellValue('1985-05-05'),
+      TextCellValue('Jl. Merdeka Raya'),
+      TextCellValue('081234567891'),
+      TextCellValue(''),
+      TextCellValue(''),
+      TextCellValue('ahmad@email.com'),
+      TextCellValue('987654321 (BCA)'),
+    ]);
+
+    return excel.encode() ?? [];
+  }
+
   Future<void> importDataPengurus({String? filePath, Uint8List? bytes}) async {
     Uint8List data;
     if (kIsWeb) {

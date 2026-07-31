@@ -1,3 +1,12 @@
+## [2026-07-28]
+### [PATCH] - Versi 1.9.31+54
+- **Sinkronisasi Filter RT pada Dasbor Data Warga:** Memperbaiki filter RT pada Tab "Dasbor & Laporan Khusus" di menu Data Warga agar secara otomatis mengikuti filter RT yang dipilih oleh pengguna pada Tab "Daftar Warga" (`data_warga_screen.dart`, `dashboard_provider.dart`, dan `dashboard_repository.dart`).
+
+## [2026-07-27]
+### [PATCH] - Versi 1.9.30+53
+- **Pengurutan Bangunan pada Profil 2:** Memperbaiki pengurutan data bangunan pada laporan Profil 2 (Profil Kependudukan) agar selalu diurutkan dari nomor urut bangunan terkecil hingga terbesar (`nomor_urut_bangunan`).
+- **Standarisasi Urutan Anggota KK (`_getIndividuAktif`):** Mengubah fungsi inti pengambilan individu aktif dalam keluarga agar selalu mengurutkan nama anggota sesuai alur standar prioritas hubungan keluarga: **KRT -> KK -> ISTRI -> ANAK -> FAMILI LAIN** (diurutkan sekunder berdasarkan tanggal lahir dari usia tertua ke termuda). Aturan ini juga telah dibakukan ke dalam file `.agents/AGENTS.md` sebagai standar pengembangan laporan baru di masa mendatang.
+
 ## [2026-07-27]
 ### [MINOR] - Versi 1.9.29+52
 - Menambahkan fungsi hapus Kartu Keluarga (KK / Keluarga) untuk role Kader Dasawisma (Kader Dawis) pada halaman Detail KRT (`DetailKrtScreen`). Sebelumnya tombol hapus KK hanya tampil dan dapat diakses oleh role ADMIN.

@@ -130,19 +130,18 @@ class ReportRepository implements IReportRepository {
 
     List<Map<String, dynamic>> rows = [];
 
+    final bIds = bangunanListForKelompok.map((e) => e['id'].toString()).toSet();
+    final memoData = await _fetchInMemoryData(db, bIds);
+    final krtByB = memoData['krt'] as Map<String, List<Map<String, dynamic>>>;
+    final kkByKrt = memoData['kk'] as Map<String, List<Map<String, dynamic>>>;
+    final indByKk =
+        memoData['individu'] as Map<String, List<Map<String, dynamic>>>;
+
     for (var b in bangunanListForKelompok) {
-      final krtList = await db.query(
-        'krt',
-        where: 'id_bangunan = ?',
-        whereArgs: [b['id']],
-      );
+      final krtList = krtByB[b['id'].toString()] ?? [];
 
       for (var krt in krtList) {
-        final kkList = await db.query(
-          'keluarga',
-          where: 'id_krt = ?',
-          whereArgs: [krt['id']],
-        );
+        final kkList = kkByKrt[krt['id'].toString()] ?? [];
 
         int jiwaLaki = 0;
         int jiwaPerempuan = 0;
@@ -194,7 +193,7 @@ class ReportRepository implements IReportRepository {
         }
 
         for (final kk in kkList) {
-          final individuList = await _getIndividuAktif(db, kk['id']);
+          final individuList = indByKk[kk['id'].toString()] ?? [];
 
           for (final individu in individuList) {
             final jk = individu['jenis_kelamin'] as String?;
@@ -838,9 +837,12 @@ class ReportRepository implements IReportRepository {
         .replaceAll(' ', '')
         .toLowerCase();
 
-    final bangunanListRaw = await db.query('bangunan');
+    final bangunanListRaw = await db.query(
+      'bangunan',
+      orderBy: 'CAST(nomor_urut_bangunan AS INTEGER) ASC',
+    );
     final bangunanListForKelompok = kelompokName == 'SEMUA KADER'
-        ? bangunanListRaw
+        ? List<Map<String, dynamic>>.from(bangunanListRaw)
         : bangunanListRaw.where((b) {
             final name = (b['kelompok_dawis']?.toString() ?? '')
                 .replaceAll('.', '')
@@ -849,22 +851,29 @@ class ReportRepository implements IReportRepository {
             return name == normalizedName;
           }).toList();
 
+    bangunanListForKelompok.sort((a, b) {
+      final intA =
+          int.tryParse(a['nomor_urut_bangunan']?.toString() ?? '') ?? 0;
+      final intB =
+          int.tryParse(b['nomor_urut_bangunan']?.toString() ?? '') ?? 0;
+      return intA.compareTo(intB);
+    });
+
     List<Map<String, dynamic>> profil1KeluargaList = [];
 
+    final bIds = bangunanListForKelompok.map((e) => e['id'].toString()).toSet();
+    final memoData = await _fetchInMemoryData(db, bIds);
+    final krtByB = memoData['krt'] as Map<String, List<Map<String, dynamic>>>;
+    final kkByKrt = memoData['kk'] as Map<String, List<Map<String, dynamic>>>;
+    final indByKk =
+        memoData['individu'] as Map<String, List<Map<String, dynamic>>>;
+
     for (var b in bangunanListForKelompok) {
-      final krtList = await db.query(
-        'krt',
-        where: 'id_bangunan = ?',
-        whereArgs: [b['id']],
-      );
+      final krtList = krtByB[b['id'].toString()] ?? [];
       for (var krt in krtList) {
-        final kkList = await db.query(
-          'keluarga',
-          where: 'id_krt = ?',
-          whereArgs: [krt['id']],
-        );
+        final kkList = kkByKrt[krt['id'].toString()] ?? [];
         for (var kk in kkList) {
-          final indList = await _getIndividuAktif(db, kk['id']);
+          final indList = indByKk[kk['id'].toString()] ?? [];
 
           if (indList.isEmpty) continue; // Skip empty families
 
@@ -1758,11 +1767,298 @@ class ReportRepository implements IReportRepository {
     return list;
   }
 
+  Future<Map<String, dynamic>> _fetchInMemoryData(
+    Database db,
+    Set<String> bangunanIds,
+  ) async {
+    final Map<String, List<Map<String, dynamic>>> krtByBangunan = {};
+    final Map<String, List<Map<String, dynamic>>> kkByKrt = {};
+    final Map<String, List<Map<String, dynamic>>> individuByKeluarga = {};
+
+    if (bangunanIds.isEmpty) {
+      return {
+        'krt': krtByBangunan,
+        'kk': kkByKrt,
+        'individu': individuByKeluarga,
+      };
+    }
+
+    final idList = bangunanIds.map((e) => "'$e'").join(',');
+
+    final allKrt = await db.rawQuery(
+      'SELECT * FROM krt WHERE id_bangunan IN ($idList)',
+    );
+    final krtIds = <String>{};
+    for (var krt in allKrt) {
+      final idB = krt['id_bangunan'].toString();
+      krtByBangunan.putIfAbsent(idB, () => []).add(krt);
+      krtIds.add(krt['id'].toString());
+    }
+
+    if (krtIds.isEmpty) {
+      return {
+        'krt': krtByBangunan,
+        'kk': kkByKrt,
+        'individu': individuByKeluarga,
+      };
+    }
+
+    final kkIdList = krtIds.map((e) => "'$e'").join(',');
+    final allKk = await db.rawQuery(
+      'SELECT * FROM keluarga WHERE id_krt IN ($kkIdList)',
+    );
+    final kelIds = <String>{};
+    for (var kk in allKk) {
+      final idK = kk['id_krt'].toString();
+      kkByKrt.putIfAbsent(idK, () => []).add(kk);
+      kelIds.add(kk['id'].toString());
+    }
+
+    if (kelIds.isEmpty) {
+      return {
+        'krt': krtByBangunan,
+        'kk': kkByKrt,
+        'individu': individuByKeluarga,
+      };
+    }
+
+    final indIdList = kelIds.map((e) => "'$e'").join(',');
+
+    // Fetch mutasi separately to avoid slow SQLite subquery
+    final allMutasi = await db.rawQuery(
+      "SELECT id_individu_asal FROM mutasi WHERE id_individu_asal IS NOT NULL AND jenis_mutasi IN ('Meninggal', 'Pindah')",
+    );
+    final mutasiIds = allMutasi
+        .map((e) => e['id_individu_asal'].toString())
+        .toSet();
+
+    final allInd = await db.rawQuery(
+      'SELECT * FROM individu WHERE id_keluarga IN ($indIdList)',
+    );
+
+    for (var ind in allInd) {
+      if (mutasiIds.contains(ind['id'].toString())) continue;
+      final idKel = ind['id_keluarga'].toString();
+      individuByKeluarga.putIfAbsent(idKel, () => []).add(ind);
+    }
+
+    return {
+      'krt': krtByBangunan,
+      'kk': kkByKrt,
+      'individu': individuByKeluarga,
+    };
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUsiaSekolahData(
+    String kelompokName,
+    int month,
+    int year,
+  ) async {
+    final db = await LocalDbHelper.database;
+    final List<Map<String, dynamic>> results = [];
+
+    // Hitung range tanggal lahir untuk usia 5 - 6 tahun di akhir bulan periode laporan
+    DateTime periodEnd = DateTime(year, month + 1, 0);
+    DateTime minDate = DateTime(
+      periodEnd.year - 7,
+      periodEnd.month,
+      periodEnd.day,
+    );
+    DateTime maxDate = DateTime(
+      periodEnd.year - 5,
+      periodEnd.month,
+      periodEnd.day,
+    );
+
+    String minDateStr =
+        "${minDate.year.toString().padLeft(4, '0')}-${minDate.month.toString().padLeft(2, '0')}-${minDate.day.toString().padLeft(2, '0')}";
+    String maxDateStr =
+        "${maxDate.year.toString().padLeft(4, '0')}-${maxDate.month.toString().padLeft(2, '0')}-${maxDate.day.toString().padLeft(2, '0')}";
+
+    // Tarik raw data yang DIBATASI berdasarkan rentang tanggal_lahir
+    final rawData = await db.rawQuery(
+      '''
+      SELECT 
+        b.alamat_lengkap AS alamat, b.rt, b.rw,
+        b.kelompok_dawis AS nama_kelompok,
+        kel.id AS keluarga_id,
+        ind.id AS individu_id,
+        ind.nama_lengkap AS nama_anak,
+        ind.nik AS nik_anak,
+        ind.tanggal_lahir,
+        ind.pendidikan_terakhir,
+        ind.alasan_belum_sekolah
+      FROM bangunan b
+      JOIN krt ON krt.id_bangunan = b.id
+      JOIN keluarga kel ON kel.id_krt = krt.id
+      JOIN individu ind ON ind.id_keluarga = kel.id
+      WHERE ind.id NOT IN (
+        SELECT id_individu_asal FROM mutasi 
+        WHERE id_individu_asal IS NOT NULL 
+        AND jenis_mutasi IN ('Meninggal', 'Pindah')
+      )
+      AND ind.tanggal_lahir > ? AND ind.tanggal_lahir <= ?
+      ''',
+      [minDateStr, maxDateStr],
+    );
+
+    // Lakukan filter manual kelompok_dawis di Dart (Sesuai AGENTS.md)
+    String normalizedTarget = kelompokName
+        .replaceAll('.', '')
+        .replaceAll(' ', '')
+        .toLowerCase();
+
+    for (var row in rawData) {
+      // Filter Kelompok Dawis di memori
+      if (kelompokName != 'SEMUA') {
+        final rowKelompok = row['nama_kelompok']?.toString() ?? '';
+        final normalizedRowKelompok = rowKelompok
+            .replaceAll('.', '')
+            .replaceAll(' ', '')
+            .toLowerCase();
+        if (normalizedRowKelompok != normalizedTarget) {
+          continue;
+        }
+      }
+
+      // Pastikan validasi umur secara persis menggunakan logika Dart
+      final String tglLahir = row['tanggal_lahir']?.toString() ?? '';
+      if (tglLahir.isEmpty) continue;
+
+      int ageYears = 0;
+      int ageMonths = 0;
+      try {
+        final dob = DateTime.parse(tglLahir);
+        ageYears = periodEnd.year - dob.year;
+        ageMonths = periodEnd.month - dob.month;
+        if (periodEnd.day < dob.day) {
+          ageMonths--;
+        }
+        if (ageMonths < 0) {
+          ageYears--;
+          ageMonths += 12;
+        }
+        if (ageYears < 5 || ageYears > 6) {
+          continue;
+        }
+      } catch (_) {
+        continue;
+      }
+
+      // Ambil data orang tua
+      final String kelId = row['keluarga_id'].toString();
+      final ortuList = await db.rawQuery(
+        '''
+        SELECT nama_lengkap, nik, hubungan_keluarga, status_dgn_krt, no_tlp
+        FROM individu 
+        WHERE id_keluarga = ? 
+        AND (
+          UPPER(hubungan_keluarga) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA', 'ISTRI', 'ORANG TUA')
+          OR UPPER(status_dgn_krt) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA', 'ISTRI', 'ORANG TUA')
+        )
+        AND id NOT IN (
+          SELECT id_individu_asal FROM mutasi 
+          WHERE id_individu_asal IS NOT NULL 
+          AND jenis_mutasi IN ('Meninggal', 'Pindah')
+        )
+        ''',
+        [kelId],
+      );
+
+      String namaOrtu = '-';
+      String nikOrtu = '-';
+      String noHp = '-';
+
+      if (ortuList.isNotEmpty) {
+        var ortu = ortuList.firstWhere((e) {
+          final hub = e['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+          final stat = e['status_dgn_krt']?.toString().toUpperCase() ?? '';
+          return hub == 'KK' ||
+              hub == 'KEPALA KELUARGA' ||
+              hub == 'KEPALA RUMAH TANGGA' ||
+              stat == 'KK' ||
+              stat == 'KEPALA KELUARGA' ||
+              stat == 'KEPALA RUMAH TANGGA';
+        }, orElse: () => ortuList.first);
+        namaOrtu = ortu['nama_lengkap']?.toString() ?? '-';
+        nikOrtu = ortu['nik']?.toString() ?? '-';
+        noHp = ortu['no_tlp']?.toString() ?? '-';
+      }
+
+      String pendTerakhir = row['pendidikan_terakhir']?.toString() ?? '';
+      bool sudahSekolah = pendTerakhir.toUpperCase() != 'TIDAK/BELUM SEKOLAH';
+
+      results.add({
+        'individu_id': row['individu_id'],
+        'nama_orang_tua': namaOrtu,
+        'nik_orang_tua': nikOrtu,
+        'nama_anak': row['nama_anak'],
+        'nik_anak': row['nik_anak'],
+        'tanggal_lahir': tglLahir,
+        'usia': '$ageYears Tahun, $ageMonths Bulan',
+        'alamat':
+            '${row['alamat'] ?? ''} RT ${row['rt'] ?? ''} / RW ${row['rw'] ?? ''}',
+        'no_hp': noHp.isEmpty ? '-' : noHp,
+        'pendidikan_terakhir': pendTerakhir,
+        'sudah_sekolah': sudahSekolah ? 'Sudah' : 'Belum',
+        'alasan_belum_sekolah': row['alasan_belum_sekolah'] ?? '-',
+        'rt': row['rt'],
+      });
+    }
+
+    // Urutkan berdasarkan RT lalu Usia lalu Nama
+    results.sort((a, b) {
+      int parseRt(String? rtStr) {
+        if (rtStr == null || rtStr.isEmpty) return 0;
+        final parts = rtStr.split('/');
+        final rt = parts[0].replaceAll(RegExp(r'[^0-9]'), '');
+        return int.tryParse(rt) ?? 0;
+      }
+
+      final rtA = parseRt(a['rt']?.toString());
+      final rtB = parseRt(b['rt']?.toString());
+      if (rtA != rtB) return rtA.compareTo(rtB);
+
+      // Extract usia from string "X Tahun, Y Bulan"
+      int ageA = 0, ageB = 0;
+      int monthA = 0, monthB = 0;
+      try {
+        var pA = a['usia']
+            .toString()
+            .replaceAll(' Tahun', '')
+            .replaceAll(' Bulan', '')
+            .split(', ');
+        ageA = int.tryParse(pA[0]) ?? 0;
+        monthA = int.tryParse(pA.length > 1 ? pA[1] : '0') ?? 0;
+
+        var pB = b['usia']
+            .toString()
+            .replaceAll(' Tahun', '')
+            .replaceAll(' Bulan', '')
+            .split(', ');
+        ageB = int.tryParse(pB[0]) ?? 0;
+        monthB = int.tryParse(pB.length > 1 ? pB[1] : '0') ?? 0;
+      } catch (_) {}
+
+      // Usia: younger first or older first?
+      // Older first would be b.compareTo(a) but we will use ascending age (younger first) because it's standard, wait, if ageA != ageB return ageA.compareTo(ageB)
+      if (ageA != ageB) return ageA.compareTo(ageB);
+      if (monthA != monthB) return monthA.compareTo(monthB);
+
+      final nameA = a['nama_anak']?.toString().toLowerCase() ?? '';
+      final nameB = b['nama_anak']?.toString().toLowerCase() ?? '';
+      return nameA.compareTo(nameB);
+    });
+
+    return results;
+  }
+
   Future<List<Map<String, dynamic>>> _getIndividuAktif(
     Database db,
     Object? idKeluarga,
   ) async {
-    return await db.rawQuery(
+    final rawList = await db.rawQuery(
       '''
       SELECT * FROM individu 
       WHERE id_keluarga = ? 
@@ -1774,6 +2070,63 @@ class ReportRepository implements IReportRepository {
     ''',
       [idKeluarga],
     );
+
+    final sortedList = List<Map<String, dynamic>>.from(rawList);
+    sortedList.sort((a, b) {
+      int getPriority(Map<String, dynamic> ind) {
+        final hub = (ind['hubungan_keluarga']?.toString() ?? '')
+            .toUpperCase()
+            .trim();
+        final sttsKrt = (ind['status_dgn_krt']?.toString() ?? '')
+            .toUpperCase()
+            .trim();
+
+        if (sttsKrt == 'KRT' ||
+            sttsKrt == 'KEPALA RUMAH TANGGA' ||
+            hub == 'KRT' ||
+            hub == 'KEPALA RUMAH TANGGA') {
+          return 1;
+        }
+        if (sttsKrt == 'KK' ||
+            sttsKrt == 'KEPALA KELUARGA' ||
+            hub == 'KK' ||
+            hub == 'KEPALA KELUARGA') {
+          return 2;
+        }
+        if (sttsKrt == 'ISTRI' || hub == 'ISTRI') {
+          return 3;
+        }
+        if (sttsKrt == 'ANAK' || hub == 'ANAK') {
+          return 4;
+        }
+        return 5;
+      }
+
+      final prioA = getPriority(a);
+      final prioB = getPriority(b);
+      if (prioA != prioB) {
+        return prioA.compareTo(prioB);
+      }
+
+      // Secondary sort: tanggal lahir ascending (oldest first)
+      final tglAStr = a['tanggal_lahir']?.toString() ?? '';
+      final tglBStr = b['tanggal_lahir']?.toString() ?? '';
+      if (tglAStr.isNotEmpty && tglBStr.isNotEmpty) {
+        try {
+          final dateA = DateTime.parse(tglAStr);
+          final dateB = DateTime.parse(tglBStr);
+          final cmp = dateA.compareTo(dateB);
+          if (cmp != 0) return cmp;
+        } catch (_) {}
+      }
+
+      // Tertiary sort: id
+      final idA = int.tryParse(a['id']?.toString() ?? '') ?? 0;
+      final idB = int.tryParse(b['id']?.toString() ?? '') ?? 0;
+      return idA.compareTo(idB);
+    });
+
+    return sortedList;
   }
 }
 

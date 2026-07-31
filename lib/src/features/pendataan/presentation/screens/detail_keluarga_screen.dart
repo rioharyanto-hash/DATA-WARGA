@@ -684,14 +684,14 @@ class DetailKeluargaScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: canDeleteIndividu ? FloatingActionButton(
         onPressed: () => context.push('/form-individu/$keluargaId'),
         backgroundColor: const Color(0xFFBFDBFE), // Blue 200
         foregroundColor: const Color(0xFF1D4ED8), // Blue 700
         elevation: 2,
         tooltip: 'Tambah Anggota',
         child: const Icon(Icons.add),
-      ),
+      ) : null,
     );
   }
 }

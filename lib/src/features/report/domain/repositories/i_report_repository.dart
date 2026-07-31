@@ -39,4 +39,11 @@ abstract class IReportRepository {
   /// Mendapatkan data anak yatim piatu
   Future<List<Map<String, dynamic>>> getYatimPiatuData(String kelompokName);
   Future<List<Map<String, dynamic>>> getPotensiWargaData(String kelompokName);
+
+  /// Mendapatkan data anak usia sekolah (5-6 tahun)
+  Future<List<Map<String, dynamic>>> getUsiaSekolahData(
+    String kelompokName,
+    int month,
+    int year,
+  );
 }

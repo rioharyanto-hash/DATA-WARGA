@@ -108,4 +108,61 @@ class ExcelReportService {
 
     return excel.encode() ?? [];
   }
+
+  Future<List<int>> generateUsiaSekolahExcel(
+    List<Map<String, dynamic>> data,
+    String kelompok,
+    String bulan,
+  ) async {
+    final excel = Excel.createExcel();
+
+    final defaultSheet = excel.getDefaultSheet();
+    if (defaultSheet != null) {
+      excel.delete(defaultSheet);
+    }
+
+    final sheet = excel['DATA USIA SEKOLAH'];
+
+    // Header
+    sheet.appendRow([TextCellValue('DATA ANAK USIA 5 - 6 TAHUN $kelompok')]);
+    sheet.appendRow([
+      TextCellValue('KELURAHAN UTAN KAYU UTARA, KECAMATAN MATRAMAN'),
+    ]);
+    sheet.appendRow([TextCellValue('PERIODE : $bulan ${DateTime.now().year}')]);
+    sheet.appendRow([]);
+
+    // Columns
+    sheet.appendRow([
+      TextCellValue('NO'),
+      TextCellValue('NAMA ORANG TUA'),
+      TextCellValue('NIK ORANG TUA'),
+      TextCellValue('NAMA ANAK'),
+      TextCellValue('NIK ANAK'),
+      TextCellValue('TANGGAL LAHIR'),
+      TextCellValue('USIA (TAHUN, BULAN)'),
+      TextCellValue('ALAMAT'),
+      TextCellValue('NO HP'),
+      TextCellValue('PENDIDIKAN TERAKHIR'),
+      TextCellValue('KETERANGAN'),
+    ]);
+
+    for (var i = 0; i < data.length; i++) {
+      final item = data[i];
+      sheet.appendRow([
+        IntCellValue(i + 1),
+        TextCellValue(item['nama_ortu'] ?? '-'),
+        TextCellValue(item['nik_ortu'] ?? '-'),
+        TextCellValue(item['nama_anak'] ?? '-'),
+        TextCellValue(item['nik_anak'] ?? '-'),
+        TextCellValue(item['tanggal_lahir'] ?? '-'),
+        TextCellValue(item['usia_format'] ?? '-'),
+        TextCellValue(item['alamat'] ?? '-'),
+        TextCellValue(item['no_hp'] ?? '-'),
+        TextCellValue(item['pendidikan_terakhir'] ?? '-'),
+        TextCellValue(item['alasan_belum_sekolah'] ?? '-'),
+      ]);
+    }
+
+    return excel.encode() ?? [];
+  }
 }

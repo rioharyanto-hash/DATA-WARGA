@@ -10775,6 +10775,111 @@ class PdfReportService {
 
     return pdf.save();
   }
+
+  Future<Uint8List> generateUsiaSekolahPdf({
+    required List<Map<String, dynamic>> data,
+    required String kelompok,
+    required String bulan,
+  }) async {
+    final pdf = pw.Document();
+
+    final headerStyle = pw.TextStyle(
+      fontWeight: pw.FontWeight.bold,
+      fontSize: 10,
+    );
+    final regularStyle = const pw.TextStyle(fontSize: 8);
+
+    final f4Landscape = const PdfPageFormat(
+      33.0 * PdfPageFormat.cm,
+      21.5 * PdfPageFormat.cm,
+      marginAll: 2.0 * PdfPageFormat.cm,
+    );
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: f4Landscape,
+        margin: const pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return [
+            pw.Center(
+              child: pw.Text(
+                'DATA ANAK USIA 5 - 6 TAHUN $kelompok',
+                style: headerStyle,
+              ),
+            ),
+            pw.Center(
+              child: pw.Text(
+                'KELURAHAN UTAN KAYU UTARA, KECAMATAN MATRAMAN',
+                style: headerStyle,
+              ),
+            ),
+            pw.Center(
+              child: pw.Text(
+                'PERIODE : $bulan ${DateTime.now().year}',
+                style: headerStyle,
+              ),
+            ),
+            pw.SizedBox(height: 20),
+            pw.TableHelper.fromTextArray(
+              context: context,
+              headers: [
+                'NO',
+                'NAMA ORANG TUA',
+                'NIK ORANG TUA',
+                'NAMA ANAK',
+                'NIK ANAK',
+                'TGL LAHIR',
+                'USIA',
+                'ALAMAT',
+                'NO HP',
+                'PENDIDIKAN TERAKHIR',
+                'KETERANGAN',
+              ],
+              data: List<List<String>>.generate(data.length, (i) {
+                final item = data[i];
+                return [
+                  (i + 1).toString(),
+                  item['nama_orang_tua']?.toString() ?? '-',
+                  item['nik_orang_tua']?.toString() ?? '-',
+                  item['nama_anak']?.toString() ?? '-',
+                  item['nik_anak']?.toString() ?? '-',
+                  item['tanggal_lahir']?.toString() ?? '-',
+                  item['usia']?.toString() ?? '-',
+                  item['alamat']?.toString() ?? '-',
+                  item['no_hp']?.toString() ?? '-',
+                  item['pendidikan_terakhir']?.toString() ?? '-',
+                  item['alasan_belum_sekolah']?.toString() ?? '-',
+                ];
+              }),
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 8,
+              ),
+              cellStyle: regularStyle,
+              headerDecoration: const pw.BoxDecoration(
+                color: PdfColors.grey300,
+              ),
+              columnWidths: {
+                0: const pw.FlexColumnWidth(1.2), // NO
+                1: const pw.FlexColumnWidth(4.5), // NAMA ORANG TUA
+                2: const pw.FlexColumnWidth(5.5), // NIK ORANG TUA
+                3: const pw.FlexColumnWidth(4.5), // NAMA ANAK
+                4: const pw.FlexColumnWidth(5.5), // NIK ANAK
+                5: const pw.FlexColumnWidth(3.5), // TGL LAHIR
+                6: const pw.FlexColumnWidth(3.5), // USIA
+                7: const pw.FlexColumnWidth(6.5), // ALAMAT
+                8: const pw.FlexColumnWidth(4.5), // NO HP
+                9: const pw.FlexColumnWidth(4.0), // PENDIDIKAN TERAKHIR
+                10: const pw.FlexColumnWidth(4.0), // ALASAN BLM SKLH
+              },
+            ),
+          ];
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
 }
 
 final pdfReportServiceProvider = Provider<PdfReportService>((ref) {

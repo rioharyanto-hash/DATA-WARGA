@@ -161,10 +161,9 @@ class BangunanListScreen extends ConsumerWidget {
           return _buildList(context, ref, bangunanList);
         },
       ),
-      floatingActionButton: _buildFAB(context),
+      floatingActionButton: (user?.role == 'ADMIN' || user?.role == 'KADER') ? _buildFAB(context) : null,
     );
   }
-
   // ── Empty state ──────────────────────────────────────────────────
   Widget _buildEmptyState() {
     return Center(
@@ -207,28 +206,33 @@ class BangunanListScreen extends ConsumerWidget {
     );
   }
 
-  // ── List ─────────────────────────────────────────────────────────
+  // ── List builder ───────────────────────────────────────────────────
   Widget _buildList(
     BuildContext context,
     WidgetRef ref,
-    List<dynamic> bangunanList,
+    List<dynamic> items,
   ) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 900),
-        child: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          itemCount: bangunanList.length,
-          itemBuilder: (context, index) {
-            final b = bangunanList[index];
-            return _buildCard(context, ref, b);
-          },
+    final userRole = ref.watch(loggedInUserProvider)?.role;
+
+    return RefreshIndicator(
+      onRefresh: () async => ref.invalidate(daftarBangunanProvider),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final b = items[index];
+              return _buildCard(context, ref, b, userRole);
+            },
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCard(BuildContext context, WidgetRef ref, dynamic b) {
+  Widget _buildCard(BuildContext context, WidgetRef ref, dynamic b, String? userRole) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -339,65 +343,66 @@ class BangunanListScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
 
                 // ── Menu ──
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert_rounded, color: _subtitle),
-                  onSelected: (value) async {
-                    if (value == 'edit') {
-                      context.push('/form-bangunan/${b.id}');
-                    } else if (value == 'delete') {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Hapus Bangunan'),
-                          content: const Text(
-                            'Apakah Anda yakin ingin menghapus bangunan ini beserta seluruh data di dalamnya?',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
-                              child: const Text('Batal'),
+                if (userRole == 'ADMIN' || userRole == 'KADER')
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert_rounded, color: _subtitle),
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        context.push('/form-bangunan/${b.id}');
+                      } else if (value == 'delete') {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Hapus Bangunan'),
+                            content: const Text(
+                              'Apakah Anda yakin ingin menghapus bangunan ini beserta seluruh data di dalamnya?',
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              child: const Text(
-                                'Hapus',
-                                style: TextStyle(color: Colors.red),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Batal'),
                               ),
-                            ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text(
+                                  'Hapus',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          final repo = ref.read(bangunanRepositoryProvider);
+                          await repo.deleteBangunan(b.id);
+                          ref.invalidate(daftarBangunanProvider);
+                        }
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 18),
+                            SizedBox(width: 8),
+                            Text('Edit'),
                           ],
                         ),
-                      );
-
-                      if (confirm == true) {
-                        final repo = ref.read(bangunanRepositoryProvider);
-                        await repo.deleteBangunan(b.id);
-                        ref.invalidate(daftarBangunanProvider);
-                      }
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
                       ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, color: Colors.red, size: 18),
-                          SizedBox(width: 8),
-                          Text('Hapus', style: TextStyle(color: Colors.red)),
-                        ],
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red, size: 18),
+                            SizedBox(width: 8),
+                            Text('Hapus', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ),

@@ -226,6 +226,8 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
 
     final pendidikanList = [
       'Tidak/Belum Sekolah',
+      'PAUD',
+      'TK / RA',
       'SD/MI',
       'SMP/MTs',
       'SMA/SMK/MA',

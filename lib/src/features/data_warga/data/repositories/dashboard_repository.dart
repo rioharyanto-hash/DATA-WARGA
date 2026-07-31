@@ -7,20 +7,41 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
 });
 
 class DashboardRepository {
-  String _buildFilterCondition(AppUser user) {
+  String _buildFilterCondition(AppUser user, {String? rtFilter}) {
+    List<String> conditions = [];
     if (user.role == 'RW') {
-      return "bangunan.rw = '${user.rw}'";
+      conditions.add("bangunan.rw = '${user.rw}'");
     } else if (user.role == 'RT') {
-      return "bangunan.rw = '${user.rw}' AND bangunan.rt = '${user.rt}'";
+      conditions.add(
+        "bangunan.rw = '${user.rw}' AND bangunan.rt = '${user.rt}'",
+      );
     } else if (user.role == 'KADER') {
-      return "bangunan.kelompok_dawis = '${user.kelompokDawis}'";
+      conditions.add("bangunan.kelompok_dawis = '${user.kelompokDawis}'");
     }
-    return "1=1";
+
+    if (rtFilter != null && rtFilter.isNotEmpty && rtFilter != 'Semua') {
+      final rtInt = int.tryParse(rtFilter);
+      if (rtInt != null) {
+        conditions.add(
+          "(bangunan.rt = '$rtFilter' OR CAST(bangunan.rt AS INTEGER) = $rtInt)",
+        );
+      } else {
+        conditions.add("bangunan.rt = '$rtFilter'");
+      }
+    }
+
+    if (conditions.isEmpty) {
+      return "1=1";
+    }
+    return conditions.join(" AND ");
   }
 
-  Future<Map<String, dynamic>> getDemografiAgregat(AppUser user) async {
+  Future<Map<String, dynamic>> getDemografiAgregat(
+    AppUser user, {
+    String? rtFilter,
+  }) async {
     final db = await LocalDbHelper.database;
-    final filter = _buildFilterCondition(user);
+    final filter = _buildFilterCondition(user, rtFilter: rtFilter);
 
     // Total KK
     final kkResult = await db.rawQuery(
@@ -97,10 +118,11 @@ class DashboardRepository {
   }
 
   Future<List<Map<String, dynamic>>> getDetailPenerimaBansos(
-    AppUser user,
-  ) async {
+    AppUser user, {
+    String? rtFilter,
+  }) async {
     final db = await LocalDbHelper.database;
-    final filter = _buildFilterCondition(user);
+    final filter = _buildFilterCondition(user, rtFilter: rtFilter);
     final res = await db.rawQuery('''
       SELECT 
         individu.nama_lengkap, 
@@ -122,9 +144,12 @@ class DashboardRepository {
     return res;
   }
 
-  Future<List<Map<String, dynamic>>> getDetailYatimPiatu(AppUser user) async {
+  Future<List<Map<String, dynamic>>> getDetailYatimPiatu(
+    AppUser user, {
+    String? rtFilter,
+  }) async {
     final db = await LocalDbHelper.database;
-    final filter = _buildFilterCondition(user);
+    final filter = _buildFilterCondition(user, rtFilter: rtFilter);
     final res = await db.rawQuery('''
       SELECT 
         individu.nama_lengkap, 
@@ -144,9 +169,12 @@ class DashboardRepository {
     return res;
   }
 
-  Future<List<Map<String, dynamic>>> getDetailDisabilitas(AppUser user) async {
+  Future<List<Map<String, dynamic>>> getDetailDisabilitas(
+    AppUser user, {
+    String? rtFilter,
+  }) async {
     final db = await LocalDbHelper.database;
-    final filter = _buildFilterCondition(user);
+    final filter = _buildFilterCondition(user, rtFilter: rtFilter);
     final res = await db.rawQuery('''
       SELECT 
         individu.nama_lengkap, 
@@ -167,9 +195,12 @@ class DashboardRepository {
     return res;
   }
 
-  Future<List<Map<String, dynamic>>> getDetailKk(AppUser user) async {
+  Future<List<Map<String, dynamic>>> getDetailKk(
+    AppUser user, {
+    String? rtFilter,
+  }) async {
     final db = await LocalDbHelper.database;
-    final filter = _buildFilterCondition(user);
+    final filter = _buildFilterCondition(user, rtFilter: rtFilter);
     final res = await db.rawQuery('''
       SELECT 
         keluarga.no_kk, 
@@ -188,9 +219,10 @@ class DashboardRepository {
   Future<List<Map<String, dynamic>>> getDetailWarga(
     AppUser user, {
     String? jenisKelamin,
+    String? rtFilter,
   }) async {
     final db = await LocalDbHelper.database;
-    final filter = _buildFilterCondition(user);
+    final filter = _buildFilterCondition(user, rtFilter: rtFilter);
 
     String genderFilter = '';
     if (jenisKelamin != null) {

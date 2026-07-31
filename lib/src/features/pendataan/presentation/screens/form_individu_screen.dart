@@ -62,6 +62,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
   final _lamaBantuanController = TextEditingController();
   final _jumlahBantuanController = TextEditingController();
   final _makananPokokController = TextEditingController();
+  final _alasanBelumSekolahController = TextEditingController();
 
   // ── Bagian 3: Kesehatan & 3 Buta ──
   bool _isButaHuruf = false;
@@ -127,6 +128,8 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
 
   final List<String> _pendidikanOptions = [
     'Tidak/Belum Sekolah',
+    'PAUD',
+    'TK / RA',
     'SD/MI',
     'SMP/MTs',
     'SMA/SMK/MA',
@@ -302,6 +305,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           _pekerjaanOptions,
           'Belum/Tidak Bekerja',
         );
+        _alasanBelumSekolahController.text = individu.alasanBelumSekolah ?? '';
 
         _jenisBantuan = _ensureValidOption(
           individu.jenisBantuan,
@@ -400,6 +404,7 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
     _tglBantuanController.dispose();
     _lamaBantuanController.dispose();
     _jumlahBantuanController.dispose();
+    _alasanBelumSekolahController.dispose();
     _noAkteController.dispose();
     _frekuensiPosyanduController.dispose();
     super.dispose();
@@ -563,17 +568,17 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
         final hubunganUpper = _hubunganKeluarga.toUpperCase();
         final krtUpper = _statusDgnKrt.toUpperCase();
 
-        if (hubunganUpper == 'KK' || hubunganUpper == 'KEPALA KELUARGA') {
-          final isDuplicate = await _checkAndWarnDuplicateRole(isKk: true);
-          if (isDuplicate) return;
-        }
+        // if (hubunganUpper == 'KK' || hubunganUpper == 'KEPALA KELUARGA') {
+        //   final isDuplicate = await _checkAndWarnDuplicateRole(isKk: true);
+        //   if (isDuplicate) return;
+        // }
 
-        if (krtUpper == 'KK' ||
-            krtUpper == 'KEPALA KELUARGA' ||
-            krtUpper == 'KEPALA RUMAH TANGGA') {
-          final isDuplicate = await _checkAndWarnDuplicateRole(isKk: false);
-          if (isDuplicate) return;
-        }
+        // if (krtUpper == 'KK' ||
+        //     krtUpper == 'KEPALA KELUARGA' ||
+        //     krtUpper == 'KEPALA RUMAH TANGGA') {
+        //   final isDuplicate = await _checkAndWarnDuplicateRole(isKk: false);
+        //   if (isDuplicate) return;
+        // }
 
         final individu = Individu(
           id: widget.individuId ?? _uuid.v4(),
@@ -601,6 +606,11 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           jumlahBantuan: _jumlahBantuanController.text.isEmpty
               ? null
               : _jumlahBantuanController.text,
+          alasanBelumSekolah:
+              _pendidikanTerakhir != 'Tidak/Belum Sekolah' ||
+                  _alasanBelumSekolahController.text.trim().isEmpty
+              ? null
+              : _alasanBelumSekolahController.text.trim(),
           metodeKb: _metodeKb,
           alasanBukanKb: _alasanBukanKb,
           isButaHuruf: _isButaHuruf ? 1 : 0,
@@ -1107,6 +1117,16 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                     onChanged: (val) =>
                         setState(() => _pendidikanTerakhir = val!),
                   ),
+                  if (_pendidikanTerakhir == 'Tidak/Belum Sekolah') ...[
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _alasanBelumSekolahController,
+                      decoration: const InputDecoration(
+                        labelText: 'Alasan Belum Sekolah',
+                        hintText: 'Masukkan alasan tidak/belum sekolah',
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     initialValue: _pekerjaan,

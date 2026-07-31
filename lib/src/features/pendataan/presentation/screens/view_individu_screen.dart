@@ -5,6 +5,7 @@ import '../providers/individu_provider.dart';
 import '../providers/mutasi_provider.dart';
 import '../providers/keluarga_provider.dart';
 import '../providers/bangunan_provider.dart';
+import '../../../settings/presentation/providers/app_user_provider.dart';
 
 class ViewIndividuScreen extends ConsumerWidget {
   final String individuId;
@@ -20,6 +21,8 @@ class ViewIndividuScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final individuAsync = ref.watch(individuByIdProvider(individuId));
     final mutasiAsync = ref.watch(mutasiByIndividuProvider(individuId));
+    final currentUser = ref.watch(loggedInUserProvider);
+    final bool canEdit = currentUser?.role == 'ADMIN' || currentUser?.role == 'KADER';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -31,7 +34,7 @@ class ViewIndividuScreen extends ConsumerWidget {
             loading: () => const SizedBox.shrink(),
             error: (_, _) => const SizedBox.shrink(),
             data: (individu) {
-              if (individu == null || isReadOnly) {
+              if (individu == null || isReadOnly || !canEdit) {
                 return const SizedBox.shrink();
               }
               return IconButton(

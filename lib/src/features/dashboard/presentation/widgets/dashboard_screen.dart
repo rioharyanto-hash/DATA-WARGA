@@ -23,12 +23,10 @@ class DashboardScreen extends ConsumerWidget {
       ref,
       'Detail Jumlah Bangunan',
       'Jumlah Bangunan',
-      ['RT', 'RW', 'Nama Bangunan', 'Alamat Rumah', 'Kelompok'],
+      ['Nama Bangunan', 'Alamat', 'Kelompok'],
       (e) => [
-        (e['rt'] ?? '').toString(),
-        (e['rw'] ?? '').toString(),
         (e['nama_bangunan'] ?? '').toString(),
-        (e['alamat_lengkap'] ?? '').toString(),
+        (e['alamat'] ?? '').toString(),
         (e['kelompok_dawis'] ?? '').toString(),
       ],
     );
@@ -38,12 +36,11 @@ class DashboardScreen extends ConsumerWidget {
       ref,
       'Detail Jumlah KK',
       'Jumlah KK',
-      ['RT', 'RW', 'No. KK', 'Kepala Keluarga'],
+      ['Nama Kepala Keluarga', 'Alamat', 'No. KK'],
       (e) => [
-        (e['rt'] ?? '').toString(),
-        (e['rw'] ?? '').toString(),
+        (e['nama_kk'] ?? e['nama_krt'] ?? '').toString(),
+        (e['alamat'] ?? '').toString(),
         (e['no_kk'] ?? '').toString(),
-        (e['nama_krt'] ?? '').toString(),
       ],
     );
 
@@ -52,11 +49,11 @@ class DashboardScreen extends ConsumerWidget {
       ref,
       'Detail Total Penduduk',
       'Total Penduduk',
-      ['RT', 'RW', 'Nama Lengkap', 'NIK', 'L/P', 'Tgl Lahir'],
+      ['Nama Lengkap', 'Alamat', 'Umur', 'NIK', 'L/P', 'Tgl Lahir'],
       (e) => [
-        (e['rt'] ?? '').toString(),
-        (e['rw'] ?? '').toString(),
         (e['nama_lengkap'] ?? '').toString(),
+        (e['alamat'] ?? '').toString(),
+        (e['umur'] ?? '').toString(),
         (e['nik'] ?? '').toString(),
         (e['jenis_kelamin'] ?? '').toString(),
         (e['tanggal_lahir'] ?? '').toString(),
@@ -153,18 +150,19 @@ class DashboardScreen extends ConsumerWidget {
                                               'Detail Total Mutasi',
                                               'Total Mutasi',
                                               [
+                                                'Nama Lengkap',
                                                 'Jenis Mutasi',
                                                 'Keterangan',
-                                                'RT',
-                                                'RW',
+                                                'Alamat',
                                               ],
                                               (e) => [
+                                                (e['nama_orang'] ?? '')
+                                                    .toString(),
                                                 (e['jenis_mutasi'] ?? '')
                                                     .toString(),
                                                 (e['keterangan_mutasi'] ?? '')
                                                     .toString(),
-                                                (e['rt'] ?? '').toString(),
-                                                (e['rw'] ?? '').toString(),
+                                                (e['alamat'] ?? '').toString(),
                                               ],
                                             ),
                                           ),
@@ -226,19 +224,21 @@ class DashboardScreen extends ConsumerWidget {
                                                   'Detail Total Mutasi',
                                                   'Total Mutasi',
                                                   [
+                                                    'Nama Lengkap',
                                                     'Jenis Mutasi',
                                                     'Keterangan',
-                                                    'RT',
-                                                    'RW',
+                                                    'Alamat',
                                                   ],
                                                   (e) => [
+                                                    (e['nama_orang'] ?? '')
+                                                        .toString(),
                                                     (e['jenis_mutasi'] ?? '')
                                                         .toString(),
                                                     (e['keterangan_mutasi'] ??
                                                             '')
                                                         .toString(),
-                                                    (e['rt'] ?? '').toString(),
-                                                    (e['rw'] ?? '').toString(),
+                                                    (e['alamat'] ?? '')
+                                                        .toString(),
                                                   ],
                                                 ),
                                               ),
@@ -287,18 +287,18 @@ class DashboardScreen extends ConsumerWidget {
                                           'Detail Total Mutasi',
                                           'Total Mutasi',
                                           [
+                                            'Nama Lengkap',
                                             'Jenis Mutasi',
                                             'Keterangan',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
+                                            (e['nama_orang'] ?? '').toString(),
                                             (e['jenis_mutasi'] ?? '')
                                                 .toString(),
                                             (e['keterangan_mutasi'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -375,22 +375,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Balita (0-4 thn)',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -408,22 +408,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Anak (5-9 thn)',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -441,22 +441,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Remaja (10-24 thn)',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -474,22 +474,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Dewasa (25-59 thn)',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -505,22 +505,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Lansia (>=60 thn)',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -538,22 +538,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Laki-laki',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -569,22 +569,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Perempuan',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -602,22 +602,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'WUS',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -633,22 +633,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'PUS',
                                           [
                                             'Nama Lengkap',
-                                            'NIK',
+                                            'Umur',
+                                            'Nomor KK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
-                                            (e['nik'] ?? '').toString(),
+                                            (e['umur'] ?? '').toString(),
+                                            (e['no_kk'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -666,22 +666,22 @@ class DashboardScreen extends ConsumerWidget {
                                           'Disabilitas',
                                           [
                                             'Nama Lengkap',
+                                            'Umur',
                                             'NIK',
                                             'L/P',
                                             'Tgl Lahir',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
                                             (e['nama_lengkap'] ?? '')
                                                 .toString(),
+                                            (e['umur'] ?? '').toString(),
                                             (e['nik'] ?? '').toString(),
                                             (e['jenis_kelamin'] ?? '')
                                                 .toString(),
                                             (e['tanggal_lahir'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -698,18 +698,18 @@ class DashboardScreen extends ConsumerWidget {
                                           'Detail Lahir',
                                           'Lahir',
                                           [
+                                            'Nama Lengkap',
                                             'Jenis Mutasi',
                                             'Keterangan',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
+                                            (e['nama_orang'] ?? '').toString(),
                                             (e['jenis_mutasi'] ?? '')
                                                 .toString(),
                                             (e['keterangan_mutasi'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -725,18 +725,18 @@ class DashboardScreen extends ConsumerWidget {
                                           'Detail Meninggal',
                                           'Meninggal',
                                           [
+                                            'Nama Lengkap',
                                             'Jenis Mutasi',
                                             'Keterangan',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
+                                            (e['nama_orang'] ?? '').toString(),
                                             (e['jenis_mutasi'] ?? '')
                                                 .toString(),
                                             (e['keterangan_mutasi'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -751,18 +751,18 @@ class DashboardScreen extends ConsumerWidget {
                                           'Detail Pindah',
                                           'Pindah',
                                           [
+                                            'Nama Lengkap',
                                             'Jenis Mutasi',
                                             'Keterangan',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
+                                            (e['nama_orang'] ?? '').toString(),
                                             (e['jenis_mutasi'] ?? '')
                                                 .toString(),
                                             (e['keterangan_mutasi'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -777,18 +777,18 @@ class DashboardScreen extends ConsumerWidget {
                                           'Detail Datang',
                                           'Datang',
                                           [
+                                            'Nama Lengkap',
                                             'Jenis Mutasi',
                                             'Keterangan',
-                                            'RT',
-                                            'RW',
+                                            'Alamat',
                                           ],
                                           (e) => [
+                                            (e['nama_orang'] ?? '').toString(),
                                             (e['jenis_mutasi'] ?? '')
                                                 .toString(),
                                             (e['keterangan_mutasi'] ?? '')
                                                 .toString(),
-                                            (e['rt'] ?? '').toString(),
-                                            (e['rw'] ?? '').toString(),
+                                            (e['alamat'] ?? '').toString(),
                                           ],
                                         ),
                                       ),
@@ -1042,24 +1042,37 @@ class DashboardScreen extends ConsumerWidget {
                                 headingRowColor: WidgetStateProperty.all(
                                   Colors.grey.shade100,
                                 ),
-                                columns: columns
-                                    .map(
-                                      (e) => DataColumn(
-                                        label: Text(
-                                          e,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                columns: [
+                                  const DataColumn(
+                                    label: Text(
+                                      'No.',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  ...columns.map(
+                                    (e) => DataColumn(
+                                      label: Text(
+                                        e,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    )
-                                    .toList(),
-                                rows: data.map((rowMap) {
+                                    ),
+                                  ),
+                                ],
+                                rows: data.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final rowMap = entry.value;
                                   final row = mapData(rowMap);
                                   return DataRow(
-                                    cells: row
-                                        .map((cell) => DataCell(Text(cell)))
-                                        .toList(),
+                                    cells: [
+                                      DataCell(Text('${index + 1}')),
+                                      ...row.map(
+                                        (cell) => DataCell(Text(cell)),
+                                      ),
+                                    ],
                                   );
                                 }).toList(),
                               ),

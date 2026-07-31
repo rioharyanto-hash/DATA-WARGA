@@ -1,14 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../../settings/presentation/providers/app_user_provider.dart';
+import 'data_warga_provider.dart';
 
 final dashboardAgregatProvider = FutureProvider<Map<String, dynamic>>((
   ref,
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return {};
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDemografiAgregat(user);
+  return await repo.getDemografiAgregat(user, rtFilter: rtFilter);
 });
 
 final detailBansosProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -16,8 +18,9 @@ final detailBansosProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return [];
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDetailPenerimaBansos(user);
+  return await repo.getDetailPenerimaBansos(user, rtFilter: rtFilter);
 });
 
 final detailYatimProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -25,8 +28,9 @@ final detailYatimProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return [];
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDetailYatimPiatu(user);
+  return await repo.getDetailYatimPiatu(user, rtFilter: rtFilter);
 });
 
 final detailDisabilitasProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -34,8 +38,9 @@ final detailDisabilitasProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return [];
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDetailDisabilitas(user);
+  return await repo.getDetailDisabilitas(user, rtFilter: rtFilter);
 });
 
 final detailKkProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -43,8 +48,9 @@ final detailKkProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return [];
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDetailKk(user);
+  return await repo.getDetailKk(user, rtFilter: rtFilter);
 });
 
 final detailWargaProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -52,8 +58,9 @@ final detailWargaProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return [];
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDetailWarga(user);
+  return await repo.getDetailWarga(user, rtFilter: rtFilter);
 });
 
 final detailLakiProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -61,8 +68,13 @@ final detailLakiProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return [];
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDetailWarga(user, jenisKelamin: 'Laki-Laki');
+  return await repo.getDetailWarga(
+    user,
+    jenisKelamin: 'Laki-Laki',
+    rtFilter: rtFilter,
+  );
 });
 
 final detailPerempuanProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -70,6 +82,11 @@ final detailPerempuanProvider = FutureProvider<List<Map<String, dynamic>>>((
 ) async {
   final user = ref.watch(loggedInUserProvider);
   if (user == null) return [];
+  final rtFilter = ref.watch(dataWargaRtFilterProvider);
   final repo = ref.read(dashboardRepositoryProvider);
-  return await repo.getDetailWarga(user, jenisKelamin: 'Perempuan');
+  return await repo.getDetailWarga(
+    user,
+    jenisKelamin: 'Perempuan',
+    rtFilter: rtFilter,
+  );
 });

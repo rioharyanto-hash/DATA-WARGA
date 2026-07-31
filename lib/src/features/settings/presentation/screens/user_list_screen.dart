@@ -7,6 +7,8 @@ import '../../domain/entities/app_user.dart';
 import '../providers/app_user_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:universal_html/html.dart' as html;
 import 'package:dawis/src/features/laporan/services/data_transfer_service.dart';
 
 class UserListScreen extends ConsumerStatefulWidget {
@@ -62,18 +64,35 @@ class _UserListScreenState extends ConsumerState<UserListScreen> {
       final service = DataTransferService();
       final bytes = await service.generateImportTemplateKader();
 
-      final downloadsDir = await getDownloadsDirectory();
-      if (downloadsDir != null) {
-        final filePath = '${downloadsDir.path}\\Template_Import_Kader.xlsx';
-        final file = File(filePath);
-        await file.writeAsBytes(bytes);
+      if (kIsWeb) {
+        final base64data = base64Encode(bytes);
+        html.AnchorElement(
+            href:
+                'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,$base64data',
+          )
+          ..setAttribute('download', 'Template_Import_Kader.xlsx')
+          ..click();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Template berhasil disimpan di $filePath')),
+            const SnackBar(content: Text('Template berhasil diunduh.')),
           );
         }
       } else {
-        throw Exception('Katalog Downloads tidak ditemukan');
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir != null) {
+          final filePath = '${downloadsDir.path}\\Template_Import_Kader.xlsx';
+          final file = File(filePath);
+          await file.writeAsBytes(bytes);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Template berhasil disimpan di $filePath'),
+              ),
+            );
+          }
+        } else {
+          throw Exception('Katalog Downloads tidak ditemukan');
+        }
       }
     } catch (e) {
       if (mounted) {

@@ -10,6 +10,7 @@ class Individu {
   final String tanggalLahir;
   final String statusPerkawinan;
   final String pendidikanTerakhir;
+  final String? alasanBelumSekolah;
   final String pekerjaan;
   final String? noTlp;
   final String? alamatKtp;
@@ -61,6 +62,7 @@ class Individu {
     required this.tanggalLahir,
     required this.statusPerkawinan,
     required this.pendidikanTerakhir,
+    this.alasanBelumSekolah,
     required this.pekerjaan,
     this.noTlp,
     this.alamatKtp,

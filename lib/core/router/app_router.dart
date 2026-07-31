@@ -26,6 +26,7 @@ import '../../src/features/pendataan/presentation/screens/lampid_list_screen.dar
 import '../../src/features/navigation/presentation/widgets/main_layout_screen.dart';
 import '../../src/features/report/presentation/screens/report_screen.dart';
 import '../../src/features/report/presentation/screens/report_preview_screen.dart';
+import '../../src/features/report/presentation/screens/report_usia_sekolah_screen.dart';
 import '../../src/features/data_warga/presentation/screens/data_warga_screen.dart';
 import '../../src/features/settings/presentation/screens/settings_screen.dart';
 import '../../src/features/settings/presentation/screens/user_list_screen.dart';
@@ -282,6 +283,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         args['generatePdf'] as Future<Uint8List> Function(),
                   );
                 },
+              ),
+              GoRoute(
+                path: '/report-usia-sekolah',
+                builder: (context, state) => const ReportUsiaSekolahScreen(),
               ),
             ],
           ),

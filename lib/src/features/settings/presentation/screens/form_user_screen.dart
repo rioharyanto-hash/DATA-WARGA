@@ -50,6 +50,8 @@ class _FormUserScreenState extends ConsumerState<FormUserScreen> {
 
   final List<String> _pendidikanList = [
     'Tidak/Belum Sekolah',
+    'PAUD',
+    'TK / RA',
     'SD/MI',
     'SMP/MTs',
     'SMA/SMK/MA',

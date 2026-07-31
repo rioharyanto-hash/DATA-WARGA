@@ -5,14 +5,28 @@ import '../../domain/repositories/dashboard_repository.dart';
 class DashboardRepositoryImpl implements DashboardRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  Future<List<Map<String, dynamic>>> _fetchAll(String table, [String? columns]) async {
+    List<Map<String, dynamic>> allData = [];
+    int offset = 0;
+    const int limit = 1000;
+    while (true) {
+      final res = await _supabase
+          .from(table)
+          .select(columns ?? '*')
+          .range(offset, offset + limit - 1);
+      allData.addAll(List<Map<String, dynamic>>.from(res));
+      if (res.length < limit) break;
+      offset += limit;
+    }
+    return allData;
+  }
+
   @override
   Future<Map<String, List<String>>> getFilterOptions({
     String? rw,
     String? rt,
   }) async {
-    final response = await _supabase
-        .from('bangunan')
-        .select('rw, rt, kelompok_dawis');
+    final response = await _fetchAll('bangunan', 'rw, rt, kelompok_dawis');
 
     final rwSet = <String>{};
     final rtSet = <String>{};
@@ -85,9 +99,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     if (kelompokDawis == 'Semua') kelompokDawis = null;
 
-    final allBangunan = await _supabase
-        .from('bangunan')
-        .select('id, rw, rt, kelompok_dawis');
+    final allBangunan = await _fetchAll('bangunan', 'id, rw, rt, kelompok_dawis');
 
     final filteredBangunan = allBangunan.where((b) {
       if (rw != null &&
@@ -125,26 +137,24 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     final bIds = filteredBangunan.map((e) => e['id'] as String).toSet();
 
-    final allKrt = await _supabase.from('krt').select('id, id_bangunan');
+    final allKrt = await _fetchAll('krt', 'id, id_bangunan');
     final krtIds = allKrt
         .where((k) => bIds.contains(k['id_bangunan']))
         .map((k) => k['id'] as String)
         .toSet();
 
-    final allKeluarga = await _supabase.from('keluarga').select('id, id_krt');
+    final allKeluarga = await _fetchAll('keluarga', 'id, id_krt');
     final kelIds = allKeluarga
         .where((k) => krtIds.contains(k['id_krt']))
         .map((k) => k['id'] as String)
         .toSet();
 
-    final allIndividu = await _supabase.from('individu').select();
+    final allIndividu = await _fetchAll('individu');
     final filteredIndividu = allIndividu
         .where((i) => kelIds.contains(i['id_keluarga']))
         .toList();
 
-    final allMutasi = await _supabase
-        .from('mutasi')
-        .select('id_bangunan, jenis_mutasi');
+    final allMutasi = await _fetchAll('mutasi', 'id_bangunan, jenis_mutasi');
     final filteredMutasi = allMutasi
         .where((m) => bIds.contains(m['id_bangunan']))
         .toList();
@@ -248,7 +258,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     final allBangunan = await _supabase
         .from('bangunan')
-        .select('id, rw, rt, kelompok_dawis, nama_bangunan, alamat_lengkap');
+        .select(
+          'id, rw, rt, kelompok_dawis, nama_bangunan, alamat_lengkap, nomor_urut_bangunan',
+        );
 
     final filteredBangunan = allBangunan.where((b) {
       if (rw != null &&
@@ -312,15 +324,30 @@ class DashboardRepositoryImpl implements DashboardRepository {
               'nama_bangunan': b['nama_bangunan'] ?? '-',
               'alamat_lengkap': b['alamat_lengkap'] ?? '-',
               'kelompok_dawis': b['kelompok_dawis'] ?? '-',
+              'nomor_urut_bangunan': b['nomor_urut_bangunan'] ?? '-',
+              'alamat':
+                  '${b['alamat_lengkap'] ?? ''} RT ${b['rt'] ?? '-'}/${b['rw'] ?? '-'}',
             },
           )
           .toList();
 
       list.sort((a, b) {
-        final rtA = int.tryParse(a['rt']?.toString() ?? '') ?? 999;
-        final rtB = int.tryParse(b['rt']?.toString() ?? '') ?? 999;
-        final rtCompare = rtA.compareTo(rtB);
-        if (rtCompare != 0) return rtCompare;
+        final noA =
+            int.tryParse(a['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
+        final noB =
+            int.tryParse(b['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
+        final noCompare = noA.compareTo(noB);
+        if (noCompare != 0) return noCompare;
+
+        final krtA = a['nama_krt']?.toString().toLowerCase() ?? '';
+        final krtB = b['nama_krt']?.toString().toLowerCase() ?? '';
+        final krtCompare = krtA.compareTo(krtB);
+        if (krtCompare != 0) return krtCompare;
+
+        final kkA = a['no_kk']?.toString().toLowerCase() ?? '';
+        final kkB = b['no_kk']?.toString().toLowerCase() ?? '';
+        final kkCompare = kkA.compareTo(kkB);
+        if (kkCompare != 0) return kkCompare;
 
         final nameA = a['nama_bangunan']?.toString().toLowerCase() ?? '';
         final nameB = b['nama_bangunan']?.toString().toLowerCase() ?? '';
@@ -331,31 +358,70 @@ class DashboardRepositoryImpl implements DashboardRepository {
     }
 
     if (category == 'Jumlah KK') {
+      final allIndividu = await _supabase
+          .from('individu')
+          .select(
+            'id_keluarga, nama_lengkap, hubungan_keluarga, status_dgn_krt',
+          );
+      final filteredIndividu = allIndividu
+          .where((i) => kelIds.contains(i['id_keluarga']))
+          .toList();
+
       final list = filteredKeluarga.map((k) {
         final krt = krtMap[k['id_krt']];
         final b = krt != null ? bMap[krt['id_bangunan']] : null;
+
+        var namaKk = krt != null ? krt['nama_krt'] : '-';
+        try {
+          final ind = filteredIndividu.firstWhere((i) {
+            if (i['id_keluarga'] != k['id']) return false;
+            final hub = i['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+            final stat = i['status_dgn_krt']?.toString().toUpperCase() ?? '';
+            return hub == 'KK' ||
+                hub == 'KEPALA KELUARGA' ||
+                hub == 'KEPALA RUMAH TANGGA' ||
+                stat == 'KK' ||
+                stat == 'KEPALA KELUARGA' ||
+                stat == 'KEPALA RUMAH TANGGA';
+          });
+          if (ind['nama_lengkap'] != null &&
+              ind['nama_lengkap'].toString().isNotEmpty) {
+            namaKk = ind['nama_lengkap'];
+          }
+        } catch (_) {}
+
         return {
           'no_kk': k['no_kk'] ?? '-',
           'nama_krt': krt != null ? krt['nama_krt'] : '-',
+          'nama_kk': namaKk,
           'rt': b != null ? b['rt'] : '-',
           'rw': b != null ? b['rw'] : '-',
+          'nomor_urut_bangunan': b != null ? b['nomor_urut_bangunan'] : '-',
+          'alamat': b != null
+              ? '${b['alamat_lengkap'] ?? ''} RT ${b['rt'] ?? '-'}/${b['rw'] ?? '-'}'
+              : '-',
         };
       }).toList();
 
       list.sort((a, b) {
-        final rtA = int.tryParse(a['rt']?.toString() ?? '') ?? 999;
-        final rtB = int.tryParse(b['rt']?.toString() ?? '') ?? 999;
-        final rtCompare = rtA.compareTo(rtB);
-        if (rtCompare != 0) return rtCompare;
+        final noA =
+            int.tryParse(a['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
+        final noB =
+            int.tryParse(b['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
+        final noCompare = noA.compareTo(noB);
+        if (noCompare != 0) return noCompare;
 
-        final kkA = a['no_kk']?.toString() ?? '';
-        final kkB = b['no_kk']?.toString() ?? '';
+        final krtA = a['nama_krt']?.toString().toLowerCase() ?? '';
+        final krtB = b['nama_krt']?.toString().toLowerCase() ?? '';
+        final krtCompare = krtA.compareTo(krtB);
+        if (krtCompare != 0) return krtCompare;
+
+        final kkA = a['no_kk']?.toString().toLowerCase() ?? '';
+        final kkB = b['no_kk']?.toString().toLowerCase() ?? '';
         final kkCompare = kkA.compareTo(kkB);
         if (kkCompare != 0) return kkCompare;
 
-        final nameA = a['nama_krt']?.toString().toLowerCase() ?? '';
-        final nameB = b['nama_krt']?.toString().toLowerCase() ?? '';
-        return nameA.compareTo(nameB);
+        return 0;
       });
 
       return list;
@@ -368,7 +434,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
       'Pindah',
       'Datang',
     ].contains(category)) {
-      final allMutasi = await _supabase.from('mutasi').select();
+      final allMutasi = await _fetchAll('mutasi');
       final filteredMutasi = allMutasi
           .where((m) => bIds.contains(m['id_bangunan']))
           .toList();
@@ -386,17 +452,24 @@ class DashboardRepositoryImpl implements DashboardRepository {
           .map((m) {
             final b = bMap[m['id_bangunan']];
             return {
+              'nama_orang': m['nama_orang'] ?? '-',
               'jenis_mutasi': m['jenis_mutasi'],
               'keterangan_mutasi': m['keterangan_mutasi'],
+              'nomor_urut_bangunan': b != null ? b['nomor_urut_bangunan'] : '-',
+              'nama_krt': '-',
+              'no_kk': '-',
               'rt': b != null ? b['rt'] : '-',
               'rw': b != null ? b['rw'] : '-',
+              'alamat': b != null
+                  ? '${b['alamat_lengkap'] ?? ''} RT ${b['rt'] ?? '-'}/${b['rw'] ?? '-'}'
+                  : '-',
             };
           })
           .toList();
     }
 
     // the rest are individu-based categories
-    final allIndividu = await _supabase.from('individu').select();
+    final allIndividu = await _fetchAll('individu');
     final filteredIndividu = allIndividu
         .where((i) => kelIds.contains(i['id_keluarga']))
         .toList();
@@ -445,36 +518,70 @@ class DashboardRepositoryImpl implements DashboardRepository {
           final krt = k != null ? krtMap[k['id_krt']] : null;
           final b = krt != null ? bMap[krt['id_bangunan']] : null;
 
+          final tglLahir = ind['tanggal_lahir']?.toString();
+          final age = _calculateAge(tglLahir);
+
+          String namaTampil = ind['nama_lengkap']?.toString() ?? '';
+          String umurTampil = age >= 0 ? age.toString() : '-';
+
+          if (category == 'PUS') {
+            final suami = filteredIndividu.firstWhere((s) {
+              final hub =
+                  s['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+              final status =
+                  s['status_dgn_krt']?.toString().toUpperCase() ?? '';
+              return s['id_keluarga'] == ind['id_keluarga'] &&
+                  s['id'] != ind['id'] &&
+                  (hub == 'SUAMI' ||
+                      hub == 'KK' ||
+                      hub == 'KEPALA KELUARGA' ||
+                      status == 'KK' ||
+                      status == 'KEPALA KELUARGA');
+            }, orElse: () => <String, dynamic>{});
+
+            if (suami.isNotEmpty) {
+              final umurSuami = _calculateAge(
+                suami['tanggal_lahir']?.toString(),
+              );
+              final strUmurSuami = umurSuami >= 0 ? umurSuami.toString() : '-';
+              namaTampil = '${suami['nama_lengkap'] ?? '-'} / $namaTampil';
+              umurTampil = '$strUmurSuami / $umurTampil';
+            }
+          }
+
           return {
-            'nama_lengkap': ind['nama_lengkap'],
+            'nama_lengkap': namaTampil,
+            'umur': umurTampil,
+            'umur_int': age,
             'nik': ind['nik'],
             'jenis_kelamin': ind['jenis_kelamin'],
             'tanggal_lahir': ind['tanggal_lahir'],
+            'nomor_urut_bangunan': b != null ? b['nomor_urut_bangunan'] : '-',
+            'nama_krt': krt != null ? krt['nama_krt'] : '-',
+            'no_kk': k != null ? k['no_kk'] : '-',
             'rt': b != null ? b['rt'] : '-',
             'rw': b != null ? b['rw'] : '-',
+            'alamat': b != null
+                ? '${b['alamat_lengkap'] ?? ''} RT ${b['rt'] ?? '-'}/${b['rw'] ?? '-'}'
+                : '-',
           };
         })
         .toList();
 
     result.sort((a, b) {
-      final rtA = int.tryParse(a['rt']?.toString() ?? '') ?? 999;
-      final rtB = int.tryParse(b['rt']?.toString() ?? '') ?? 999;
+      final rtA = int.tryParse(a['rt']?.toString() ?? '') ?? 99999;
+      final rtB = int.tryParse(b['rt']?.toString() ?? '') ?? 99999;
       final rtCompare = rtA.compareTo(rtB);
       if (rtCompare != 0) return rtCompare;
 
+      final umurA = a['umur_int'] as int? ?? 99999;
+      final umurB = b['umur_int'] as int? ?? 99999;
+      final umurCompare = umurA.compareTo(umurB);
+      if (umurCompare != 0) return umurCompare;
+
       final nameA = a['nama_lengkap']?.toString().toLowerCase() ?? '';
       final nameB = b['nama_lengkap']?.toString().toLowerCase() ?? '';
-      final nameCompare = nameA.compareTo(nameB);
-      if (nameCompare != 0) return nameCompare;
-
-      final nikA = a['nik']?.toString() ?? '';
-      final nikB = b['nik']?.toString() ?? '';
-      final nikCompare = nikA.compareTo(nikB);
-      if (nikCompare != 0) return nikCompare;
-
-      final jkA = a['jenis_kelamin']?.toString() ?? '';
-      final jkB = b['jenis_kelamin']?.toString() ?? '';
-      return jkA.compareTo(jkB);
+      return nameA.compareTo(nameB);
     });
 
     return result;

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/extensions/supabase_extensions.dart';
 import '../models/individu_model.dart';
 import '../../domain/entities/individu.dart';
 
@@ -149,7 +150,7 @@ class IndividuRepository {
         kelompokDawis.isNotEmpty &&
         kelompokDawis != 'Semua') {
       // Need to filter by kelompok_dawis
-      final bs = await _supabase.from('bangunan').select('id, kelompok_dawis');
+      final bs = await _supabase.fetchAll('bangunan', columns: 'id, kelompok_dawis');
 
       final normalizedDawis = kelompokDawis
           .replaceAll('.', '')
@@ -185,7 +186,7 @@ class IndividuRepository {
           .select()
           .inFilter('id_keluarga', kelIds);
     } else {
-      response = await _supabase.from('individu').select();
+      response = await _supabase.fetchAll('individu');
     }
 
     final q = query.toLowerCase();

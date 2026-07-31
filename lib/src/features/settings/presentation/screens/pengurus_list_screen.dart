@@ -6,6 +6,10 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/app_user.dart';
 import '../providers/app_user_provider.dart';
 import 'package:dawis/src/features/laporan/services/data_transfer_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:universal_html/html.dart' as html;
 
 class PengurusListScreen extends ConsumerStatefulWidget {
   const PengurusListScreen({super.key});
@@ -55,9 +59,94 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
     }
   }
 
+  Future<void> _downloadTemplate() async {
+    try {
+      final service = DataTransferService();
+      final bytes = await service.generateImportTemplatePengurus();
+
+      if (kIsWeb) {
+        final base64data = base64Encode(bytes);
+        html.AnchorElement(
+            href:
+                'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,$base64data',
+          )
+          ..setAttribute('download', 'Template_Import_Pengurus.xlsx')
+          ..click();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Template berhasil diunduh.')),
+          );
+        }
+      } else {
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir != null) {
+          final filePath =
+              '${downloadsDir.path}\\Template_Import_Pengurus.xlsx';
+          final file = File(filePath);
+          await file.writeAsBytes(bytes);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Template berhasil disimpan di $filePath'),
+              ),
+            );
+          }
+        } else {
+          throw Exception('Katalog Downloads tidak ditemukan');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan template: $e')));
+      }
+    }
+  }
+
+  Future<void> _confirmDelete(AppUser user) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Pengurus'),
+        content: Text('Apakah Anda yakin ingin menghapus ${user.nama}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    try {
+      final repository = ref.read(appUserRepositoryProvider);
+      await repository.deleteUser(user.id);
+      ref.invalidate(allUsersProvider);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pengurus berhasil dihapus')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal menghapus pengurus: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(allUsersProvider);
+    final currentUser = ref.watch(loggedInUserProvider);
+    final isAdmin = currentUser?.role == 'ADMIN';
 
     return Scaffold(
       appBar: AppBar(
@@ -77,6 +166,11 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
+          IconButton(
+            tooltip: 'Download Template Pengurus',
+            icon: const Icon(Icons.download),
+            onPressed: _isImporting ? null : _downloadTemplate,
+          ),
           IconButton(
             tooltip: 'Import Excel RT/RW',
             icon: const Icon(Icons.upload_file),
@@ -119,7 +213,7 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
                 itemCount: pengurusList.length,
                 itemBuilder: (context, index) {
                   final user = pengurusList[index];
-                  return _buildUserCard(context, user, index + 1);
+                  return _buildUserCard(context, user, index + 1, isAdmin);
                 },
               );
             },
@@ -157,7 +251,12 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
     );
   }
 
-  Widget _buildUserCard(BuildContext context, AppUser user, int index) {
+  Widget _buildUserCard(
+    BuildContext context,
+    AppUser user,
+    int index,
+    bool isAdmin,
+  ) {
     Color chipColor;
     switch (user.role) {
       case 'ADMIN':
@@ -211,13 +310,23 @@ class _PengurusListScreenState extends ConsumerState<PengurusListScreen> {
             ],
           ],
         ),
-        trailing: Chip(
-          label: Text(
-            user.role,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-          ),
-          backgroundColor: chipColor,
-          padding: EdgeInsets.zero,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Chip(
+              label: Text(
+                user.role,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              backgroundColor: chipColor,
+              padding: EdgeInsets.zero,
+            ),
+            if (isAdmin)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _confirmDelete(user),
+              ),
+          ],
         ),
         onTap: () {
           context.push('/form-pengurus/${user.id}');
