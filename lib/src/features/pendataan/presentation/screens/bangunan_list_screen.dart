@@ -161,9 +161,12 @@ class BangunanListScreen extends ConsumerWidget {
           return _buildList(context, ref, bangunanList);
         },
       ),
-      floatingActionButton: (user?.role == 'ADMIN' || user?.role == 'KADER') ? _buildFAB(context) : null,
+      floatingActionButton: (user?.role == 'ADMIN' || user?.role == 'KADER')
+          ? _buildFAB(context)
+          : null,
     );
   }
+
   // ── Empty state ──────────────────────────────────────────────────
   Widget _buildEmptyState() {
     return Center(
@@ -207,11 +210,7 @@ class BangunanListScreen extends ConsumerWidget {
   }
 
   // ── List builder ───────────────────────────────────────────────────
-  Widget _buildList(
-    BuildContext context,
-    WidgetRef ref,
-    List<dynamic> items,
-  ) {
+  Widget _buildList(BuildContext context, WidgetRef ref, List<dynamic> items) {
     final userRole = ref.watch(loggedInUserProvider)?.role;
 
     return RefreshIndicator(
@@ -232,7 +231,12 @@ class BangunanListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCard(BuildContext context, WidgetRef ref, dynamic b, String? userRole) {
+  Widget _buildCard(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic b,
+    String? userRole,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(

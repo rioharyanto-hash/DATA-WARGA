@@ -22,7 +22,8 @@ class ViewIndividuScreen extends ConsumerWidget {
     final individuAsync = ref.watch(individuByIdProvider(individuId));
     final mutasiAsync = ref.watch(mutasiByIndividuProvider(individuId));
     final currentUser = ref.watch(loggedInUserProvider);
-    final bool canEdit = currentUser?.role == 'ADMIN' || currentUser?.role == 'KADER';
+    final bool canEdit =
+        currentUser?.role == 'ADMIN' || currentUser?.role == 'KADER';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),

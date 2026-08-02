@@ -1882,6 +1882,7 @@ class ReportRepository implements IReportRepository {
       SELECT 
         b.alamat_lengkap AS alamat, b.rt, b.rw,
         b.kelompok_dawis AS nama_kelompok,
+        b.nama_bangunan,
         kel.id AS keluarga_id,
         ind.id AS individu_id,
         ind.nama_lengkap AS nama_anak,
@@ -2004,6 +2005,8 @@ class ReportRepository implements IReportRepository {
         'sudah_sekolah': sudahSekolah ? 'Sudah' : 'Belum',
         'alasan_belum_sekolah': row['alasan_belum_sekolah'] ?? '-',
         'rt': row['rt'],
+        'nama_kelompok': row['nama_kelompok'],
+        'nama_bangunan': row['nama_bangunan'],
       });
     }
 

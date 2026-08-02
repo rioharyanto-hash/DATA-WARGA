@@ -12,7 +12,9 @@ extension SupabaseExtensions on SupabaseClient {
     const int limit = 1000;
 
     while (true) {
-      PostgrestTransformBuilder<PostgrestList> query = from(table).select(columns ?? '*');
+      PostgrestTransformBuilder<PostgrestList> query = from(
+        table,
+      ).select(columns ?? '*');
       if (orderBy != null) {
         query = query.order(orderBy, ascending: ascending);
       }

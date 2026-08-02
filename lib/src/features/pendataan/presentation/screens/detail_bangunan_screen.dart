@@ -141,7 +141,7 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
 
   Widget? _buildActionBtn(String? role) {
     if (role != 'ADMIN' && role != 'KADER') return null;
-    
+
     if (_tabController.index == 0) {
       return FloatingActionButton.extended(
         onPressed: () => context.push('/form-bangunan/${widget.bangunanId}'),
@@ -544,7 +544,10 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
     }
   }
 
-  Widget _buildTabKrt(BuildContext context, AsyncValue<List<dynamic>> krtListAsync) {
+  Widget _buildTabKrt(
+    BuildContext context,
+    AsyncValue<List<dynamic>> krtListAsync,
+  ) {
     final userRole = ref.watch(loggedInUserProvider)?.role;
     final canEdit = userRole == 'ADMIN' || userRole == 'KADER';
 
@@ -569,57 +572,67 @@ class _DetailBangunanScreenState extends ConsumerState<DetailBangunanScreen>
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text('NIK: ${krt.nikKrt}\nNo. KK: ${krt.noKkKrt}'),
-                trailing: canEdit ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Color(0xFF6366F1)),
-                      onPressed: () => context.push('/form-krt-edit/${krt.id}'),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Hapus Data'),
-                            content: const Text(
-                              'Anda yakin ingin menghapus data KRT ini? Seluruh data keluarga dan individu di dalamnya juga akan terhapus.',
+                trailing: canEdit
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Color(0xFF6366F1),
                             ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => context.pop(),
-                                child: const Text('Batal'),
-                              ),
-                              FilledButton(
-                                onPressed: () async {
-                                  context.pop();
-                                  await ref
-                                      .read(krtRepositoryProvider)
-                                      .deleteKrt(krt.id);
-                                  ref.invalidate(
-                                    krtByBangunanProvider(widget.bangunanId),
-                                  );
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Data KRT berhasil dihapus',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: const Text('Hapus'),
-                              ),
-                            ],
+                            onPressed: () =>
+                                context.push('/form-krt-edit/${krt.id}'),
                           ),
-                        );
-                      },
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ) : null,
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Hapus Data'),
+                                  content: const Text(
+                                    'Anda yakin ingin menghapus data KRT ini? Seluruh data keluarga dan individu di dalamnya juga akan terhapus.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => context.pop(),
+                                      child: const Text('Batal'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () async {
+                                        context.pop();
+                                        await ref
+                                            .read(krtRepositoryProvider)
+                                            .deleteKrt(krt.id);
+                                        ref.invalidate(
+                                          krtByBangunanProvider(
+                                            widget.bangunanId,
+                                          ),
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Data KRT berhasil dihapus',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: const Text('Hapus'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      )
+                    : null,
                 onTap: () => context.push('/detail-krt/${krt.id}'),
               ),
             );

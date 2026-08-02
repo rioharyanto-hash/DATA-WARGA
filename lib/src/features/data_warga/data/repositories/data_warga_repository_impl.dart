@@ -7,7 +7,10 @@ import '../../domain/repositories/data_warga_repository.dart';
 class DataWargaRepositoryImpl implements DataWargaRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<List<Map<String, dynamic>>> _fetchAll(String table, [String? columns]) async {
+  Future<List<Map<String, dynamic>>> _fetchAll(
+    String table, [
+    String? columns,
+  ]) async {
     List<Map<String, dynamic>> allData = [];
     int offset = 0;
     const int limit = 1000;
@@ -113,7 +116,10 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
     // 3. Fetch related data
     final krtList = await _fetchAll('krt', 'id, id_bangunan, nama_krt');
     final keluargaList = await _fetchAll('keluarga', 'id, id_krt');
-    final individuList = await _fetchAll('individu', 'id, id_keluarga, jenis_kelamin, nama_lengkap');
+    final individuList = await _fetchAll(
+      'individu',
+      'id, id_keluarga, jenis_kelamin, nama_lengkap',
+    );
 
     // Map relationships
     Map<String, List<Map<String, dynamic>>> bToKrt = {};

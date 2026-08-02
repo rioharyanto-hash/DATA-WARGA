@@ -150,7 +150,10 @@ class IndividuRepository {
         kelompokDawis.isNotEmpty &&
         kelompokDawis != 'Semua') {
       // Need to filter by kelompok_dawis
-      final bs = await _supabase.fetchAll('bangunan', columns: 'id, kelompok_dawis');
+      final bs = await _supabase.fetchAll(
+        'bangunan',
+        columns: 'id, kelompok_dawis',
+      );
 
       final normalizedDawis = kelompokDawis
           .replaceAll('.', '')

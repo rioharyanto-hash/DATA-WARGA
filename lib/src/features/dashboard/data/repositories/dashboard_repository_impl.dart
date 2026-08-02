@@ -5,7 +5,10 @@ import '../../domain/repositories/dashboard_repository.dart';
 class DashboardRepositoryImpl implements DashboardRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<List<Map<String, dynamic>>> _fetchAll(String table, [String? columns]) async {
+  Future<List<Map<String, dynamic>>> _fetchAll(
+    String table, [
+    String? columns,
+  ]) async {
     List<Map<String, dynamic>> allData = [];
     int offset = 0;
     const int limit = 1000;
@@ -99,7 +102,10 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     if (kelompokDawis == 'Semua') kelompokDawis = null;
 
-    final allBangunan = await _fetchAll('bangunan', 'id, rw, rt, kelompok_dawis');
+    final allBangunan = await _fetchAll(
+      'bangunan',
+      'id, rw, rt, kelompok_dawis',
+    );
 
     final filteredBangunan = allBangunan.where((b) {
       if (rw != null &&
@@ -332,23 +338,19 @@ class DashboardRepositoryImpl implements DashboardRepository {
           .toList();
 
       list.sort((a, b) {
-        final noA =
-            int.tryParse(a['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
-        final noB =
-            int.tryParse(b['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
-        final noCompare = noA.compareTo(noB);
-        if (noCompare != 0) return noCompare;
+        // 1. RT
+        final rtA = a['rt']?.toString().toLowerCase() ?? '';
+        final rtB = b['rt']?.toString().toLowerCase() ?? '';
+        final rtCompare = rtA.compareTo(rtB);
+        if (rtCompare != 0) return rtCompare;
 
-        final krtA = a['nama_krt']?.toString().toLowerCase() ?? '';
-        final krtB = b['nama_krt']?.toString().toLowerCase() ?? '';
-        final krtCompare = krtA.compareTo(krtB);
-        if (krtCompare != 0) return krtCompare;
+        // 2. Kelompok Dawis
+        final kdWA = a['kelompok_dawis']?.toString().toLowerCase() ?? '';
+        final kdWB = b['kelompok_dawis']?.toString().toLowerCase() ?? '';
+        final kdCompare = kdWA.compareTo(kdWB);
+        if (kdCompare != 0) return kdCompare;
 
-        final kkA = a['no_kk']?.toString().toLowerCase() ?? '';
-        final kkB = b['no_kk']?.toString().toLowerCase() ?? '';
-        final kkCompare = kkA.compareTo(kkB);
-        if (kkCompare != 0) return kkCompare;
-
+        // 3. Abjad (Nama Bangunan)
         final nameA = a['nama_bangunan']?.toString().toLowerCase() ?? '';
         final nameB = b['nama_bangunan']?.toString().toLowerCase() ?? '';
         return nameA.compareTo(nameB);
@@ -396,6 +398,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
           'nama_kk': namaKk,
           'rt': b != null ? b['rt'] : '-',
           'rw': b != null ? b['rw'] : '-',
+          'kelompok_dawis': b != null ? b['kelompok_dawis'] : '-',
           'nomor_urut_bangunan': b != null ? b['nomor_urut_bangunan'] : '-',
           'alamat': b != null
               ? '${b['alamat_lengkap'] ?? ''} RT ${b['rt'] ?? '-'}/${b['rw'] ?? '-'}'
@@ -404,24 +407,28 @@ class DashboardRepositoryImpl implements DashboardRepository {
       }).toList();
 
       list.sort((a, b) {
-        final noA =
-            int.tryParse(a['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
-        final noB =
-            int.tryParse(b['nomor_urut_bangunan']?.toString() ?? '') ?? 99999;
-        final noCompare = noA.compareTo(noB);
-        if (noCompare != 0) return noCompare;
+        // 1. RT
+        final rtA = a['rt']?.toString().toLowerCase() ?? '';
+        final rtB = b['rt']?.toString().toLowerCase() ?? '';
+        final rtCompare = rtA.compareTo(rtB);
+        if (rtCompare != 0) return rtCompare;
 
-        final krtA = a['nama_krt']?.toString().toLowerCase() ?? '';
-        final krtB = b['nama_krt']?.toString().toLowerCase() ?? '';
-        final krtCompare = krtA.compareTo(krtB);
-        if (krtCompare != 0) return krtCompare;
+        // 2. Kelompok Dawis
+        final kdWA = a['kelompok_dawis']?.toString().toLowerCase() ?? '';
+        final kdWB = b['kelompok_dawis']?.toString().toLowerCase() ?? '';
+        final kdCompare = kdWA.compareTo(kdWB);
+        if (kdCompare != 0) return kdCompare;
 
+        // 3. Abjad (Nama KK)
+        final nameA = a['nama_kk']?.toString().toLowerCase() ?? '';
+        final nameB = b['nama_kk']?.toString().toLowerCase() ?? '';
+        final nameCompare = nameA.compareTo(nameB);
+        if (nameCompare != 0) return nameCompare;
+
+        // 4. No KK
         final kkA = a['no_kk']?.toString().toLowerCase() ?? '';
         final kkB = b['no_kk']?.toString().toLowerCase() ?? '';
-        final kkCompare = kkA.compareTo(kkB);
-        if (kkCompare != 0) return kkCompare;
-
-        return 0;
+        return kkA.compareTo(kkB);
       });
 
       return list;

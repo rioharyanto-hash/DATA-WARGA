@@ -102,7 +102,10 @@ class BangunanRepository {
   }
 
   Future<List<String>> getDistinctKelompokDawis() async {
-    final response = await _supabase.fetchAll('bangunan', columns: 'kelompok_dawis');
+    final response = await _supabase.fetchAll(
+      'bangunan',
+      columns: 'kelompok_dawis',
+    );
     final dawisSet = <String>{};
     for (var row in response) {
       final kd = row['kelompok_dawis']?.toString() ?? '';

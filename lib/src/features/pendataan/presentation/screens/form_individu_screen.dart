@@ -565,9 +565,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           return;
         }
 
-        final hubunganUpper = _hubunganKeluarga.toUpperCase();
-        final krtUpper = _statusDgnKrt.toUpperCase();
-
         // if (hubunganUpper == 'KK' || hubunganUpper == 'KEPALA KELUARGA') {
         //   final isDuplicate = await _checkAndWarnDuplicateRole(isKk: true);
         //   if (isDuplicate) return;
@@ -801,6 +798,28 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    int ageYears = -1;
+    if (_tanggalLahirController.text.isNotEmpty) {
+      try {
+        final date = DateTime.parse(_tanggalLahirController.text);
+        final now = DateTime.now();
+        ageYears = now.year - date.year;
+        if (now.month < date.month ||
+            (now.month == date.month && now.day < date.day)) {
+          ageYears--;
+        }
+      } catch (_) {}
+    }
+
+    final isUsiaSekolah = ageYears == 5 || ageYears == 6;
+    final showAlasan = _pendidikanTerakhir == 'Tidak/Belum Sekolah';
+    final showNamaSekolah = isUsiaSekolah && !showAlasan;
+    final showAlasanField = showAlasan || showNamaSekolah;
+    final labelSekolah = showAlasan ? 'Alasan Belum Sekolah' : 'Nama Sekolah';
+    final hintSekolah = showAlasan
+        ? 'Masukkan alasan tidak/belum sekolah'
+        : 'Masukkan nama sekolah';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Form Data Individu')),
       body: SingleChildScrollView(
@@ -1117,13 +1136,13 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                     onChanged: (val) =>
                         setState(() => _pendidikanTerakhir = val!),
                   ),
-                  if (_pendidikanTerakhir == 'Tidak/Belum Sekolah') ...[
+                  if (showAlasanField) ...[
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _alasanBelumSekolahController,
-                      decoration: const InputDecoration(
-                        labelText: 'Alasan Belum Sekolah',
-                        hintText: 'Masukkan alasan tidak/belum sekolah',
+                      decoration: InputDecoration(
+                        labelText: labelSekolah,
+                        hintText: hintSekolah,
                       ),
                     ),
                   ],

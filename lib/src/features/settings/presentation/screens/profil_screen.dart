@@ -32,6 +32,8 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
   late TextEditingController _emailController;
   late TextEditingController _noRekeningBankController;
   late TextEditingController _npwpController;
+  late TextEditingController _passwordController;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -70,6 +72,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
       text: user?.noRekeningBank ?? '',
     );
     _npwpController = TextEditingController(text: user?.npwp ?? '');
+    _passwordController = TextEditingController(text: user?.password ?? '');
   }
 
   @override
@@ -93,6 +96,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
     _emailController.dispose();
     _noRekeningBankController.dispose();
     _npwpController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -122,6 +126,7 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
       email: _emailController.text,
       noRekeningBank: _noRekeningBankController.text,
       npwp: _npwpController.text,
+      password: _passwordController.text,
     );
 
     final repo = ref.read(appUserRepositoryProvider);
@@ -306,6 +311,31 @@ class _ProfilScreenState extends ConsumerState<ProfilScreen> {
                         _idKaderController,
                         required: true,
                         readOnly: !isAdmin,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (v) =>
+                              v == null || v.isEmpty ? 'Wajib diisi' : null,
+                        ),
                       ),
                     ],
                   ),
