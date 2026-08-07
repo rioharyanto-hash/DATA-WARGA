@@ -162,6 +162,8 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
     'BST',
     'Program Bantuan Atensi',
     'BANTUAN PANGAN',
+    'KAJ',
+    'KLJ',
   ];
 
   final List<String> _metodeKbOptions = [
@@ -440,104 +442,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
     }
   }
 
-  void _showDuplicateRoleDialog({
-    required String title,
-    required String message,
-  }) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.orange.shade700,
-              size: 28,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(fontSize: 14, height: 1.4),
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Mengerti'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _checkAndWarnDuplicateRole({required bool isKk}) async {
-    final assignedKeluargaId = _selectedKeluargaId ?? widget.keluargaId;
-    if (assignedKeluargaId.isEmpty) return false;
-
-    try {
-      final repo = ref.read(individuRepositoryProvider);
-      final existingMembers = await repo.getIndividuByKeluargaId(
-        assignedKeluargaId,
-      );
-
-      for (final member in existingMembers) {
-        if (widget.individuId != null && member.id == widget.individuId) {
-          continue;
-        }
-
-        if (isKk) {
-          final memberHubunganUpper = member.hubunganKeluarga.toUpperCase();
-          if (memberHubunganUpper == 'KK' ||
-              memberHubunganUpper == 'KEPALA KELUARGA') {
-            if (mounted) {
-              _showDuplicateRoleDialog(
-                title: 'Peringatan Batasan Kepala Keluarga',
-                message:
-                    'Dalam satu Kartu Keluarga (KK) tidak boleh ada dua atau lebih Kepala Keluarga.\n\nSaat ini posisi Kepala Keluarga dalam KK ini sudah diisi oleh:\n"${member.namaLengkap}" (NIK: ${member.nik}).\n\nSilakan pilih status hubungan keluarga yang lain.',
-              );
-            }
-            return true;
-          }
-        } else {
-          final memberKrtUpper = (member.statusDgnKrt ?? '').toUpperCase();
-          if (memberKrtUpper == 'KK' ||
-              memberKrtUpper == 'KEPALA KELUARGA' ||
-              memberKrtUpper == 'KEPALA RUMAH TANGGA') {
-            if (mounted) {
-              _showDuplicateRoleDialog(
-                title: 'Peringatan Batasan Kepala Rumah Tangga',
-                message:
-                    'Dalam satu Kartu Keluarga/KRT tidak boleh ada dua atau lebih Kepala Rumah Tangga.\n\nSaat ini posisi Kepala Rumah Tangga sudah diisi oleh:\n"${member.namaLengkap}" (NIK: ${member.nik}).\n\nSilakan pilih status hubungan dengan KRT yang lain.',
-              );
-            }
-            return true;
-          }
-        }
-      }
-    } catch (e) {
-      // Abaikan jika error fetch
-    }
-    return false;
-  }
-
   Future<void> _simpanData() async {
     if (_isLoading) return;
     if (_formKey.currentState!.validate()) {
@@ -564,18 +468,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
           }
           return;
         }
-
-        // if (hubunganUpper == 'KK' || hubunganUpper == 'KEPALA KELUARGA') {
-        //   final isDuplicate = await _checkAndWarnDuplicateRole(isKk: true);
-        //   if (isDuplicate) return;
-        // }
-
-        // if (krtUpper == 'KK' ||
-        //     krtUpper == 'KEPALA KELUARGA' ||
-        //     krtUpper == 'KEPALA RUMAH TANGGA') {
-        //   final isDuplicate = await _checkAndWarnDuplicateRole(isKk: false);
-        //   if (isDuplicate) return;
-        // }
 
         final individu = Individu(
           id: widget.individuId ?? _uuid.v4(),
@@ -719,15 +611,19 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
         // Refresh list
         ref.invalidate(individuByKeluargaProvider(assignedKeluargaId));
 
-        // Update KRT jika individu adalah Kepala Keluarga
+        // Update KRT jika individu adalah Kepala Keluarga atau KRT
         final upperStatus = individu.hubunganKeluarga.toUpperCase();
         final upperStatusKrt = individu.statusDgnKrt?.toUpperCase() ?? '';
-        if (upperStatus == "KK" ||
-            upperStatus == "KEPALA KELUARGA" ||
-            upperStatus == "KEPALA RUMAH TANGGA" ||
+        
+        final isKrtExplicit = (upperStatusKrt == "KRT" || 
             upperStatusKrt == "KK" ||
             upperStatusKrt == "KEPALA KELUARGA" ||
-            upperStatusKrt == "KEPALA RUMAH TANGGA") {
+            upperStatusKrt == "KEPALA RUMAH TANGGA");
+
+        if (isKrtExplicit || 
+            upperStatus == "KK" ||
+            upperStatus == "KEPALA KELUARGA" ||
+            upperStatus == "KEPALA RUMAH TANGGA") {
           final keluargaRepo = ref.read(keluargaRepositoryProvider);
           final keluarga = await keluargaRepo.getKeluargaById(
             assignedKeluargaId,
@@ -736,17 +632,22 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
             final krtRepo = ref.read(krtRepositoryProvider);
             final krt = await krtRepo.getKrtById(keluarga.idKrt);
             if (krt != null) {
-              final updatedKrt = Krt(
-                id: krt.id,
-                idBangunan: krt.idBangunan,
-                namaKrt: individu.namaLengkap,
-                nikKrt: individu.nik,
-                noKkKrt: krt.noKkKrt,
-                isSynced: krt.isSynced,
-              );
-              await krtRepo.updateKrt(updatedKrt);
-              ref.invalidate(krtByBangunanProvider(krt.idBangunan));
-              ref.invalidate(krtByIdProvider(krt.id));
+              if (isKrtExplicit || 
+                  krt.namaKrt == 'KRT Baru' || 
+                  krt.namaKrt == 'Tanpa Nama' || 
+                  krt.namaKrt == '-') {
+                final updatedKrt = Krt(
+                  id: krt.id,
+                  idBangunan: krt.idBangunan,
+                  namaKrt: individu.namaLengkap,
+                  nikKrt: individu.nik,
+                  noKkKrt: krt.noKkKrt,
+                  isSynced: krt.isSynced,
+                );
+                await krtRepo.updateKrt(updatedKrt);
+                ref.invalidate(krtByBangunanProvider(krt.idBangunan));
+                ref.invalidate(krtByIdProvider(krt.id));
+              }
             }
           }
         }
@@ -945,10 +846,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                     onChanged: (val) async {
                       if (val != null) {
                         setState(() => _hubunganKeluarga = val);
-                        if (val.toUpperCase() == 'KEPALA KELUARGA' ||
-                            val.toUpperCase() == 'KK') {
-                          await _checkAndWarnDuplicateRole(isKk: true);
-                        }
                         await _fetchParentsIfAnak();
                       }
                     },
@@ -992,11 +889,6 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
                     onChanged: (val) async {
                       if (val != null) {
                         setState(() => _statusDgnKrt = val);
-                        if (val.toUpperCase() == 'KEPALA RUMAH TANGGA' ||
-                            val.toUpperCase() == 'KEPALA KELUARGA' ||
-                            val.toUpperCase() == 'KK') {
-                          await _checkAndWarnDuplicateRole(isKk: false);
-                        }
                       }
                     },
                   ),

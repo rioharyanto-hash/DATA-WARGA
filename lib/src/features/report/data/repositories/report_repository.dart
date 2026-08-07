@@ -384,6 +384,10 @@ class ReportRepository implements IReportRepository {
       whereArgs = [parsedRw];
     }
 
+    final krtMap = await _prefetchKrt(db);
+    final kkMap = await _prefetchKeluarga(db);
+    final indMap = await _prefetchIndividuAktif(db);
+
     final bangunanList = await db.query(
       'bangunan',
       where: whereClause.isEmpty ? null : whereClause,
@@ -418,11 +422,7 @@ class ReportRepository implements IReportRepository {
       String idBangunan = b['id'].toString();
 
       // Get KRT
-      final krtList = await db.query(
-        'krt',
-        where: 'id_bangunan = ?',
-        whereArgs: [idBangunan],
-      );
+      final krtList = krtMap[idBangunan] ?? [];
       jumlahKrt += krtList.length;
       kelompokMap[kel]!['jumlahKrt'] =
           (kelompokMap[kel]!['jumlahKrt'] as int) + krtList.length;
@@ -431,11 +431,7 @@ class ReportRepository implements IReportRepository {
         String idKrt = krt['id'].toString();
 
         // Get Keluarga
-        final kkList = await db.query(
-          'keluarga',
-          where: 'id_krt = ?',
-          whereArgs: [idKrt],
-        );
+        final kkList = kkMap[idKrt] ?? [];
         jumlahKeluarga += kkList.length;
         kelompokMap[kel]!['jumlahKeluarga'] =
             (kelompokMap[kel]!['jumlahKeluarga'] as int) + kkList.length;
@@ -444,7 +440,7 @@ class ReportRepository implements IReportRepository {
           String idKk = kk['id'].toString();
 
           // Get Individu
-          final indList = await _getIndividuAktif(db, idKk);
+          final indList = indMap[idKk] ?? [];
           jumlahIndividu += indList.length;
           kelompokMap[kel]!['jumlahIndividu'] =
               (kelompokMap[kel]!['jumlahIndividu'] as int) + indList.length;
@@ -535,7 +531,6 @@ class ReportRepository implements IReportRepository {
       'bangunan',
       where: whereClause.isEmpty ? null : whereClause,
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
-      orderBy: 'CAST(nomor_urut_bangunan AS INTEGER) ASC',
     );
 
     final normalizedName = kelompokName
@@ -550,6 +545,10 @@ class ReportRepository implements IReportRepository {
       return name == normalizedName;
     }).toList();
 
+    final krtMap = await _prefetchKrt(db);
+    final kkMap = await _prefetchKeluarga(db);
+    final indMap = await _prefetchIndividuAktif(db);
+
     List<Map<String, dynamic>> bangunanDataList = [];
     int totalKrt = 0;
     int totalKeluarga = 0;
@@ -562,29 +561,21 @@ class ReportRepository implements IReportRepository {
       int jKeluarga = 0;
       int jIndividu = 0;
 
-      final krtList = await db.query(
-        'krt',
-        where: 'id_bangunan = ?',
-        whereArgs: [idBangunan],
-      );
+      final krtList = krtMap[idBangunan] ?? [];
       jKrt = krtList.length;
       totalKrt += jKrt;
 
       for (var krt in krtList) {
         String idKrt = krt['id'].toString();
 
-        final kkList = await db.query(
-          'keluarga',
-          where: 'id_krt = ?',
-          whereArgs: [idKrt],
-        );
+        final kkList = kkMap[idKrt] ?? [];
         jKeluarga += kkList.length;
         totalKeluarga += kkList.length;
 
         for (var kk in kkList) {
           String idKk = kk['id'].toString();
 
-          final indList = await _getIndividuAktif(db, idKk);
+          final indList = indMap[idKk] ?? [];
           jIndividu += indList.length;
           totalIndividu += indList.length;
         }
@@ -650,7 +641,6 @@ class ReportRepository implements IReportRepository {
 
     final bangunanListRaw = await db.query(
       'bangunan',
-      orderBy: 'CAST(nomor_urut_bangunan AS INTEGER) ASC',
     );
 
     final bangunanList = kelompokName == 'SEMUA KADER'
@@ -663,6 +653,10 @@ class ReportRepository implements IReportRepository {
             return name == normalizedName;
           }).toList();
 
+    final krtMap = await _prefetchKrt(db);
+    final kkMap = await _prefetchKeluarga(db);
+    final indMap = await _prefetchIndividuAktif(db);
+
     List<Map<String, dynamic>> rows = [];
 
     for (var b in bangunanList) {
@@ -673,11 +667,7 @@ class ReportRepository implements IReportRepository {
       String lb = b['luas_bangunan']?.toString() ?? '';
       String ll = b['luas_tanah']?.toString() ?? '';
 
-      final krtList = await db.query(
-        'krt',
-        where: 'id_bangunan = ?',
-        whereArgs: [idBangunan],
-      );
+      final krtList = krtMap[idBangunan] ?? [];
 
       if (krtList.isEmpty) {
         // If building has no KRT, still show the building? Maybe not needed for individu list, but let's show an empty row for building.
@@ -697,11 +687,7 @@ class ReportRepository implements IReportRepository {
         String namaKrt = krt['nama_krt']?.toString() ?? '';
         String nikKrt = krt['nik_krt']?.toString() ?? '';
 
-        final kkList = await db.query(
-          'keluarga',
-          where: 'id_krt = ?',
-          whereArgs: [idKrt],
-        );
+        final kkList = kkMap[idKrt] ?? [];
 
         if (kkList.isEmpty) {
           rows.add({
@@ -721,7 +707,7 @@ class ReportRepository implements IReportRepository {
           String idKk = kk['id'].toString();
           String noKk = kk['no_kk']?.toString() ?? '';
 
-          final indList = await _getIndividuAktif(db, idKk);
+          final indList = indMap[idKk] ?? [];
 
           // Find Kepala Keluarga name
           String namaKepalaKeluarga = '';
@@ -839,7 +825,6 @@ class ReportRepository implements IReportRepository {
 
     final bangunanListRaw = await db.query(
       'bangunan',
-      orderBy: 'CAST(nomor_urut_bangunan AS INTEGER) ASC',
     );
     final bangunanListForKelompok = kelompokName == 'SEMUA KADER'
         ? List<Map<String, dynamic>>.from(bangunanListRaw)
@@ -1092,27 +1077,23 @@ class ReportRepository implements IReportRepository {
       return intA.compareTo(intB);
     });
 
+    final krtMap = await _prefetchKrt(db);
+    final kkMap = await _prefetchKeluarga(db);
+    final indMap = await _prefetchIndividuAktif(db);
+
     final List<Map<String, dynamic>> krtRows = [];
 
     int no = 1;
     for (var bgn in bgnList) {
       String idBgn = bgn['id'].toString();
 
-      final krtList = await db.query(
-        'krt',
-        where: 'id_bangunan = ?',
-        whereArgs: [idBgn],
-      );
+      final krtList = krtMap[idBgn] ?? [];
 
       for (var krt in krtList) {
         String idKrt = krt['id'].toString();
         String namaKrt = krt['nama_krt']?.toString() ?? '';
 
-        final kkList = await db.query(
-          'keluarga',
-          where: 'id_krt = ?',
-          whereArgs: [idKrt],
-        );
+        final kkList = kkMap[idKrt] ?? [];
 
         bool isFirstKk = true;
 
@@ -1131,7 +1112,7 @@ class ReportRepository implements IReportRepository {
               kondom = 0;
           int hamil = 0, ias = 0, iat = 0, tial = 0;
 
-          final indList = await _getIndividuAktif(db, idKk);
+          final indList = indMap[idKk] ?? [];
 
           // Find Kepala Keluarga in this KK
           String currentNamaKk = '';
@@ -1311,10 +1292,12 @@ class ReportRepository implements IReportRepository {
     );
     if (kelList.isEmpty) return result;
 
-    for (var kel in kelList) {
-      final kelId = kel['id'];
+    final indMap = await _prefetchIndividuAktif(db);
 
-      final individuList = await _getIndividuAktif(db, kelId);
+    for (var kel in kelList) {
+      final kelId = kel['id']?.toString() ?? '';
+
+      final individuList = indMap[kelId] ?? [];
 
       final kkList = individuList.where((i) {
         final upperHub = (i['hubungan_keluarga']?.toString() ?? '')
@@ -1414,6 +1397,10 @@ class ReportRepository implements IReportRepository {
             return normDawis == normalizedName;
           }).toList();
 
+    final krtMap = await _prefetchKrt(db);
+    final kkMap = await _prefetchKeluarga(db);
+    final indMap = await _prefetchIndividuAktif(db);
+
     List<Map<String, dynamic>> result = [];
     int no = 1;
 
@@ -1421,47 +1408,21 @@ class ReportRepository implements IReportRepository {
       final idBangunan = bgnRow['id']?.toString() ?? '';
       final namaBangunan = bgnRow['nama_bangunan']?.toString() ?? '';
 
-      // Count KRT in this bangunan
-      final krtRes = await db.rawQuery(
-        '''
-        SELECT COUNT(*) FROM krt k
-        WHERE k.id_bangunan = ?
-      ''',
-        [idBangunan],
-      );
-      final krtCount = krtRes.isNotEmpty
-          ? (krtRes.first.values.first as int? ?? 0)
-          : 0;
+      final krtList = krtMap[idBangunan] ?? [];
+      final krtCount = krtList.length;
+      int kkCount = 0;
+      List<Map<String, dynamic>> individuList = [];
 
-      // Count KK in this bangunan
-      final kkRes = await db.rawQuery(
-        '''
-        SELECT COUNT(DISTINCT kel.id) FROM keluarga kel
-        JOIN krt k ON kel.id_krt = k.id
-        WHERE k.id_bangunan = ?
-      ''',
-        [idBangunan],
-      );
-      final kkCount = kkRes.isNotEmpty
-          ? (kkRes.first.values.first as int? ?? 0)
-          : 0;
+      for (var krt in krtList) {
+        final idKrt = krt['id']?.toString() ?? '';
+        final kkList = kkMap[idKrt] ?? [];
+        kkCount += kkList.length;
 
-      // Demographics in this bangunan
-      final individuList = await db.rawQuery(
-        '''
-        SELECT i.*
-        FROM individu i
-        JOIN keluarga kel ON i.id_keluarga = kel.id
-        JOIN krt k ON kel.id_krt = k.id
-        WHERE k.id_bangunan = ?
-        AND i.id NOT IN (
-            SELECT id_individu_asal FROM mutasi 
-            WHERE id_individu_asal IS NOT NULL 
-            AND jenis_mutasi IN ('Meninggal', 'Pindah')
-          )
-      ''',
-        [idBangunan],
-      );
+        for (var kk in kkList) {
+          final idKk = kk['id']?.toString() ?? '';
+          individuList.addAll(indMap[idKk] ?? []);
+        }
+      }
 
       int l = 0;
       int p = 0;
@@ -1783,63 +1744,34 @@ class ReportRepository implements IReportRepository {
       };
     }
 
-    final idList = bangunanIds.map((e) => "'$e'").join(',');
+    final krtMapAll = await _prefetchKrt(db);
+    final kkMapAll = await _prefetchKeluarga(db);
+    final indMapAll = await _prefetchIndividuAktif(db);
 
-    final allKrt = await db.rawQuery(
-      'SELECT * FROM krt WHERE id_bangunan IN ($idList)',
-    );
     final krtIds = <String>{};
-    for (var krt in allKrt) {
-      final idB = krt['id_bangunan'].toString();
-      krtByBangunan.putIfAbsent(idB, () => []).add(krt);
-      krtIds.add(krt['id'].toString());
+    for (var bId in bangunanIds) {
+      if (krtMapAll.containsKey(bId)) {
+        krtByBangunan[bId] = krtMapAll[bId]!;
+        for (var krt in krtMapAll[bId]!) {
+          krtIds.add(krt['id'].toString());
+        }
+      }
     }
 
-    if (krtIds.isEmpty) {
-      return {
-        'krt': krtByBangunan,
-        'kk': kkByKrt,
-        'individu': individuByKeluarga,
-      };
-    }
-
-    final kkIdList = krtIds.map((e) => "'$e'").join(',');
-    final allKk = await db.rawQuery(
-      'SELECT * FROM keluarga WHERE id_krt IN ($kkIdList)',
-    );
     final kelIds = <String>{};
-    for (var kk in allKk) {
-      final idK = kk['id_krt'].toString();
-      kkByKrt.putIfAbsent(idK, () => []).add(kk);
-      kelIds.add(kk['id'].toString());
+    for (var krtId in krtIds) {
+      if (kkMapAll.containsKey(krtId)) {
+        kkByKrt[krtId] = kkMapAll[krtId]!;
+        for (var kk in kkMapAll[krtId]!) {
+          kelIds.add(kk['id'].toString());
+        }
+      }
     }
 
-    if (kelIds.isEmpty) {
-      return {
-        'krt': krtByBangunan,
-        'kk': kkByKrt,
-        'individu': individuByKeluarga,
-      };
-    }
-
-    final indIdList = kelIds.map((e) => "'$e'").join(',');
-
-    // Fetch mutasi separately to avoid slow SQLite subquery
-    final allMutasi = await db.rawQuery(
-      "SELECT id_individu_asal FROM mutasi WHERE id_individu_asal IS NOT NULL AND jenis_mutasi IN ('Meninggal', 'Pindah')",
-    );
-    final mutasiIds = allMutasi
-        .map((e) => e['id_individu_asal'].toString())
-        .toSet();
-
-    final allInd = await db.rawQuery(
-      'SELECT * FROM individu WHERE id_keluarga IN ($indIdList)',
-    );
-
-    for (var ind in allInd) {
-      if (mutasiIds.contains(ind['id'].toString())) continue;
-      final idKel = ind['id_keluarga'].toString();
-      individuByKeluarga.putIfAbsent(idKel, () => []).add(ind);
+    for (var kelId in kelIds) {
+      if (indMapAll.containsKey(kelId)) {
+        individuByKeluarga[kelId] = indMapAll[kelId]!;
+      }
     }
 
     return {
@@ -1894,10 +1826,10 @@ class ReportRepository implements IReportRepository {
       JOIN krt ON krt.id_bangunan = b.id
       JOIN keluarga kel ON kel.id_krt = krt.id
       JOIN individu ind ON ind.id_keluarga = kel.id
-      WHERE ind.id NOT IN (
-        SELECT id_individu_asal FROM mutasi 
-        WHERE id_individu_asal IS NOT NULL 
-        AND jenis_mutasi IN ('Meninggal', 'Pindah')
+      WHERE NOT EXISTS (
+        SELECT 1 FROM mutasi m
+        WHERE m.id_individu_asal = ind.id 
+        AND m.jenis_mutasi IN ('Meninggal', 'Pindah')
       )
       AND ind.tanggal_lahir > ? AND ind.tanggal_lahir <= ?
       ''',
@@ -1909,6 +1841,8 @@ class ReportRepository implements IReportRepository {
         .replaceAll('.', '')
         .replaceAll(' ', '')
         .toLowerCase();
+
+    final indMap = await _prefetchIndividuAktif(db);
 
     for (var row in rawData) {
       // Filter Kelompok Dawis di memori
@@ -1949,23 +1883,21 @@ class ReportRepository implements IReportRepository {
 
       // Ambil data orang tua
       final String kelId = row['keluarga_id'].toString();
-      final ortuList = await db.rawQuery(
-        '''
-        SELECT nama_lengkap, nik, hubungan_keluarga, status_dgn_krt, no_tlp
-        FROM individu 
-        WHERE id_keluarga = ? 
-        AND (
-          UPPER(hubungan_keluarga) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA', 'ISTRI', 'ORANG TUA')
-          OR UPPER(status_dgn_krt) IN ('KK', 'KEPALA KELUARGA', 'KEPALA RUMAH TANGGA', 'ISTRI', 'ORANG TUA')
-        )
-        AND id NOT IN (
-          SELECT id_individu_asal FROM mutasi 
-          WHERE id_individu_asal IS NOT NULL 
-          AND jenis_mutasi IN ('Meninggal', 'Pindah')
-        )
-        ''',
-        [kelId],
-      );
+      final familyMembers = indMap[kelId] ?? [];
+      final ortuList = familyMembers.where((ind) {
+        final hub = (ind['hubungan_keluarga']?.toString() ?? '').toUpperCase();
+        final stat = (ind['status_dgn_krt']?.toString() ?? '').toUpperCase();
+        return hub == 'KK' ||
+            hub == 'KEPALA KELUARGA' ||
+            hub == 'KEPALA RUMAH TANGGA' ||
+            hub == 'ISTRI' ||
+            hub == 'ORANG TUA' ||
+            stat == 'KK' ||
+            stat == 'KEPALA KELUARGA' ||
+            stat == 'KEPALA RUMAH TANGGA' ||
+            stat == 'ISTRI' ||
+            stat == 'ORANG TUA';
+      }).toList();
 
       String namaOrtu = '-';
       String nikOrtu = '-';
@@ -2057,6 +1989,98 @@ class ReportRepository implements IReportRepository {
     return results;
   }
 
+  Future<Map<String, List<Map<String, dynamic>>>> _prefetchKrt(
+    Database db,
+  ) async {
+    final list = await db.query('krt');
+    final map = <String, List<Map<String, dynamic>>>{};
+    for (var k in list) {
+      final idBgn = k['id_bangunan']?.toString() ?? '';
+      if (idBgn.isNotEmpty) {
+        map.putIfAbsent(idBgn, () => []).add(k);
+      }
+    }
+    return map;
+  }
+
+  Future<Map<String, List<Map<String, dynamic>>>> _prefetchKeluarga(
+    Database db,
+  ) async {
+    final list = await db.query('keluarga');
+    final map = <String, List<Map<String, dynamic>>>{};
+    for (var k in list) {
+      final idKrt = k['id_krt']?.toString() ?? '';
+      if (idKrt.isNotEmpty) {
+        map.putIfAbsent(idKrt, () => []).add(k);
+      }
+    }
+    return map;
+  }
+
+  Future<Map<String, List<Map<String, dynamic>>>> _prefetchIndividuAktif(
+    Database db,
+  ) async {
+    final list = await db.rawQuery('''
+      SELECT * FROM individu 
+      WHERE NOT EXISTS (
+        SELECT 1 FROM mutasi m
+        WHERE m.id_individu_asal = individu.id 
+        AND m.jenis_mutasi IN ('Meninggal', 'Pindah')
+      )
+      ''');
+    final map = <String, List<Map<String, dynamic>>>{};
+    for (var ind in list) {
+      final idKk = ind['id_keluarga']?.toString() ?? '';
+      if (idKk.isNotEmpty) {
+        map.putIfAbsent(idKk, () => []).add(ind);
+      }
+    }
+    for (var v in map.values) {
+      v.sort((a, b) {
+        int getPriority(Map<String, dynamic> ind) {
+          final hub = (ind['hubungan_keluarga']?.toString() ?? '')
+              .toUpperCase()
+              .trim();
+          final sttsKrt = (ind['status_dgn_krt']?.toString() ?? '')
+              .toUpperCase()
+              .trim();
+          if (sttsKrt == 'KRT' ||
+              sttsKrt == 'KEPALA RUMAH TANGGA' ||
+              hub == 'KRT' ||
+              hub == 'KEPALA RUMAH TANGGA')
+            return 1;
+          if (sttsKrt == 'KK' ||
+              sttsKrt == 'KEPALA KELUARGA' ||
+              hub == 'KK' ||
+              hub == 'KEPALA KELUARGA')
+            return 2;
+          if (sttsKrt == 'ISTRI' || hub == 'ISTRI') return 3;
+          if (sttsKrt == 'ANAK' || hub == 'ANAK') return 4;
+          return 5;
+        }
+
+        final prioA = getPriority(a);
+        final prioB = getPriority(b);
+        if (prioA != prioB) return prioA.compareTo(prioB);
+
+        final tglAStr = a['tanggal_lahir']?.toString() ?? '';
+        final tglBStr = b['tanggal_lahir']?.toString() ?? '';
+        if (tglAStr.isNotEmpty && tglBStr.isNotEmpty) {
+          try {
+            final dateA = DateTime.parse(tglAStr);
+            final dateB = DateTime.parse(tglBStr);
+            final cmp = dateA.compareTo(dateB);
+            if (cmp != 0) return cmp;
+          } catch (_) {}
+        }
+        final idA = int.tryParse(a['id']?.toString() ?? '') ?? 0;
+        final idB = int.tryParse(b['id']?.toString() ?? '') ?? 0;
+        return idA.compareTo(idB);
+      });
+    }
+    return map;
+  }
+
   Future<List<Map<String, dynamic>>> _getIndividuAktif(
     Database db,
     Object? idKeluarga,
@@ -2065,10 +2089,10 @@ class ReportRepository implements IReportRepository {
       '''
       SELECT * FROM individu 
       WHERE id_keluarga = ? 
-      AND id NOT IN (
-        SELECT id_individu_asal FROM mutasi 
-        WHERE id_individu_asal IS NOT NULL 
-        AND jenis_mutasi IN ('Meninggal', 'Pindah')
+      AND NOT EXISTS (
+        SELECT 1 FROM mutasi m
+        WHERE m.id_individu_asal = individu.id 
+        AND m.jenis_mutasi IN ('Meninggal', 'Pindah')
       )
     ''',
       [idKeluarga],

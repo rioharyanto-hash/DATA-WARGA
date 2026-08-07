@@ -34,6 +34,8 @@ import '../../src/features/settings/presentation/screens/form_user_screen.dart';
 import '../../src/features/settings/presentation/screens/profil_screen.dart';
 import '../../src/features/settings/presentation/screens/pengurus_list_screen.dart';
 import '../../src/features/settings/presentation/screens/form_pengurus_screen.dart';
+import '../../src/features/surat_pengantar/presentation/screens/surat_pengantar_list_screen.dart';
+import '../../src/features/surat_pengantar/presentation/screens/form_surat_pengantar_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,6 +43,7 @@ final _pendataanNavigatorKey = GlobalKey<NavigatorState>();
 final _laporanNavigatorKey = GlobalKey<NavigatorState>();
 final _dataWargaNavigatorKey = GlobalKey<NavigatorState>();
 final _settingsNavigatorKey = GlobalKey<NavigatorState>();
+final _suratPengantarNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -339,6 +342,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   final userId = state.pathParameters['userId']!;
                   return FormPengurusScreen(userId: userId);
                 },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _suratPengantarNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/surat-pengantar',
+                builder: (context, state) => const SuratPengantarListScreen(),
+              ),
+              GoRoute(
+                path: '/form-surat-pengantar',
+                builder: (context, state) => const FormSuratPengantarScreen(),
               ),
             ],
           ),

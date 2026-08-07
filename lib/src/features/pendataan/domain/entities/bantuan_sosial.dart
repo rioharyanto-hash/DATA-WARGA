@@ -5,6 +5,8 @@ class BantuanSosialConstants {
   static const String pip = 'PIP';
   static const String blt = 'BLT';
   static const String bantuanPangan = 'BANTUAN PANGAN';
+  static const String kaj = 'KAJ';
+  static const String klj = 'KLJ';
 
   static const List<String> values = [
     pkh,
@@ -13,5 +15,7 @@ class BantuanSosialConstants {
     pip,
     blt,
     bantuanPangan,
+    kaj,
+    klj,
   ];
 }

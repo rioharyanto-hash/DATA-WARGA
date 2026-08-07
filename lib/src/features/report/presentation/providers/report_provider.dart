@@ -102,10 +102,23 @@ final reportBulanProvider = NotifierProvider<ReportBulanNotifier, String>(
 
 final kelompokDawisListProvider =
     FutureProvider.autoDispose<List<Map<String, String>>>((ref) async {
+      final currentUser = ref.watch(loggedInUserProvider);
+
+      if (currentUser != null && currentUser.role == 'KADER') {
+        return [
+          {
+            'kelompok_dawis': currentUser.kelompokDawis ?? '',
+            'rt': currentUser.rt ?? '',
+            'rw': currentUser.rw ?? '',
+            'id_kader': currentUser.idKader,
+            'nama': currentUser.nama,
+          }
+        ];
+      }
+
       final repo = ref.read(reportRepositoryProvider);
       final allList = await repo.getAllKelompokDawisList();
 
-      final currentUser = ref.watch(loggedInUserProvider);
       if (currentUser == null || currentUser.role == 'ADMIN') {
         return allList;
       }
@@ -121,21 +134,6 @@ final kelompokDawisListProvider =
                   map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
             )
             .toList();
-      }
-
-      if (currentUser.role == 'KADER') {
-        final kaderName = (currentUser.kelompokDawis ?? '')
-            .replaceAll('.', '')
-            .replaceAll(' ', '')
-            .toLowerCase();
-
-        return allList.where((map) {
-          final dbName = (map['kelompok_dawis'] ?? '')
-              .replaceAll('.', '')
-              .replaceAll(' ', '')
-              .toLowerCase();
-          return dbName == kaderName;
-        }).toList();
       }
 
       return allList;
@@ -325,22 +323,36 @@ class ReportController extends Notifier<ReportState> {
 
       final repo = ref.read(reportRepositoryProvider);
 
-      // Fetch all Kelompok Dawis list
-      final allList = await repo.getAllKelompokDawisList();
       final currentUser = ref.read(loggedInUserProvider);
-      List<Map<String, String>> targetKaders = allList;
-      if (currentUser != null && currentUser.role != 'ADMIN') {
-        if (currentUser.role == 'RW') {
-          targetKaders = allList
-              .where((map) => map['rw'] == currentUser.rw)
-              .toList();
-        } else if (currentUser.role == 'RT' || currentUser.role == 'KADER') {
-          targetKaders = allList
-              .where(
-                (map) =>
-                    map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
-              )
-              .toList();
+      List<Map<String, String>> targetKaders = [];
+
+      if (currentUser != null && currentUser.role == 'KADER') {
+        targetKaders = [
+          {
+            'kelompok_dawis': currentUser.kelompokDawis ?? '',
+            'rt': currentUser.rt ?? '',
+            'rw': currentUser.rw ?? '',
+            'id_kader': currentUser.idKader,
+            'nama': currentUser.nama,
+          }
+        ];
+      } else {
+        // Fetch all Kelompok Dawis list
+        final allList = await repo.getAllKelompokDawisList();
+        targetKaders = allList;
+        if (currentUser != null && currentUser.role != 'ADMIN') {
+          if (currentUser.role == 'RW') {
+            targetKaders = allList
+                .where((map) => map['rw'] == currentUser.rw)
+                .toList();
+          } else if (currentUser.role == 'RT') {
+            targetKaders = allList
+                .where(
+                  (map) =>
+                      map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
+                )
+                .toList();
+          }
         }
       }
 
@@ -383,21 +395,35 @@ class ReportController extends Notifier<ReportState> {
       final dataForm1 = await repo.getForm1Data(rt, rw);
 
       // Fetch data for Form 2 (multiple pages)
-      final allList = await repo.getAllKelompokDawisList();
       final currentUser = ref.read(loggedInUserProvider);
-      List<Map<String, String>> targetKaders = allList;
-      if (currentUser != null && currentUser.role != 'ADMIN') {
-        if (currentUser.role == 'RW') {
-          targetKaders = allList
-              .where((map) => map['rw'] == currentUser.rw)
-              .toList();
-        } else if (currentUser.role == 'RT' || currentUser.role == 'KADER') {
-          targetKaders = allList
-              .where(
-                (map) =>
-                    map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
-              )
-              .toList();
+      List<Map<String, String>> targetKaders = [];
+
+      if (currentUser != null && currentUser.role == 'KADER') {
+        targetKaders = [
+          {
+            'kelompok_dawis': currentUser.kelompokDawis ?? '',
+            'rt': currentUser.rt ?? '',
+            'rw': currentUser.rw ?? '',
+            'id_kader': currentUser.idKader,
+            'nama': currentUser.nama,
+          }
+        ];
+      } else {
+        final allList = await repo.getAllKelompokDawisList();
+        targetKaders = allList;
+        if (currentUser != null && currentUser.role != 'ADMIN') {
+          if (currentUser.role == 'RW') {
+            targetKaders = allList
+                .where((map) => map['rw'] == currentUser.rw)
+                .toList();
+          } else if (currentUser.role == 'RT') {
+            targetKaders = allList
+                .where(
+                  (map) =>
+                      map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
+                )
+                .toList();
+          }
         }
       }
 
@@ -634,22 +660,36 @@ class ReportController extends Notifier<ReportState> {
     final repo = ref.read(reportRepositoryProvider);
 
     final dataForm1 = await repo.getForm1Data(rt, rw);
-    final allList = await repo.getAllKelompokDawisList();
     final currentUser = ref.read(loggedInUserProvider);
 
-    List<Map<String, String>> targetKaders = allList;
-    if (currentUser != null && currentUser.role != 'ADMIN') {
-      if (currentUser.role == 'RW') {
-        targetKaders = allList
-            .where((map) => map['rw'] == currentUser.rw)
-            .toList();
-      } else if (currentUser.role == 'RT' || currentUser.role == 'KADER') {
-        targetKaders = allList
-            .where(
-              (map) =>
-                  map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
-            )
-            .toList();
+    List<Map<String, String>> targetKaders = [];
+
+    if (currentUser != null && currentUser.role == 'KADER') {
+      targetKaders = [
+        {
+          'kelompok_dawis': currentUser.kelompokDawis ?? '',
+          'rt': currentUser.rt ?? '',
+          'rw': currentUser.rw ?? '',
+          'id_kader': currentUser.idKader,
+          'nama': currentUser.nama,
+        }
+      ];
+    } else {
+      final allList = await repo.getAllKelompokDawisList();
+      targetKaders = allList;
+      if (currentUser != null && currentUser.role != 'ADMIN') {
+        if (currentUser.role == 'RW') {
+          targetKaders = allList
+              .where((map) => map['rw'] == currentUser.rw)
+              .toList();
+        } else if (currentUser.role == 'RT') {
+          targetKaders = allList
+              .where(
+                (map) =>
+                    map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
+              )
+              .toList();
+        }
       }
     }
 

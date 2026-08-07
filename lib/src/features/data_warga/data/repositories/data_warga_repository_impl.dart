@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/extensions/supabase_extensions.dart';
 import '../../../settings/domain/entities/app_user.dart';
 import '../../domain/entities/data_warga_bangunan.dart';
 import '../../domain/entities/data_warga_keluarga.dart';
@@ -239,23 +240,19 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
     final krtIds = krtList.map((k) => k['id'] as String).toSet();
 
     // 2. Fetch Keluarga for these KRTs
-    final keluargaList = await _supabase
+    final kels = await _supabase
         .from('keluarga')
-        .select('id, id_krt, no_kk');
-    final kels = keluargaList
-        .where((k) => krtIds.contains(k['id_krt']))
-        .toList();
+        .select('id, id_krt, no_kk, id_kepala_keluarga')
+        .inFilter('id_krt', krtIds.toList());
     if (kels.isEmpty) return [];
 
     final kelIds = kels.map((k) => k['id'] as String).toSet();
 
     // 3. Fetch Individu
-    final individuList = await _supabase
+    final inds = await _supabase
         .from('individu')
-        .select('id, id_keluarga, nama_lengkap, hubungan_keluarga');
-    final inds = individuList
-        .where((i) => kelIds.contains(i['id_keluarga']))
-        .toList();
+        .select('id, id_keluarga, nama_lengkap, hubungan_keluarga')
+        .inFilter('id_keluarga', kelIds.toList());
 
     // 4. Fetch Bangunan status_hunian
     final bangunan = await _supabase
@@ -281,15 +278,36 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
       final krt = krtMap[kel['id_krt']];
       final kelInds = kelToInd[kel['id']] ?? [];
 
-      String namaKepala = krt?['nama_krt']?.toString() ?? 'Tanpa Nama';
-      for (var ind in kelInds) {
-        final hub = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
-        if (hub == 'KK' ||
-            hub == 'KEPALA KELUARGA' ||
-            hub == 'KEPALA RUMAH TANGGA') {
-          namaKepala = ind['nama_lengkap']?.toString() ?? namaKepala;
-          break;
+      String namaKepala = '[KK Kosong / Pindah]';
+      if (kelInds.isNotEmpty) {
+        namaKepala = 'Tanpa Nama';
+        final idKk = kel['id_kepala_keluarga']?.toString();
+        if (idKk != null && idKk.isNotEmpty) {
+          final matched = kelInds.cast<Map<String, dynamic>?>().firstWhere(
+            (ind) => ind?['id'] == idKk,
+            orElse: () => null,
+          );
+          if (matched != null) {
+            namaKepala = matched['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+          }
         }
+
+        if (namaKepala == 'Tanpa Nama') {
+          for (var ind in kelInds) {
+            final hk = ind['hubungan_keluarga']?.toString().toUpperCase() ?? '';
+            if (hk == 'KK' ||
+                hk == 'KEPALA KELUARGA' ||
+                hk == 'KEPALA RUMAH TANGGA') {
+              namaKepala = ind['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+              break;
+            }
+          }
+        }
+        if (namaKepala == 'Tanpa Nama' && kelInds.isNotEmpty) {
+          namaKepala = kelInds.first['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+        }
+      } else {
+        namaKepala = krt?['nama_krt']?.toString() ?? 'Tanpa Nama';
       }
 
       result.add(

@@ -50,10 +50,10 @@ class _FormKrtScreenState extends ConsumerState<FormKrtScreen> {
             FROM individu i
             JOIN keluarga k ON i.id_keluarga = k.id
             WHERE k.id_krt = ?
-            AND i.id NOT IN (
-                 SELECT id_individu_asal FROM mutasi 
-                 WHERE id_individu_asal IS NOT NULL 
-                 AND jenis_mutasi IN ('Meninggal', 'Pindah')
+            AND NOT EXISTS (
+                 SELECT 1 FROM mutasi m
+                 WHERE m.id_individu_asal = i.id 
+                 AND m.jenis_mutasi IN ('Meninggal', 'Pindah')
             )
           ''',
             [widget.krtId],

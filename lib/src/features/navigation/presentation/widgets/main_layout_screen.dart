@@ -49,6 +49,12 @@ class MainLayoutScreen extends ConsumerWidget {
       branchIndex: 3,
     ),
     _NavItem(
+      icon: Icons.mark_email_unread_outlined,
+      activeIcon: Icons.mark_email_read,
+      label: 'Surat Pengantar',
+      branchIndex: 5,
+    ),
+    _NavItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings,
       label: 'Pengaturan',
@@ -57,12 +63,21 @@ class MainLayoutScreen extends ConsumerWidget {
   ];
 
   List<_NavItem> _getFilteredNavItems(String? role) {
-    if (role == 'RW' || role == 'RT') {
+    if (role == 'RW') {
       return _allNavItems
-          .where((item) => [0, 3, 4].contains(item.branchIndex))
+          .where((item) => [0, 3, 4, 5].contains(item.branchIndex))
           .toList();
+    } else if (role == 'RT') {
+      return _allNavItems
+          .where((item) => [0, 3, 4, 5].contains(item.branchIndex))
+          .toList();
+    } else if (role == 'ADMIN') {
+      return _allNavItems;
     }
-    return _allNavItems;
+    // Default for Kader (or others): exclude branch 5 (Surat Pengantar)
+    return _allNavItems
+        .where((item) => item.branchIndex != 5)
+        .toList();
   }
 
   int _getDisplayIndex(List<_NavItem> items, int branchIndex) {

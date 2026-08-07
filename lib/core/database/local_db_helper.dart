@@ -28,7 +28,7 @@ class LocalDbHelper {
       return await factory.openDatabase(
         filePath,
         options: OpenDatabaseOptions(
-          version: 30,
+          version: 31,
           onCreate: _createDB,
           onUpgrade: _upgradeDB,
         ),
@@ -47,7 +47,7 @@ class LocalDbHelper {
 
       return await openDatabase(
         path,
-        version: 30,
+        version: 31,
         onCreate: _createDB,
         onUpgrade: _upgradeDB,
       );
@@ -408,6 +408,17 @@ class LocalDbHelper {
         );
       } catch (_) {}
     }
+
+    if (oldVersion < 31) {
+      try {
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_krt_id_bangunan ON krt (id_bangunan)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_keluarga_id_krt ON keluarga (id_krt)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_individu_id_keluarga ON individu (id_keluarga)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_rt_rw ON bangunan (rw, rt)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_kelompok_dawis ON bangunan (kelompok_dawis)');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_mutasi_id_individu_asal ON mutasi (id_individu_asal)');
+      } catch (_) {}
+    }
   }
 
   static Future<void> _createDB(Database db, int version) async {
@@ -572,5 +583,12 @@ class LocalDbHelper {
       INSERT OR IGNORE INTO app_user (id, nama, id_kader, password, role, is_active)
       VALUES ('admin', 'Administrator', 'admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'ADMIN', 1)
     ''');
+
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_krt_id_bangunan ON krt (id_bangunan)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_keluarga_id_krt ON keluarga (id_krt)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_individu_id_keluarga ON individu (id_keluarga)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_rt_rw ON bangunan (rw, rt)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_kelompok_dawis ON bangunan (kelompok_dawis)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_mutasi_id_individu_asal ON mutasi (id_individu_asal)');
   }
 }

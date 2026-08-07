@@ -387,6 +387,21 @@ class _LampidListItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bangunanAsync = ref.watch(bangunanByIdProvider(mutasi.idBangunan));
+    final usersAsync = ref.watch(allUsersProvider);
+
+    String? kaderName;
+    if (bangunanAsync.hasValue &&
+        bangunanAsync.value != null &&
+        usersAsync.hasValue &&
+        usersAsync.value != null) {
+      try {
+        final kader = usersAsync.value!.firstWhere(
+          (u) => u.kelompokDawis == bangunanAsync.value!.kelompokDawis,
+        );
+        kaderName = kader.nama;
+      } catch (_) {}
+    }
+
     final isKeluar =
         mutasi.jenisMutasi == 'Meninggal' || mutasi.jenisMutasi == 'Pindah';
 
@@ -412,9 +427,28 @@ class _LampidListItem extends ConsumerWidget {
       ),
       child: ListTile(
         leading: CircleAvatar(child: Icon(icon, color: iconColor)),
-        title: Text(
-          mutasi.namaOrang,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                mutasi.namaOrang,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            if (mutasi.idIndividuAsal != null &&
+                mutasi.idIndividuAsal!.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.person, color: Colors.blue),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: 'Lihat Profil Individu',
+                onPressed: () {
+                  context.push(
+                    '/view-individu/${mutasi.idIndividuAsal}?isReadOnly=true',
+                  );
+                },
+              ),
+          ],
         ),
         trailing: isAdmin
             ? IconButton(
@@ -475,6 +509,28 @@ class _LampidListItem extends ConsumerWidget {
                             color: Colors.black87,
                           ),
                         ),
+                        Text(
+                          'RT/RW: ${bangunan.rt}/${bangunan.rw}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          'Kelompok: ${bangunan.kelompokDawis}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        if (kaderName != null)
+                          Text(
+                            'Kader: $kaderName',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                          ),
                       ],
                     ),
                   );
@@ -502,20 +558,17 @@ class _LampidListItem extends ConsumerWidget {
           ],
         ),
         onTap: () {
-          if (mutasi.idIndividuAsal != null &&
-              mutasi.idIndividuAsal!.isNotEmpty) {
-            context.push(
-              '/view-individu/${mutasi.idIndividuAsal}?isReadOnly=true',
-            );
-          } else {
-            _showDetailDialog(context, bangunanAsync.value);
-          }
+          _showDetailDialog(context, bangunanAsync.value, kaderName);
         },
       ),
     );
   }
 
-  void _showDetailDialog(BuildContext context, dynamic bangunan) {
+  void _showDetailDialog(
+    BuildContext context,
+    dynamic bangunan,
+    String? kaderName,
+  ) {
     String dateStr = mutasi.tanggalMutasi;
     try {
       final date = DateTime.parse(mutasi.tanggalMutasi);
@@ -523,7 +576,7 @@ class _LampidListItem extends ConsumerWidget {
     } catch (_) {}
 
     final bangunanStr = bangunan != null
-        ? '\${bangunan.namaKepalaKeluarga}'
+        ? '${bangunan.namaBangunan}'
         : '-';
 
     showDialog(
@@ -615,6 +668,15 @@ class _LampidListItem extends ConsumerWidget {
                         _buildDetailRow('NIK', mutasi.nik!),
                       _buildDetailRow('Tanggal', dateStr),
                       _buildDetailRow('Bangunan (KK)', bangunanStr),
+                      if (bangunan != null)
+                        _buildDetailRow(
+                          'RT/RW',
+                          '${bangunan.rt}/${bangunan.rw}',
+                        ),
+                      if (bangunan != null)
+                        _buildDetailRow('Kelompok', bangunan.kelompokDawis),
+                      if (kaderName != null)
+                        _buildDetailRow('Nama Kader', kaderName),
                       if (mutasi.asal != null && mutasi.asal!.isNotEmpty)
                         _buildDetailRow('Asal', mutasi.asal!),
                       if (mutasi.tujuan != null && mutasi.tujuan!.isNotEmpty)

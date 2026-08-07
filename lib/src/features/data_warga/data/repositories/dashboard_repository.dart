@@ -52,56 +52,42 @@ class DashboardRepository {
     final individuJoin =
         "FROM individu JOIN keluarga ON individu.id_keluarga = keluarga.id JOIN krt ON keluarga.id_krt = krt.id JOIN bangunan ON krt.id_bangunan = bangunan.id WHERE $filter";
 
-    // Total Warga
-    final wargaResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin",
-    );
-    final totalWarga = SqfliteUtils.firstIntValue(wargaResult) ?? 0;
+    final aggregatedResult = await db.rawQuery('''
+      SELECT 
+        COUNT(individu.id) as totalWarga,
+        SUM(CASE WHEN individu.jenis_kelamin = 'Laki-laki' THEN 1 ELSE 0 END) as totalLaki,
+        SUM(CASE WHEN individu.jenis_kelamin = 'Perempuan' THEN 1 ELSE 0 END) as totalPerempuan,
+        SUM(CASE WHEN UPPER(individu.status_yatim_piatu) IN ('YATIM', 'PIATU', 'YATIM PIATU', 'YATIM (AUTO)') THEN 1 ELSE 0 END) as totalYatim,
+        SUM(CASE WHEN UPPER(individu.status_yatim_piatu) IN ('YATIM', 'YATIM (AUTO)') THEN 1 ELSE 0 END) as yatimOnly,
+        SUM(CASE WHEN UPPER(individu.status_yatim_piatu) = 'PIATU' THEN 1 ELSE 0 END) as piatuOnly,
+        SUM(CASE WHEN UPPER(individu.status_yatim_piatu) = 'YATIM PIATU' THEN 1 ELSE 0 END) as yatimPiatu,
+        SUM(CASE WHEN individu.kriteria_berkebutuhan_khusus IS NOT NULL AND individu.kriteria_berkebutuhan_khusus != '' AND UPPER(individu.kriteria_berkebutuhan_khusus) NOT IN ('TIDAK ADA', 'TIDAK') THEN 1 ELSE 0 END) as totalDifabel,
+        SUM(CASE WHEN individu.jenis_bantuan IS NOT NULL AND individu.jenis_bantuan != '' AND individu.jenis_bantuan != 'Tidak Ada' THEN 1 ELSE 0 END) as totalBansos
+      $individuJoin
+    ''');
 
-    // Laki-laki
-    final lResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND individu.jenis_kelamin = 'Laki-laki'",
-    );
-    final totalLaki = SqfliteUtils.firstIntValue(lResult) ?? 0;
+    int totalWarga = 0;
+    int totalLaki = 0;
+    int totalPerempuan = 0;
+    int totalYatim = 0;
+    int yatimOnly = 0;
+    int piatuOnly = 0;
+    int yatimPiatu = 0;
+    int totalDifabel = 0;
+    int totalBansos = 0;
 
-    // Perempuan
-    final pResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND individu.jenis_kelamin = 'Perempuan'",
-    );
-    final totalPerempuan = SqfliteUtils.firstIntValue(pResult) ?? 0;
-
-    // Yatim Piatu Total
-    final yatimResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND UPPER(individu.status_yatim_piatu) IN ('YATIM', 'PIATU', 'YATIM PIATU', 'YATIM (AUTO)')",
-    );
-    final totalYatim = SqfliteUtils.firstIntValue(yatimResult) ?? 0;
-
-    final yatimOnlyResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND UPPER(individu.status_yatim_piatu) IN ('YATIM', 'YATIM (AUTO)')",
-    );
-    final yatimOnly = SqfliteUtils.firstIntValue(yatimOnlyResult) ?? 0;
-
-    final piatuOnlyResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND UPPER(individu.status_yatim_piatu) = 'PIATU'",
-    );
-    final piatuOnly = SqfliteUtils.firstIntValue(piatuOnlyResult) ?? 0;
-
-    final yatimPiatuResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND UPPER(individu.status_yatim_piatu) = 'YATIM PIATU'",
-    );
-    final yatimPiatu = SqfliteUtils.firstIntValue(yatimPiatuResult) ?? 0;
-
-    // Disabilitas Total
-    final difabelResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND individu.kriteria_berkebutuhan_khusus IS NOT NULL AND individu.kriteria_berkebutuhan_khusus != '' AND UPPER(individu.kriteria_berkebutuhan_khusus) NOT IN ('TIDAK ADA', 'TIDAK')",
-    );
-    final totalDifabel = SqfliteUtils.firstIntValue(difabelResult) ?? 0;
-
-    // Bansos Total
-    final bansosResult = await db.rawQuery(
-      "SELECT COUNT(individu.id) as total $individuJoin AND individu.jenis_bantuan IS NOT NULL AND individu.jenis_bantuan != '' AND individu.jenis_bantuan != 'Tidak Ada'",
-    );
-    final totalBansos = SqfliteUtils.firstIntValue(bansosResult) ?? 0;
+    if (aggregatedResult.isNotEmpty) {
+      final row = aggregatedResult.first;
+      totalWarga = (row['totalWarga'] as num?)?.toInt() ?? 0;
+      totalLaki = (row['totalLaki'] as num?)?.toInt() ?? 0;
+      totalPerempuan = (row['totalPerempuan'] as num?)?.toInt() ?? 0;
+      totalYatim = (row['totalYatim'] as num?)?.toInt() ?? 0;
+      yatimOnly = (row['yatimOnly'] as num?)?.toInt() ?? 0;
+      piatuOnly = (row['piatuOnly'] as num?)?.toInt() ?? 0;
+      yatimPiatu = (row['yatimPiatu'] as num?)?.toInt() ?? 0;
+      totalDifabel = (row['totalDifabel'] as num?)?.toInt() ?? 0;
+      totalBansos = (row['totalBansos'] as num?)?.toInt() ?? 0;
+    }
 
     return {
       'totalKk': totalKk,

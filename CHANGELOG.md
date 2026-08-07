@@ -309,3 +309,8 @@ Semua perubahan yang signifikan pada proyek Dasawisma akan didokumentasikan dala
 ### [PATCH] - Versi 1.9.19+42
 - Standarisasi warna, bentuk tombol, dan tata letak UI (AppTheme).
 - Migrasi ke GoRouter secara menyeluruh untuk navigasi layar laporan.
+[2026-08-05] [PATCH] Fixed SQLite WASM crashing (Database 1 not found) on web by removing ORDER BY CAST and heavily optimizing _fetchInMemoryData to avoid large IN clauses.
+[2026-08-06] [PATCH] Show RT dropdown filter in Surat Pengantar screen for ADMIN role.
+[2026-08-06] [MINOR] Added NIK and Alamat to Surat Pengantar list view.
+[2026-08-06] [PATCH] Fixed logic in Data Warga list detail to show actual Kepala Keluarga name instead of defaulting to Kepala Rumah Tangga name
+[2026-08-06] [PATCH] Fixed 1000 limit pagination bug in Data Warga detail fetching individuals

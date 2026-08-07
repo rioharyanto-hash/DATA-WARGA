@@ -2,7 +2,7 @@ name: dawis
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.9.48+72
+version: 1.9.53+77
 
 environment:
   sdk: ^3.11.0
