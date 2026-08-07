@@ -46,4 +46,10 @@ abstract class IReportRepository {
     int month,
     int year,
   );
+
+  Future<List<Map<String, dynamic>>> getRekapanLpjDasawismaData(
+    dynamic user,
+    String rw,
+    String rt,
+  );
 }

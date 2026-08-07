@@ -614,13 +614,14 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
         // Update KRT jika individu adalah Kepala Keluarga atau KRT
         final upperStatus = individu.hubunganKeluarga.toUpperCase();
         final upperStatusKrt = individu.statusDgnKrt?.toUpperCase() ?? '';
-        
-        final isKrtExplicit = (upperStatusKrt == "KRT" || 
+
+        final isKrtExplicit =
+            (upperStatusKrt == "KRT" ||
             upperStatusKrt == "KK" ||
             upperStatusKrt == "KEPALA KELUARGA" ||
             upperStatusKrt == "KEPALA RUMAH TANGGA");
 
-        if (isKrtExplicit || 
+        if (isKrtExplicit ||
             upperStatus == "KK" ||
             upperStatus == "KEPALA KELUARGA" ||
             upperStatus == "KEPALA RUMAH TANGGA") {
@@ -632,9 +633,9 @@ class _FormIndividuScreenState extends ConsumerState<FormIndividuScreen> {
             final krtRepo = ref.read(krtRepositoryProvider);
             final krt = await krtRepo.getKrtById(keluarga.idKrt);
             if (krt != null) {
-              if (isKrtExplicit || 
-                  krt.namaKrt == 'KRT Baru' || 
-                  krt.namaKrt == 'Tanpa Nama' || 
+              if (isKrtExplicit ||
+                  krt.namaKrt == 'KRT Baru' ||
+                  krt.namaKrt == 'Tanpa Nama' ||
                   krt.namaKrt == '-') {
                 final updatedKrt = Krt(
                   id: krt.id,

@@ -12,10 +12,12 @@ class FormSuratPengantarScreen extends ConsumerStatefulWidget {
   const FormSuratPengantarScreen({super.key, this.existingData});
 
   @override
-  ConsumerState<FormSuratPengantarScreen> createState() => _FormSuratPengantarScreenState();
+  ConsumerState<FormSuratPengantarScreen> createState() =>
+      _FormSuratPengantarScreenState();
 }
 
-class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScreen> {
+class _FormSuratPengantarScreenState
+    extends ConsumerState<FormSuratPengantarScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _isSearchingNik = false;
@@ -30,16 +32,28 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
   @override
   void initState() {
     super.initState();
-    _noSuratController = TextEditingController(text: widget.existingData?.noSurat ?? '');
-    
+    _noSuratController = TextEditingController(
+      text: widget.existingData?.noSurat ?? '',
+    );
+
     // Set today's date if empty
     final today = DateFormat('dd-MM-yyyy').format(DateTime.now());
-    _tanggalSuratController = TextEditingController(text: widget.existingData?.tanggalSurat ?? today);
-    
-    _namaPemohonController = TextEditingController(text: widget.existingData?.namaPemohon ?? '');
-    _nikController = TextEditingController(text: widget.existingData?.nik ?? '');
-    _alamatController = TextEditingController(text: widget.existingData?.alamat ?? '');
-    _keperluanController = TextEditingController(text: widget.existingData?.keperluan ?? '');
+    _tanggalSuratController = TextEditingController(
+      text: widget.existingData?.tanggalSurat ?? today,
+    );
+
+    _namaPemohonController = TextEditingController(
+      text: widget.existingData?.namaPemohon ?? '',
+    );
+    _nikController = TextEditingController(
+      text: widget.existingData?.nik ?? '',
+    );
+    _alamatController = TextEditingController(
+      text: widget.existingData?.alamat ?? '',
+    );
+    _keperluanController = TextEditingController(
+      text: widget.existingData?.keperluan ?? '',
+    );
   }
 
   @override
@@ -55,7 +69,7 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
 
   Future<void> _searchNik(String nik) async {
     if (nik.length < 16) return;
-    
+
     setState(() {
       _isSearchingNik = true;
     });
@@ -63,18 +77,21 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
     try {
       final response = await Supabase.instance.client
           .from('individu')
-          .select('nama_lengkap, alamat_domisili, alamat_ktp, keluarga(krt(bangunan(alamat_lengkap, rt, rw)))')
+          .select(
+            'nama_lengkap, alamat_domisili, alamat_ktp, keluarga(krt(bangunan(alamat_lengkap, rt, rw)))',
+          )
           .eq('nik', nik)
           .maybeSingle();
 
       if (response != null && mounted) {
         setState(() {
-          _namaPemohonController.text = response['nama_lengkap']?.toString() ?? '';
-          
+          _namaPemohonController.text =
+              response['nama_lengkap']?.toString() ?? '';
+
           String alamat = '';
           final domisili = response['alamat_domisili']?.toString().trim() ?? '';
           final ktp = response['alamat_ktp']?.toString().trim() ?? '';
-          
+
           if (domisili.isNotEmpty) {
             alamat = domisili;
           } else if (ktp.isNotEmpty) {
@@ -83,10 +100,11 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
             try {
               final bangunan = response['keluarga']['krt']['bangunan'];
               if (bangunan != null) {
-                final almtLengkap = bangunan['alamat_lengkap']?.toString().trim() ?? '';
+                final almtLengkap =
+                    bangunan['alamat_lengkap']?.toString().trim() ?? '';
                 final rt = bangunan['rt']?.toString().trim() ?? '';
                 final rw = bangunan['rw']?.toString().trim() ?? '';
-                
+
                 alamat = almtLengkap;
                 if (rt.isNotEmpty || rw.isNotEmpty) {
                   alamat += ' RT $rt / RW $rw';
@@ -96,16 +114,22 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
               // Ignore if nested data is missing
             }
           }
-          
+
           _alamatController.text = alamat;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Data ditemukan, form telah diisi otomatis.'), duration: Duration(seconds: 2)),
+          const SnackBar(
+            content: Text('Data ditemukan, form telah diisi otomatis.'),
+            duration: Duration(seconds: 2),
+          ),
         );
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Data NIK tidak ditemukan. Silakan isi manual.'), duration: Duration(seconds: 2)),
+          const SnackBar(
+            content: Text('Data NIK tidak ditemukan. Silakan isi manual.'),
+            duration: Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
@@ -145,7 +169,9 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
         rw: user?.rw,
       );
 
-      await ref.read(suratPengantarRepositoryProvider).saveSuratPengantar(surat);
+      await ref
+          .read(suratPengantarRepositoryProvider)
+          .saveSuratPengantar(surat);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -155,9 +181,9 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $e')));
       }
     } finally {
       if (mounted) {
@@ -174,8 +200,13 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
-          widget.existingData == null ? 'Buat Surat Pengantar' : 'Edit Surat Pengantar',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          widget.existingData == null
+              ? 'Buat Surat Pengantar'
+              : 'Edit Surat Pengantar',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: const Color(0xFF4338CA),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -200,19 +231,26 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
                     children: [
                       const Text(
                         'Informasi Surat',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _noSuratController,
                         decoration: _buildInputDecoration('Nomor Surat'),
-                        validator: (v) => v!.isEmpty ? 'Nomor surat harus diisi' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Nomor surat harus diisi' : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _tanggalSuratController,
-                        decoration: _buildInputDecoration('Tanggal Surat (dd-MM-yyyy)'),
-                        validator: (v) => v!.isEmpty ? 'Tanggal surat harus diisi' : null,
+                        decoration: _buildInputDecoration(
+                          'Tanggal Surat (dd-MM-yyyy)',
+                        ),
+                        validator: (v) =>
+                            v!.isEmpty ? 'Tanggal surat harus diisi' : null,
                       ),
                     ],
                   ),
@@ -232,30 +270,38 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
                     children: [
                       const Text(
                         'Data Pemohon',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _nikController,
                         keyboardType: TextInputType.number,
                         decoration: _buildInputDecoration('NIK').copyWith(
-                          suffixIcon: _isSearchingNik 
-                            ? const Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                          suffixIcon: _isSearchingNik
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                )
+                              : IconButton(
+                                  icon: const Icon(
+                                    Icons.search,
+                                    color: Color(0xFF4338CA),
+                                  ),
+                                  onPressed: () {
+                                    if (_nikController.text.isNotEmpty) {
+                                      _searchNik(_nikController.text.trim());
+                                    }
+                                  },
                                 ),
-                              )
-                            : IconButton(
-                                icon: const Icon(Icons.search, color: Color(0xFF4338CA)),
-                                onPressed: () {
-                                  if (_nikController.text.isNotEmpty) {
-                                    _searchNik(_nikController.text.trim());
-                                  }
-                                },
-                              ),
                         ),
                         onChanged: (val) {
                           if (val.length == 16) {
@@ -268,14 +314,16 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
                       TextFormField(
                         controller: _namaPemohonController,
                         decoration: _buildInputDecoration('Nama Lengkap'),
-                        validator: (v) => v!.isEmpty ? 'Nama pemohon harus diisi' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Nama pemohon harus diisi' : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _alamatController,
                         maxLines: 2,
                         decoration: _buildInputDecoration('Alamat Lengkap'),
-                        validator: (v) => v!.isEmpty ? 'Alamat harus diisi' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Alamat harus diisi' : null,
                       ),
                     ],
                   ),
@@ -295,14 +343,20 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
                     children: [
                       const Text(
                         'Keperluan',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _keperluanController,
                         maxLines: 3,
-                        decoration: _buildInputDecoration('Tujuan pembuatan surat'),
-                        validator: (v) => v!.isEmpty ? 'Keperluan harus diisi' : null,
+                        decoration: _buildInputDecoration(
+                          'Tujuan pembuatan surat',
+                        ),
+                        validator: (v) =>
+                            v!.isEmpty ? 'Keperluan harus diisi' : null,
                       ),
                     ],
                   ),
@@ -324,9 +378,18 @@ class _FormSuratPengantarScreenState extends ConsumerState<FormSuratPengantarScr
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
-                      : const Text('Simpan Data Surat', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      : const Text(
+                          'Simpan Data Surat',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 32),

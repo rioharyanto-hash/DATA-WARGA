@@ -304,7 +304,8 @@ class DataWargaRepositoryImpl implements DataWargaRepository {
           }
         }
         if (namaKepala == 'Tanpa Nama' && kelInds.isNotEmpty) {
-          namaKepala = kelInds.first['nama_lengkap']?.toString() ?? 'Tanpa Nama';
+          namaKepala =
+              kelInds.first['nama_lengkap']?.toString() ?? 'Tanpa Nama';
         }
       } else {
         namaKepala = krt?['nama_krt']?.toString() ?? 'Tanpa Nama';

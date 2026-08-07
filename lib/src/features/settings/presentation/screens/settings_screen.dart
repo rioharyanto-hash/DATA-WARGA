@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 import '../providers/app_user_provider.dart';
 import '../providers/region_provider.dart';
 import '../../services/csv_transfer_service.dart';
+import '../../services/backup_service.dart';
 import '../../../pendataan/presentation/providers/bangunan_provider.dart';
 import '../../../../../core/database/local_db_helper.dart';
 import '../../../navigation/presentation/widgets/shared_app_bar_title.dart';
@@ -22,6 +23,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _csvService = CsvTransferService();
+  final _backupService = BackupService();
 
   void _showImportResult(String title, ImportSummary summary) {
     showDialog(
@@ -387,6 +389,157 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _backupDatabaseToJson() async {
+    bool dialogShown = false;
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        useRootNavigator: true,
+        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      );
+      dialogShown = true;
+
+      final jsonData = await _backupService.exportDatabaseToJson();
+
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        dialogShown = false;
+      }
+
+      final bytes = Uint8List.fromList(utf8.encode(jsonData));
+      final dateStr = DateTime.now().toIso8601String().split('T').first;
+
+      String? outputFile = await FilePicker.saveFile(
+        dialogTitle: 'Simpan Backup Database (JSON)',
+        fileName: 'dawis_backup_$dateStr.json',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: bytes,
+      );
+
+      if (kIsWeb) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('File Backup JSON berhasil diunduh.')),
+          );
+        }
+      } else {
+        if (outputFile != null) {
+          final file = File(outputFile);
+          await file.writeAsBytes(bytes);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Backup disimpan di: $outputFile')),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        if (dialogShown) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal membuat backup: $e')));
+      }
+    }
+  }
+
+  Future<void> _restoreDatabaseFromJson() async {
+    bool dialogShown = false;
+    try {
+      FilePickerResult? result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        withData: true,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.single;
+        if (!mounted) return;
+
+        // Konfirmasi sebelum restore
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Konfirmasi Restore Data'),
+            content: const Text(
+              'Apakah Anda yakin ingin me-restore data dari file ini? Proses ini mungkin akan menimpa data yang sudah ada di server dan membutuhkan waktu yang cukup lama.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Batal'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text(
+                  'Ya, Restore Data',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        );
+
+        if (confirm != true) return;
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          useRootNavigator: true,
+          builder: (ctx) => const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Proses Restore sedang berjalan, mohon tunggu...',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        );
+        dialogShown = true;
+
+        String jsonString;
+        if (kIsWeb) {
+          jsonString = utf8.decode(file.bytes!);
+        } else {
+          if (file.bytes != null) {
+            jsonString = utf8.decode(file.bytes!);
+          } else {
+            jsonString = await File(file.path!).readAsString();
+          }
+        }
+
+        await _backupService.importDatabaseFromJson(jsonString);
+
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          dialogShown = false;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Proses Restore Database BERHASIL!')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        if (dialogShown) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal me-restore data: $e')));
+      }
+    }
+  }
+
   Future<void> _showRegionSettingsDialog() async {
     final region = ref.read(regionProvider);
     final provController = TextEditingController(text: region.provinsi);
@@ -522,6 +675,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           _buildTransferBangunanSection(),
                         ],
                       ),
+                    const SizedBox(height: 32),
+                  ],
+                  if (user.role == 'ADMIN') ...[
+                    _buildBackupRestoreSection(),
                     const SizedBox(height: 32),
                   ],
                   _buildDangerZone(user.role == 'ADMIN'),
@@ -735,6 +892,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 title: 'Export Data Bangunan (CSV)',
                 subtitle: 'Unduh data bangunan dari lokal',
                 onTap: _exportBangunan,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBackupRestoreSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('BACKUP & RESTORE DATABASE'),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            children: [
+              _buildListTile(
+                icon: Icons.cloud_download,
+                iconColor: Colors.blue.shade700,
+                iconBg: Colors.blue.shade50,
+                title: 'Backup Database (JSON)',
+                subtitle: 'Unduh seluruh data server sebagai JSON',
+                onTap: _backupDatabaseToJson,
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.settings_backup_restore,
+                iconColor: Colors.red.shade700,
+                iconBg: Colors.red.shade50,
+                title: 'Restore Database (JSON)',
+                subtitle: 'Pulihkan data dari file Backup JSON',
+                onTap: _restoreDatabaseFromJson,
               ),
             ],
           ),

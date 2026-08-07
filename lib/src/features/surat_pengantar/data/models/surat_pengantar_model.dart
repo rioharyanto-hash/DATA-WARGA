@@ -25,8 +25,8 @@ class SuratPengantarModel extends SuratPengantar {
       keperluan: json['keperluan']?.toString() ?? '',
       rt: json['rt']?.toString(),
       rw: json['rw']?.toString(),
-      createdAt: json['created_at'] != null 
-          ? DateTime.tryParse(json['created_at'].toString()) 
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
     );
   }

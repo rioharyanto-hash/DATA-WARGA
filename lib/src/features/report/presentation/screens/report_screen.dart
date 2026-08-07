@@ -694,6 +694,24 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                     );
                   },
                 ),
+                if (_isRingkasan)
+                  _buildActionCard(
+                    title: 'Cetak Rekapan LPJ Dasawisma',
+                    icon: Icons.picture_as_pdf,
+                    isLoading: state.isLoading,
+                    onTap: () {
+                      context.push(
+                        '/report-preview',
+                        extra: {
+                          'isRingkasan': true,
+                          'title': 'Rekapan LPJ Dasawisma',
+                          'generatePdf': () => ref
+                              .read(reportControllerProvider.notifier)
+                              .generateRekapanLpjDasawismaPdf(),
+                        },
+                      );
+                    },
+                  ),
               ],
             ),
 

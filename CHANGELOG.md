@@ -314,3 +314,4 @@ Semua perubahan yang signifikan pada proyek Dasawisma akan didokumentasikan dala
 [2026-08-06] [MINOR] Added NIK and Alamat to Surat Pengantar list view.
 [2026-08-06] [PATCH] Fixed logic in Data Warga list detail to show actual Kepala Keluarga name instead of defaulting to Kepala Rumah Tangga name
 [2026-08-06] [PATCH] Fixed 1000 limit pagination bug in Data Warga detail fetching individuals
+[2026-08-07] [MINOR] Added comprehensive Database Backup and Restore features with JSON support

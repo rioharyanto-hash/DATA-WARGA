@@ -411,12 +411,24 @@ class LocalDbHelper {
 
     if (oldVersion < 31) {
       try {
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_krt_id_bangunan ON krt (id_bangunan)');
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_keluarga_id_krt ON keluarga (id_krt)');
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_individu_id_keluarga ON individu (id_keluarga)');
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_rt_rw ON bangunan (rw, rt)');
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_kelompok_dawis ON bangunan (kelompok_dawis)');
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_mutasi_id_individu_asal ON mutasi (id_individu_asal)');
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_krt_id_bangunan ON krt (id_bangunan)',
+        );
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_keluarga_id_krt ON keluarga (id_krt)',
+        );
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_individu_id_keluarga ON individu (id_keluarga)',
+        );
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_bangunan_rt_rw ON bangunan (rw, rt)',
+        );
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_bangunan_kelompok_dawis ON bangunan (kelompok_dawis)',
+        );
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_mutasi_id_individu_asal ON mutasi (id_individu_asal)',
+        );
       } catch (_) {}
     }
   }
@@ -584,11 +596,23 @@ class LocalDbHelper {
       VALUES ('admin', 'Administrator', 'admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'ADMIN', 1)
     ''');
 
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_krt_id_bangunan ON krt (id_bangunan)');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_keluarga_id_krt ON keluarga (id_krt)');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_individu_id_keluarga ON individu (id_keluarga)');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_rt_rw ON bangunan (rw, rt)');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_bangunan_kelompok_dawis ON bangunan (kelompok_dawis)');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_mutasi_id_individu_asal ON mutasi (id_individu_asal)');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_krt_id_bangunan ON krt (id_bangunan)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_keluarga_id_krt ON keluarga (id_krt)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_individu_id_keluarga ON individu (id_keluarga)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_bangunan_rt_rw ON bangunan (rw, rt)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_bangunan_kelompok_dawis ON bangunan (kelompok_dawis)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_mutasi_id_individu_asal ON mutasi (id_individu_asal)',
+    );
   }
 }

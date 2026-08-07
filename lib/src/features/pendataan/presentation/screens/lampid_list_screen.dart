@@ -575,9 +575,7 @@ class _LampidListItem extends ConsumerWidget {
       dateStr = DateFormat('dd MMMM yyyy').format(date);
     } catch (_) {}
 
-    final bangunanStr = bangunan != null
-        ? '${bangunan.namaBangunan}'
-        : '-';
+    final bangunanStr = bangunan != null ? '${bangunan.namaBangunan}' : '-';
 
     showDialog(
       context: context,

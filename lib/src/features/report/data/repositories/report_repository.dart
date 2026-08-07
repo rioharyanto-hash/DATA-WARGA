@@ -639,9 +639,7 @@ class ReportRepository implements IReportRepository {
         .replaceAll(' ', '')
         .toLowerCase();
 
-    final bangunanListRaw = await db.query(
-      'bangunan',
-    );
+    final bangunanListRaw = await db.query('bangunan');
 
     final bangunanList = kelompokName == 'SEMUA KADER'
         ? bangunanListRaw
@@ -823,9 +821,7 @@ class ReportRepository implements IReportRepository {
         .replaceAll(' ', '')
         .toLowerCase();
 
-    final bangunanListRaw = await db.query(
-      'bangunan',
-    );
+    final bangunanListRaw = await db.query('bangunan');
     final bangunanListForKelompok = kelompokName == 'SEMUA KADER'
         ? List<Map<String, dynamic>>.from(bangunanListRaw)
         : bangunanListRaw.where((b) {
@@ -2154,6 +2150,151 @@ class ReportRepository implements IReportRepository {
     });
 
     return sortedList;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getRekapanLpjDasawismaData(
+    dynamic user,
+    String rw,
+    String rt,
+  ) async {
+    final db = await LocalDbHelper.database;
+    final List<Map<String, dynamic>> results = [];
+
+    List<Map<String, dynamic>> kaders = [];
+    if (user.role == 'KADER') {
+      kaders = await db.query(
+        'app_user',
+        where: 'id_kader = ?',
+        whereArgs: [user.idKader],
+      );
+    } else {
+      String whereClause = 'role = "KADER" AND rw = ?';
+      List<String> whereArgs = [rw];
+      if (rt != 'Semua' && rt != '...' && rt.isNotEmpty) {
+        whereClause += ' AND rt = ?';
+        whereArgs.add(rt);
+      }
+      kaders = await db.query(
+        'app_user',
+        where: whereClause,
+        whereArgs: whereArgs,
+      );
+    }
+
+    for (var kader in kaders) {
+      final kelompokName = kader['kelompok_dawis']?.toString() ?? '';
+      if (kelompokName.isEmpty) continue;
+
+      final normalizedKelompok = kelompokName
+          .replaceAll('.', '')
+          .replaceAll(' ', '')
+          .toLowerCase();
+
+      // Get bangunan
+      final bList = await db.query('bangunan');
+      final bangunanList = bList.where((b) {
+        final n =
+            b['nama_kelompok']?.toString() ??
+            b['kelompok_dawis']?.toString() ??
+            '';
+        return n.replaceAll('.', '').replaceAll(' ', '').toLowerCase() ==
+            normalizedKelompok;
+      }).toList();
+
+      if (bangunanList.isEmpty) continue;
+
+      int jmlRumah = bangunanList.length;
+      int jmlKeluarga = 0;
+      int jmlWargaL = 0;
+      int jmlWargaP = 0;
+      int jmlBayiL = 0;
+      int jmlBayiP = 0;
+      int jmlMeninggal = 0;
+      int jmlPindah = 0;
+      int jmlPindahan = 0;
+
+      for (var b in bangunanList) {
+        final bId = b['id'];
+        final krts = await db.query(
+          'krt',
+          where: 'id_bangunan = ?',
+          whereArgs: [bId],
+        );
+
+        final mutasis = await db.query(
+          'mutasi',
+          where: 'id_bangunan = ?',
+          whereArgs: [bId],
+        );
+        for (var m in mutasis) {
+          final j = m['jenis_mutasi']?.toString().toLowerCase() ?? '';
+          if (j == 'meninggal')
+            jmlMeninggal++;
+          else if (j == 'pindah')
+            jmlPindah++;
+          else if (j == 'datang')
+            jmlPindahan++;
+        }
+
+        for (var krt in krts) {
+          final krtId = krt['id'];
+          final kels = await db.query(
+            'keluarga',
+            where: 'id_krt = ?',
+            whereArgs: [krtId],
+          );
+          jmlKeluarga += kels.length;
+
+          for (var kel in kels) {
+            final kelId = kel['id'];
+            final inds = await _getIndividuAktif(db, kelId);
+
+            for (var ind in inds) {
+              final jk = ind['jenis_kelamin']?.toString().toUpperCase() ?? '';
+              final tgl = ind['tanggal_lahir']?.toString() ?? '';
+              int umur = 99;
+              if (tgl.isNotEmpty) {
+                try {
+                  final dt = DateTime.parse(tgl);
+                  final now = DateTime.now();
+                  umur = now.year - dt.year;
+                  if (now.month < dt.month ||
+                      (now.month == dt.month && now.day < dt.day)) {
+                    umur--;
+                  }
+                } catch (_) {}
+              }
+
+              if (jk == 'L') {
+                jmlWargaL++;
+                if (umur < 5) jmlBayiL++;
+              } else if (jk == 'P') {
+                jmlWargaP++;
+                if (umur < 5) jmlBayiP++;
+              }
+            }
+          }
+        }
+      }
+
+      results.add({
+        'nama_kader': kader['nama']?.toString() ?? '',
+        'nama_kelompok': kelompokName,
+        'rt': kader['rt']?.toString() ?? rt,
+        'jml_rumah': jmlRumah,
+        'jml_keluarga': jmlKeluarga,
+        'jml_warga_l': jmlWargaL,
+        'jml_warga_p': jmlWargaP,
+        'jml_bayi_l': jmlBayiL,
+        'jml_bayi_p': jmlBayiP,
+        'jml_meninggal': jmlMeninggal,
+        'jml_pindah': jmlPindah,
+        'jml_pindahan': jmlPindahan,
+      });
+    }
+
+    return results;
   }
 }
 

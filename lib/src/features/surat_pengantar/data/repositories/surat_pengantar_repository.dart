@@ -3,31 +3,38 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/surat_pengantar_model.dart';
 import '../../domain/entities/surat_pengantar.dart';
 
-final suratPengantarRepositoryProvider = Provider<SuratPengantarRepository>((ref) {
+final suratPengantarRepositoryProvider = Provider<SuratPengantarRepository>((
+  ref,
+) {
   return SuratPengantarRepository();
 });
 
 class SuratPengantarRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
-  
+
   SuratPengantarRepository();
-  
+
   static const String tableName = 'surat_pengantar';
 
-  Future<List<SuratPengantar>> getSuratPengantarList({String? rt, String? rw}) async {
+  Future<List<SuratPengantar>> getSuratPengantarList({
+    String? rt,
+    String? rw,
+  }) async {
     try {
       var query = _supabase.from(tableName).select();
-      
+
       if (rw != null && rw.isNotEmpty) {
         query = query.eq('rw', rw);
       }
       if (rt != null && rt.isNotEmpty && rt != 'Semua RT') {
         query = query.eq('rt', rt);
       }
-      
+
       final response = await query.order('created_at', ascending: false);
 
-      return (response as List).map((json) => SuratPengantarModel.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => SuratPengantarModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw Exception('Gagal mengambil data surat pengantar: $e');
     }
@@ -53,7 +60,7 @@ class SuratPengantarRepository {
       final model = SuratPengantarModel.fromEntity(surat);
       final data = model.toJson();
 
-      // Jika ID tidak kosong, lakukan update (meskipun form umumnya create only, 
+      // Jika ID tidak kosong, lakukan update (meskipun form umumnya create only,
       // namun praktik baik jika kita sediakan update juga).
       if (surat.id.isNotEmpty) {
         final response = await _supabase

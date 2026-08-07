@@ -75,9 +75,7 @@ class MainLayoutScreen extends ConsumerWidget {
       return _allNavItems;
     }
     // Default for Kader (or others): exclude branch 5 (Surat Pengantar)
-    return _allNavItems
-        .where((item) => item.branchIndex != 5)
-        .toList();
+    return _allNavItems.where((item) => item.branchIndex != 5).toList();
   }
 
   int _getDisplayIndex(List<_NavItem> items, int branchIndex) {

@@ -3,6 +3,7 @@ import '../../data/repositories/report_repository.dart';
 import '../../data/services/pdf_perincian_service.dart';
 import '../../data/services/pdf_ringkasan_service.dart';
 import '../../data/services/pdf_blank_service.dart';
+import '../../data/services/pdf_rekap_lpj_dasawisma_service.dart';
 import 'dart:typed_data';
 import '../../../settings/presentation/providers/app_user_provider.dart';
 import '../../../settings/presentation/providers/region_provider.dart';
@@ -10,6 +11,9 @@ import '../../../settings/presentation/providers/region_provider.dart';
 final pdfPerincianServiceProvider = Provider((ref) => PdfPerincianService());
 final pdfRingkasanServiceProvider = Provider((ref) => PdfRingkasanService());
 final pdfBlankServiceProvider = Provider((ref) => PdfBlankService());
+final pdfRekapLpjDasawismaServiceProvider = Provider(
+  (ref) => PdfRekapLpjDasawismaService(),
+);
 
 class ReportState {
   final bool isLoading;
@@ -112,7 +116,7 @@ final kelompokDawisListProvider =
             'rw': currentUser.rw ?? '',
             'id_kader': currentUser.idKader,
             'nama': currentUser.nama,
-          }
+          },
         ];
       }
 
@@ -334,7 +338,7 @@ class ReportController extends Notifier<ReportState> {
             'rw': currentUser.rw ?? '',
             'id_kader': currentUser.idKader,
             'nama': currentUser.nama,
-          }
+          },
         ];
       } else {
         // Fetch all Kelompok Dawis list
@@ -349,7 +353,8 @@ class ReportController extends Notifier<ReportState> {
             targetKaders = allList
                 .where(
                   (map) =>
-                      map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
+                      map['rw'] == currentUser.rw &&
+                      map['rt'] == currentUser.rt,
                 )
                 .toList();
           }
@@ -406,7 +411,7 @@ class ReportController extends Notifier<ReportState> {
             'rw': currentUser.rw ?? '',
             'id_kader': currentUser.idKader,
             'nama': currentUser.nama,
-          }
+          },
         ];
       } else {
         final allList = await repo.getAllKelompokDawisList();
@@ -420,7 +425,8 @@ class ReportController extends Notifier<ReportState> {
             targetKaders = allList
                 .where(
                   (map) =>
-                      map['rw'] == currentUser.rw && map['rt'] == currentUser.rt,
+                      map['rw'] == currentUser.rw &&
+                      map['rt'] == currentUser.rt,
                 )
                 .toList();
           }
@@ -672,7 +678,7 @@ class ReportController extends Notifier<ReportState> {
           'rw': currentUser.rw ?? '',
           'id_kader': currentUser.idKader,
           'nama': currentUser.nama,
-        }
+        },
       ];
     } else {
       final allList = await repo.getAllKelompokDawisList();
@@ -1283,6 +1289,38 @@ class ReportController extends Notifier<ReportState> {
       return pdfBytes;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<Uint8List> generateRekapanLpjDasawismaPdf() async {
+    state = state.copyWith(isLoading: true, error: null, successMessage: null);
+    try {
+      final repo = ref.read(reportRepositoryProvider);
+      final pdfService = ref.read(pdfRekapLpjDasawismaServiceProvider);
+      final user = ref.read(loggedInUserProvider);
+      final rw = ref.read(reportRwProvider);
+      final rt = ref.read(reportRtProvider);
+
+      if (user == null) throw Exception('User not logged in');
+
+      final dataList = await repo.getRekapanLpjDasawismaData(user, rw, rt);
+      final region = ref.read(regionProvider);
+
+      final pdfBytes = await pdfService.generate(
+        dataList,
+        rw,
+        ref.read(reportBulanProvider),
+        region.kelurahan,
+        region.kecamatan,
+      );
+
+      state = state.copyWith(isLoading: false);
+      return pdfBytes;
+    } catch (e, stack) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      print(e);
+      print(stack);
       rethrow;
     }
   }
