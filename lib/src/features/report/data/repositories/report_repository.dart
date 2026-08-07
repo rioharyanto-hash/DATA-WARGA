@@ -2169,7 +2169,7 @@ class ReportRepository implements IReportRepository {
         whereArgs: [user.idKader],
       );
     } else {
-      String whereClause = 'role = "KADER" AND rw = ?';
+      String whereClause = 'role = \'KADER\' AND rw = ?';
       List<String> whereArgs = [rw];
       if (rt != 'Semua' && rt != '...' && rt.isNotEmpty) {
         whereClause += ' AND rt = ?';
