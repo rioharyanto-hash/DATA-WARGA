@@ -89,35 +89,26 @@ class PdfRekapLpjDasawismaService {
               ),
             ),
             pw.Divider(height: 1, thickness: 1, color: PdfColors.black),
-            pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            pw.Table(
+              border: pw.TableBorder.symmetric(inside: const pw.BorderSide(width: 1)),
+              columnWidths: {
+                0: const pw.FlexColumnWidth(),
+                1: const pw.FlexColumnWidth(),
+              },
               children: [
-                pw.Expanded(
-                  child: pw.Container(
-                    padding: const pw.EdgeInsets.all(5),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      'L',
-                      style: pw.TextStyle(
-                        fontSize: 8,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
+                pw.TableRow(
+                  children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(5),
+                      alignment: pw.Alignment.center,
+                      child: pw.Text('L', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
                     ),
-                  ),
-                ),
-                pw.Container(width: 1, color: PdfColors.black),
-                pw.Expanded(
-                  child: pw.Container(
-                    padding: const pw.EdgeInsets.all(5),
-                    alignment: pw.Alignment.center,
-                    child: pw.Text(
-                      'P',
-                      style: pw.TextStyle(
-                        fontSize: 8,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(5),
+                      alignment: pw.Alignment.center,
+                      child: pw.Text('P', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -128,39 +119,32 @@ class PdfRekapLpjDasawismaService {
 
     // Helper for split data cell (L/P)
     pw.Widget _buildSplitData(String valL, String valP, {bool isBold = false}) {
-      return pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+      return pw.Table(
+        border: pw.TableBorder.symmetric(inside: const pw.BorderSide(width: 1)),
+        columnWidths: {
+          0: const pw.FlexColumnWidth(),
+          1: const pw.FlexColumnWidth(),
+        },
         children: [
-          pw.Expanded(
-            child: pw.Container(
-              padding: const pw.EdgeInsets.all(5),
-              alignment: pw.Alignment.center,
-              child: pw.Text(
-                valL,
-                style: pw.TextStyle(
-                  fontSize: 9,
-                  fontWeight: isBold
-                      ? pw.FontWeight.bold
-                      : pw.FontWeight.normal,
+          pw.TableRow(
+            children: [
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  valL,
+                  style: pw.TextStyle(fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
                 ),
               ),
-            ),
-          ),
-          pw.Container(width: 1, color: PdfColors.black),
-          pw.Expanded(
-            child: pw.Container(
-              padding: const pw.EdgeInsets.all(5),
-              alignment: pw.Alignment.center,
-              child: pw.Text(
-                valP,
-                style: pw.TextStyle(
-                  fontSize: 9,
-                  fontWeight: isBold
-                      ? pw.FontWeight.bold
-                      : pw.FontWeight.normal,
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  valP,
+                  style: pw.TextStyle(fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       );
