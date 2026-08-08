@@ -12,8 +12,10 @@ class PdfRekapLpjDasawismaService {
   ) async {
     final pdf = pw.Document();
 
+    final List<Map<String, dynamic>> mutableDataList = List.from(dataList);
+
     // 1. Sort by nama_kelompok
-    dataList.sort((a, b) {
+    mutableDataList.sort((a, b) {
       final nameA = a['nama_kelompok']?.toString() ?? '';
       final nameB = b['nama_kelompok']?.toString() ?? '';
       return nameA.compareTo(nameB);
@@ -30,207 +32,89 @@ class PdfRekapLpjDasawismaService {
     int totalPindah = 0;
     int totalPindahan = 0;
 
-    for (var row in dataList) {
-      totalRumah += int.tryParse(row['jml_rumah']?.toString() ?? '0') ?? 0;
-      totalKeluarga +=
+    final List<List<dynamic>> tableData = [];
+
+    for (int i = 0; i < mutableDataList.length; i++) {
+      final row = mutableDataList[i];
+      final jmlRumah = int.tryParse(row['jml_rumah']?.toString() ?? '0') ?? 0;
+      final jmlKeluarga =
           int.tryParse(row['jml_keluarga']?.toString() ?? '0') ?? 0;
-      totalWargaL += int.tryParse(row['jml_warga_l']?.toString() ?? '0') ?? 0;
-      totalWargaP += int.tryParse(row['jml_warga_p']?.toString() ?? '0') ?? 0;
-      totalBayiL += int.tryParse(row['jml_bayi_l']?.toString() ?? '0') ?? 0;
-      totalBayiP += int.tryParse(row['jml_bayi_p']?.toString() ?? '0') ?? 0;
-      totalMeninggal +=
+      final jmlWargaL =
+          int.tryParse(row['jml_warga_l']?.toString() ?? '0') ?? 0;
+      final jmlWargaP =
+          int.tryParse(row['jml_warga_p']?.toString() ?? '0') ?? 0;
+      final jmlBayiL = int.tryParse(row['jml_bayi_l']?.toString() ?? '0') ?? 0;
+      final jmlBayiP = int.tryParse(row['jml_bayi_p']?.toString() ?? '0') ?? 0;
+      final jmlMeninggal =
           int.tryParse(row['jml_meninggal']?.toString() ?? '0') ?? 0;
-      totalPindah += int.tryParse(row['jml_pindah']?.toString() ?? '0') ?? 0;
-      totalPindahan +=
+      final jmlPindah = int.tryParse(row['jml_pindah']?.toString() ?? '0') ?? 0;
+      final jmlPindahan =
           int.tryParse(row['jml_pindahan']?.toString() ?? '0') ?? 0;
+
+      totalRumah += jmlRumah;
+      totalKeluarga += jmlKeluarga;
+      totalWargaL += jmlWargaL;
+      totalWargaP += jmlWargaP;
+      totalBayiL += jmlBayiL;
+      totalBayiP += jmlBayiP;
+      totalMeninggal += jmlMeninggal;
+      totalPindah += jmlPindah;
+      totalPindahan += jmlPindahan;
+
+      tableData.add([
+        (i + 1).toString(),
+        row['nama_kader']?.toString() ?? '',
+        row['nama_kelompok']?.toString() ?? '',
+        row['rt']?.toString() ?? '',
+        jmlRumah.toString(),
+        jmlKeluarga.toString(),
+        jmlWargaL.toString(),
+        jmlWargaP.toString(),
+        jmlBayiL.toString(),
+        jmlBayiP.toString(),
+        jmlMeninggal.toString(),
+        jmlPindah.toString(),
+        jmlPindahan.toString(),
+      ]);
     }
 
-    // Helper for simple cell
-    pw.Widget _buildCell(
-      String text, {
-      pw.Alignment align = pw.Alignment.center,
-      bool isHeader = false,
-      bool isBold = false,
-    }) {
-      return pw.Container(
-        padding: const pw.EdgeInsets.all(5),
-        alignment: align,
-        color: isHeader ? PdfColors.grey200 : null,
-        child: pw.Text(
-          text,
-          textAlign: pw.TextAlign.center,
-          style: pw.TextStyle(
-            fontSize: isHeader ? 8 : 9,
-            fontWeight: isBold || isHeader
-                ? pw.FontWeight.bold
-                : pw.FontWeight.normal,
-          ),
-        ),
-      );
-    }
+    // 3. Add JUMLAH row
+    tableData.add([
+      '',
+      'JUMLAH',
+      '',
+      '',
+      totalRumah.toString(),
+      totalKeluarga.toString(),
+      totalWargaL.toString(),
+      totalWargaP.toString(),
+      totalBayiL.toString(),
+      totalBayiP.toString(),
+      totalMeninggal.toString(),
+      totalPindah.toString(),
+      totalPindahan.toString(),
+    ]);
 
-    // Helper for split header cell (L/P)
-    pw.Widget _buildSplitHeader(String title) {
-      return pw.Container(
-        color: PdfColors.grey200,
-        child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-          children: [
-            pw.Container(
-              padding: const pw.EdgeInsets.all(5),
-              alignment: pw.Alignment.center,
-              child: pw.Text(
-                title,
-                textAlign: pw.TextAlign.center,
-                style: pw.TextStyle(
-                  fontSize: 8,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-            ),
-            pw.Divider(height: 1, thickness: 1, color: PdfColors.black),
-            pw.Table(
-              border: pw.TableBorder.symmetric(inside: const pw.BorderSide(width: 1)),
-              columnWidths: {
-                0: const pw.FlexColumnWidth(),
-                1: const pw.FlexColumnWidth(),
-              },
-              children: [
-                pw.TableRow(
-                  children: [
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(5),
-                      alignment: pw.Alignment.center,
-                      child: pw.Text('L', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(5),
-                      alignment: pw.Alignment.center,
-                      child: pw.Text('P', style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
+    // Headers matching the reference image layout:
+    // JUMLAH WARGA YANG DIDATA -> L | P
+    // JUMLAH BAYI YANG DIDATA -> L | P
+    final headers = [
+      'NO',
+      'NAMA KADER',
+      'NAMA KELOMPOK',
+      'RT',
+      'JML\nRUMAH\nDIDATA',
+      'JUMLAH\nKELUARGA\nDIDATA',
+      'JUMLAH WARGA\nYANG DIDATA\nL',
+      'JUMLAH WARGA\nYANG DIDATA\nP',
+      'JUMLAH BAYI\nYANG DIDATA\nL',
+      'JUMLAH BAYI\nYANG DIDATA\nP',
+      'JUMLAH\nWARGA\nMENINGGAL',
+      'JUMLAH\nWARGA\nPINDAH',
+      'JUMLAH\nWARGA\nPINDAHAN',
+    ];
 
-    // Helper for split data cell (L/P)
-    pw.Widget _buildSplitData(String valL, String valP, {bool isBold = false}) {
-      return pw.Table(
-        border: pw.TableBorder.symmetric(inside: const pw.BorderSide(width: 1)),
-        columnWidths: {
-          0: const pw.FlexColumnWidth(),
-          1: const pw.FlexColumnWidth(),
-        },
-        children: [
-          pw.TableRow(
-            children: [
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  valL,
-                  style: pw.TextStyle(fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  valP,
-                  style: pw.TextStyle(fontSize: 9, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
-    final tableRows = <pw.TableRow>[];
-
-    // 1. Header Row
-    tableRows.add(
-      pw.TableRow(
-        children: [
-          _buildCell('NO', isHeader: true),
-          _buildCell('NAMA KADER', isHeader: true),
-          _buildCell('NAMA KELOMPOK', isHeader: true),
-          _buildCell('RT', isHeader: true),
-          _buildCell('JML RUMAH\nDIDATA', isHeader: true),
-          _buildCell('JUMLAH\nKELUARGA\nDIDATA', isHeader: true),
-          _buildSplitHeader('JUMLAH WARGA\nYANG DIDATA'),
-          _buildSplitHeader('JUMLAH BAYI\nYANG DIDATA'),
-          _buildCell('JUMLAH\nWARGA\nMENINGGAL', isHeader: true),
-          _buildCell('JUMLAH\nWARGA\nPINDAH', isHeader: true),
-          _buildCell('JUMLAH\nWARGA\nPINDAHAN', isHeader: true),
-        ],
-      ),
-    );
-
-    // 2. Data Rows
-    for (int i = 0; i < dataList.length; i++) {
-      final row = dataList[i];
-      tableRows.add(
-        pw.TableRow(
-          children: [
-            _buildCell((i + 1).toString()),
-            _buildCell(
-              row['nama_kader']?.toString() ?? '',
-              align: pw.Alignment.centerLeft,
-            ),
-            _buildCell(
-              row['nama_kelompok']?.toString() ?? '',
-              align: pw.Alignment.centerLeft,
-            ),
-            _buildCell(row['rt']?.toString() ?? ''),
-            _buildCell(row['jml_rumah']?.toString() ?? '0'),
-            _buildCell(row['jml_keluarga']?.toString() ?? '0'),
-            _buildSplitData(
-              row['jml_warga_l']?.toString() ?? '0',
-              row['jml_warga_p']?.toString() ?? '0',
-            ),
-            _buildSplitData(
-              row['jml_bayi_l']?.toString() ?? '0',
-              row['jml_bayi_p']?.toString() ?? '0',
-            ),
-            _buildCell(row['jml_meninggal']?.toString() ?? '0'),
-            _buildCell(row['jml_pindah']?.toString() ?? '0'),
-            _buildCell(row['jml_pindahan']?.toString() ?? '0'),
-          ],
-        ),
-      );
-    }
-
-    // 3. Footer / JUMLAH Row
-    tableRows.add(
-      pw.TableRow(
-        children: [
-          _buildCell(''),
-          _buildCell('JUMLAH', isBold: true, align: pw.Alignment.center),
-          _buildCell(''),
-          _buildCell(''),
-          _buildCell(totalRumah.toString(), isBold: true),
-          _buildCell(totalKeluarga.toString(), isBold: true),
-          _buildSplitData(
-            totalWargaL.toString(),
-            totalWargaP.toString(),
-            isBold: true,
-          ),
-          _buildSplitData(
-            totalBayiL.toString(),
-            totalBayiP.toString(),
-            isBold: true,
-          ),
-          _buildCell(totalMeninggal.toString(), isBold: true),
-          _buildCell(totalPindah.toString(), isBold: true),
-          _buildCell(totalPindahan.toString(), isBold: true),
-        ],
-      ),
-    );
+    final lastRowIndex = tableData.length - 1;
 
     pdf.addPage(
       pw.MultiPage(
@@ -255,22 +139,71 @@ class PdfRekapLpjDasawismaService {
               style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 20),
-            pw.Table(
+            pw.TableHelper.fromTextArray(
+              headers: headers,
+              data: tableData,
               border: pw.TableBorder.all(width: 1),
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 8,
+              ),
+              headerDecoration: const pw.BoxDecoration(
+                color: PdfColors.grey200,
+              ),
+              headerAlignments: {
+                0: pw.Alignment.center,
+                1: pw.Alignment.center,
+                2: pw.Alignment.center,
+                3: pw.Alignment.center,
+                4: pw.Alignment.center,
+                5: pw.Alignment.center,
+                6: pw.Alignment.center,
+                7: pw.Alignment.center,
+                8: pw.Alignment.center,
+                9: pw.Alignment.center,
+                10: pw.Alignment.center,
+                11: pw.Alignment.center,
+                12: pw.Alignment.center,
+              },
+              cellStyle: const pw.TextStyle(fontSize: 9),
+              cellAlignments: {
+                0: pw.Alignment.center,
+                1: pw.Alignment.centerLeft,
+                2: pw.Alignment.centerLeft,
+                3: pw.Alignment.center,
+                4: pw.Alignment.center,
+                5: pw.Alignment.center,
+                6: pw.Alignment.center,
+                7: pw.Alignment.center,
+                8: pw.Alignment.center,
+                9: pw.Alignment.center,
+                10: pw.Alignment.center,
+                11: pw.Alignment.center,
+                12: pw.Alignment.center,
+              },
               columnWidths: {
                 0: const pw.FlexColumnWidth(0.5),
                 1: const pw.FlexColumnWidth(2.0),
                 2: const pw.FlexColumnWidth(2.5),
-                3: const pw.FlexColumnWidth(0.8),
-                4: const pw.FlexColumnWidth(1.2),
-                5: const pw.FlexColumnWidth(1.2),
-                6: const pw.FlexColumnWidth(2.0),
-                7: const pw.FlexColumnWidth(2.0),
-                8: const pw.FlexColumnWidth(1.2),
+                3: const pw.FlexColumnWidth(0.5),
+                4: const pw.FlexColumnWidth(1.0),
+                5: const pw.FlexColumnWidth(1.0),
+                6: const pw.FlexColumnWidth(1.0),
+                7: const pw.FlexColumnWidth(1.0),
+                8: const pw.FlexColumnWidth(1.0),
                 9: const pw.FlexColumnWidth(1.0),
-                10: const pw.FlexColumnWidth(1.2),
+                10: const pw.FlexColumnWidth(1.0),
+                11: const pw.FlexColumnWidth(1.0),
+                12: const pw.FlexColumnWidth(1.0),
               },
-              children: tableRows,
+              oddCellStyle: const pw.TextStyle(fontSize: 9),
+              cellDecoration: (index, data, rowNum) {
+                // Bold the last row (JUMLAH)
+                if (rowNum == lastRowIndex) {
+                  return const pw.BoxDecoration(color: PdfColors.grey100);
+                }
+                return const pw.BoxDecoration();
+              },
             ),
           ];
         },
